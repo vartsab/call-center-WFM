@@ -1,0 +1,13 @@
+{
+  "seed": 20260511,
+  "source_rows": 6200,
+  "synthetic_calls_path": "data/processed/synthetic_calls_sample.csv",
+  "agents_path": "data/processed/dim_agents_sample.csv",
+  "queues_path": "data/processed/dim_queues_sample.csv",
+  "agent_count": 60,
+  "queue_count": 101,
+  "abandonment_rate": 0.0661,
+  "average_handle_time_sec_answered": 517.57,
+  "interval_count": 1321,
+  "max_calls_in_interval": 17
+}

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Data extracts and generated outputs
+data/raw/*
+data/processed/*
+data/external/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/external/.gitkeep
+
+# Local app/runtime files
+.streamlit/secrets.toml
+*.log
+python
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
