@@ -6,9 +6,9 @@ The staffing step converts the 30-minute call volume forecast into a required nu
 
 ## Input
 
-The first staffing artifact uses:
+The latest staffing artifact uses:
 
-- `data/processed/baseline_forecast_sample.csv` for interval-level predicted call volume;
+- `data/processed/sklearn_best_forecast_sample.csv` for interval-level predicted call volume;
 - `data/processed/forecasting_input_sample.csv` for interval-level average handle time;
 - a 30-minute planning interval.
 

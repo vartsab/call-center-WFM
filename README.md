@@ -80,7 +80,9 @@ Build forecasting input and run the first baseline forecast:
 
 ```powershell
 python src\forecasting\build_forecasting_input.py
+python src\forecasting\build_feature_matrix.py
 python src\forecasting\baseline_forecast.py
+python src\forecasting\sklearn_model_compare.py
 ```
 
 Calculate interval staffing requirements:

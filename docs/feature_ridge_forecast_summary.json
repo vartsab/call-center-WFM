@@ -1,0 +1,27 @@
+{
+  "model": "standard-library ridge regression with calendar, previous-week lag, and federal holiday features",
+  "feature_count": 11,
+  "features": [
+    "half_hour_sin",
+    "half_hour_cos",
+    "day_of_week_sin",
+    "day_of_week_cos",
+    "day_of_month",
+    "week_of_year",
+    "month",
+    "is_weekend",
+    "is_federal_holiday",
+    "days_to_nearest_federal_holiday",
+    "lag_336_intervals"
+  ],
+  "alpha": 25.0,
+  "train_start": "2025-01-01",
+  "train_end": "2025-01-24",
+  "test_start": "2025-01-25",
+  "test_end": "2025-01-31",
+  "test_intervals": 336,
+  "mae": 1.6171,
+  "rmse": 2.1294,
+  "mape": 0.7099,
+  "output": "data/processed/feature_ridge_forecast_sample.csv"
+}

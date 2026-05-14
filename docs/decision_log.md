@@ -127,3 +127,19 @@ Status: accepted.
 Decision: treat service level as a queue, service-category, interval, and staffing metric rather than an agent-level performance metric.
 
 Reasoning: service level measures whether calls are answered within a target wait time. That outcome is driven by demand, routing, queue backlog, staffing, scheduling, and forecast accuracy before the call reaches an individual agent. Agent performance should focus on handled-call volume and handle-time components.
+
+## 2026-05-14 - Use federal holidays in forecasting features
+
+Status: accepted.
+
+Decision: add US federal holiday flags, holiday names, and distance-to-holiday features to the forecasting feature matrix.
+
+Reasoning: public-service contact volume can change around holidays. Holiday features make the forecast more explainable and prepare the project for a longer historical training window.
+
+## 2026-05-14 - Select feature-based Poisson regression for the first proper forecast
+
+Status: accepted for current sample.
+
+Decision: compare multiple scikit-learn models and use the lowest-MAE model output for downstream staffing.
+
+Reasoning: the feature-based Poisson model outperformed the seasonal naive baseline on MAE, RMSE, and MAPE in the current holdout. Poisson regression is also a defensible first model for count forecasting.

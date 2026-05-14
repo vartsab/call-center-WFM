@@ -390,6 +390,7 @@ def render_historical_trends(volume: pd.DataFrame) -> None:
 
 def render_forecasting(forecasting: pd.DataFrame) -> None:
     summary = load_json(DOCS_DIR / "baseline_forecast_summary.json")
+    model_summary = load_json(DOCS_DIR / "sklearn_model_comparison_summary.json")
 
     metric_cols = st.columns(4)
     metric_cols[0].metric("Test intervals", summary.get("test_intervals", 0))
@@ -397,7 +398,14 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
     metric_cols[2].metric("RMSE", summary.get("rmse", 0))
     metric_cols[3].metric("MAPE", f"{summary.get('mape', 0):.1%}")
 
+    if model_summary:
+        model_rows = pd.DataFrame(model_summary.get("models", []))
+        if not model_rows.empty:
+            st.subheader("Model comparison")
+            st.dataframe(model_rows, width="stretch", hide_index=True)
+
     baseline = read_csv(DATA_DIR / "baseline_forecast_sample.csv")
+    feature_forecast = read_csv(DATA_DIR / "sklearn_best_forecast_sample.csv")
     if baseline.empty:
         st.info("Baseline forecast output is not available.")
         return
@@ -405,6 +413,9 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
     baseline["interval_start_datetime"] = pd.to_datetime(baseline["interval_start_datetime"])
     baseline["actual_call_volume"] = pd.to_numeric(baseline["actual_call_volume"])
     baseline["predicted_call_volume"] = pd.to_numeric(baseline["predicted_call_volume"])
+    if not feature_forecast.empty:
+        feature_forecast["interval_start_datetime"] = pd.to_datetime(feature_forecast["interval_start_datetime"])
+        feature_forecast["predicted_call_volume"] = pd.to_numeric(feature_forecast["predicted_call_volume"])
 
     fig = go.Figure()
     fig.add_trace(
@@ -423,7 +434,16 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
             name="Baseline",
         )
     )
-    fig.update_layout(title="Baseline forecast holdout period", xaxis_title=None, yaxis_title="Calls")
+    if not feature_forecast.empty:
+        fig.add_trace(
+            go.Scatter(
+                x=feature_forecast["interval_start_datetime"],
+                y=feature_forecast["predicted_call_volume"],
+                mode="lines",
+                name=f"Best feature model ({model_summary.get('selected_model', 'selected')})",
+            )
+        )
+    fig.update_layout(title="Forecast holdout period", xaxis_title=None, yaxis_title="Calls")
     st.plotly_chart(fig, width="stretch")
 
     if not forecasting.empty:

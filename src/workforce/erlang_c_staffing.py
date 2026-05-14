@@ -254,7 +254,7 @@ def build_summary(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--forecast", default="data/processed/baseline_forecast_sample.csv")
+    parser.add_argument("--forecast", default="data/processed/sklearn_best_forecast_sample.csv")
     parser.add_argument("--forecasting-input", default="data/processed/forecasting_input_sample.csv")
     parser.add_argument("--output", default="data/processed/staffing_requirements_sample.csv")
     parser.add_argument("--summary-output", default="docs/staffing_requirements_summary.json")

@@ -1,6 +1,6 @@
 {
   "method": "Erlang C",
-  "forecast_input": "data/processed/baseline_forecast_sample.csv",
+  "forecast_input": "data/processed/sklearn_best_forecast_sample.csv",
   "output": "data/processed/staffing_requirements_sample.csv",
   "interval_count": 336,
   "start": "2025-01-25T00:00:00",
@@ -10,12 +10,12 @@
   "target_service_level": 0.8,
   "max_occupancy": 0.85,
   "shrinkage_rate": 0.3,
-  "avg_predicted_calls": 4.3914,
-  "peak_predicted_calls": 12.0,
-  "avg_base_required_agents": 3.1012,
-  "peak_base_required_agents": 7,
-  "avg_shrinkage_adjusted_agents": 4.8452,
-  "peak_shrinkage_adjusted_agents": 10,
-  "avg_expected_occupancy": 0.3356,
+  "avg_predicted_calls": 3.7575,
+  "peak_predicted_calls": 8.2835,
+  "avg_base_required_agents": 2.872,
+  "peak_base_required_agents": 5,
+  "avg_shrinkage_adjusted_agents": 4.4702,
+  "peak_shrinkage_adjusted_agents": 8,
+  "avg_expected_occupancy": 0.3287,
   "avg_service_level_probability": 0.8966
 }

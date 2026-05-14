@@ -117,8 +117,11 @@ The first generation script writes:
 | `docs/sample_generation_summary.json` | Committed summary metrics from the latest generated sample. |
 | `data/processed/sql_load/*.csv` | SQL-load-ready dimension and fact files. |
 | `data/processed/forecasting_input_sample.csv` | 30-minute forecasting input by normalized queue service category. |
+| `data/processed/forecast_features_sample.csv` | Holiday-aware feature matrix for interval forecasting. |
 | `data/processed/baseline_forecast_sample.csv` | First baseline forecast output for the holdout period. |
 | `docs/baseline_forecast_summary.json` | Committed metrics from the latest baseline forecast run. |
+| `data/processed/sklearn_best_forecast_sample.csv` | Best forecast from the scikit-learn model comparison. |
+| `docs/sklearn_model_comparison_summary.json` | Committed comparison metrics for feature-based forecasting models. |
 | `data/processed/staffing_requirements_sample.csv` | Erlang C staffing requirements by 30-minute interval. |
 | `docs/staffing_requirements_summary.json` | Committed staffing summary from the latest Erlang C run. |
 | `data/processed/optimized_schedule_sample.csv` | Optimized agent shift assignments for the sample staffing horizon. |
@@ -152,19 +155,32 @@ The first forecasting baseline uses the mean call volume by weekday and 30-minut
 | RMSE | 2.3866 |
 | MAPE | 0.7344 |
 
+## Latest Feature Forecast Summary
+
+The first feature-based comparison uses calendar, previous-week lag, and US federal holiday features. The selected model is the model with the lowest holdout MAE.
+
+| Metric | Value |
+| --- | ---: |
+| Selected model | poisson |
+| Feature count | 11 |
+| Test intervals | 336 |
+| MAE | 1.5504 |
+| RMSE | 1.9901 |
+| MAPE | 0.5715 |
+
 ## Latest Staffing Summary
 
-The first staffing calculation uses the baseline forecast, Erlang C, an 80/20 service target, a maximum occupancy of 85 percent, and a 30 percent shrinkage assumption.
+The latest staffing calculation uses the selected feature-based forecast, Erlang C, an 80/20 service target, a maximum occupancy of 85 percent, and a 30 percent shrinkage assumption.
 
 | Metric | Value |
 | --- | ---: |
 | Staffing intervals | 336 |
-| Average predicted calls | 4.3914 |
-| Peak predicted calls | 12.0000 |
-| Average base required agents | 3.1012 |
-| Peak base required agents | 7 |
-| Average shrinkage-adjusted agents | 4.8452 |
-| Peak shrinkage-adjusted agents | 10 |
+| Average predicted calls | 3.7575 |
+| Peak predicted calls | 8.2835 |
+| Average base required agents | 2.8720 |
+| Peak base required agents | 5 |
+| Average shrinkage-adjusted agents | 4.4702 |
+| Peak shrinkage-adjusted agents | 8 |
 
 ## Latest Scheduling Summary
 
@@ -173,11 +189,11 @@ The first schedule uses OR-Tools CP-SAT with 8-hour shifts, a 30-minute break af
 | Metric | Value |
 | --- | ---: |
 | Solver status | FEASIBLE |
-| Scheduled shifts | 138 |
+| Scheduled shifts | 123 |
 | Agents scheduled | 55 |
 | Coverage intervals | 336 |
 | Understaffed agent-intervals | 0 |
-| Overstaffed agent-intervals | 442 |
+| Overstaffed agent-intervals | 343 |
 | Intervals with understaffing | 0 |
-| Peak required agents | 10 |
-| Peak scheduled agents | 11 |
+| Peak required agents | 8 |
+| Peak scheduled agents | 10 |

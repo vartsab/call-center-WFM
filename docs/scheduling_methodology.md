@@ -41,14 +41,14 @@ The latest sample run produced:
 | Metric | Value |
 | --- | ---: |
 | Solver status | FEASIBLE |
-| Scheduled shifts | 138 |
+| Scheduled shifts | 123 |
 | Agents scheduled | 55 |
 | Coverage intervals | 336 |
 | Understaffed agent-intervals | 0 |
-| Overstaffed agent-intervals | 442 |
+| Overstaffed agent-intervals | 343 |
 | Intervals with understaffing | 0 |
-| Peak required agents | 10 |
-| Peak scheduled agents | 11 |
+| Peak required agents | 8 |
+| Peak scheduled agents | 10 |
 
 ## Output
 
