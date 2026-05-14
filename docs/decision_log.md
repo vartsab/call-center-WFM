@@ -79,3 +79,19 @@ Decision: keep the original 311 `created_date` as `Source_Created_Datetime`, but
 Reasoning: the public API sample can be front-loaded when records are ordered by creation timestamp. Workforce management analysis needs a usable 30-minute operational workload curve. This approach keeps the real daily/service mix while creating an interval-level call center simulation.
 
 Limitation: this is a synthetic intraday distribution, so the final report must not claim that it represents actual NYC 311 call arrival times.
+
+## 2026-05-14 - Add SQL-load-ready files before SQL Server execution
+
+Status: accepted for MVP.
+
+Decision: generate SQL-load-ready CSV files for `Dim_Date`, `Dim_Time`, `Dim_Agent`, `Dim_Queue`, and `Fact_Calls` before running SQL Server bulk load scripts.
+
+Reasoning: separating CSV preparation from SQL Server loading makes the pipeline easier to inspect, test, and reproduce. It also allows progress on forecasting and dashboard preparation even before SQL Server is configured locally.
+
+## 2026-05-14 - Use a seasonal naive baseline before advanced forecasting
+
+Status: accepted.
+
+Decision: implement the first forecast as a seasonal naive mean by weekday and 30-minute interval.
+
+Reasoning: a baseline model is necessary for evaluating later Prophet, XGBoost, or other time-series models. It also provides a quick, explainable first forecasting artifact for the capstone.

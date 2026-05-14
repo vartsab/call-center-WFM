@@ -114,6 +114,10 @@ The first generation script writes:
 | `data/processed/dim_agents_sample.csv` | Synthetic agent dimension source. |
 | `data/processed/dim_queues_sample.csv` | Queue dimension source derived from complaint types. |
 | `docs/sample_generation_summary.json` | Committed summary metrics from the latest generated sample. |
+| `data/processed/sql_load/*.csv` | SQL-load-ready dimension and fact files. |
+| `data/processed/forecasting_input_sample.csv` | 30-minute forecasting input by service category. |
+| `data/processed/baseline_forecast_sample.csv` | First baseline forecast output for the holdout period. |
+| `docs/baseline_forecast_summary.json` | Committed metrics from the latest baseline forecast run. |
 
 ## Latest Generated Sample Summary
 
@@ -128,3 +132,16 @@ The first generated sample was created from a January 2025 NYC 311 extract with 
 | Average handle time, answered calls | 517.57 sec |
 | Distinct 30-minute intervals | 1,321 |
 | Maximum calls in one interval | 17 |
+
+## Latest Baseline Forecast Summary
+
+The first forecasting baseline uses the mean call volume by weekday and 30-minute interval from the training period.
+
+| Metric | Value |
+| --- | ---: |
+| Training period | 2025-01-01 to 2025-01-24 |
+| Test period | 2025-01-25 to 2025-01-31 |
+| Test intervals | 301 |
+| MAE | 1.6544 |
+| RMSE | 2.2243 |
+| MAPE | 0.5174 |

@@ -22,8 +22,12 @@ The current implementation includes:
 
 - NYC 311 sample acquisition script;
 - synthetic call center data generation script;
+- SQL-load-ready dimension and fact file builder;
 - initial SQL Server warehouse schema;
+- SQL Server staging and load scripts;
 - initial SQL analytics views;
+- first 30-minute forecasting input builder;
+- first seasonal naive baseline forecast;
 - project documentation for dataset selection, data generation methodology, architecture, and data dictionary.
 
 ## Repository Structure
@@ -63,10 +67,24 @@ Generate synthetic call center records:
 python src\data_generation\generate_synthetic_calls.py
 ```
 
+Prepare SQL-load-ready files:
+
+```powershell
+python src\data_generation\prepare_sql_load_files.py
+```
+
+Build forecasting input and run the first baseline forecast:
+
+```powershell
+python src\forecasting\build_forecasting_input.py
+python src\forecasting\baseline_forecast.py
+```
+
 View the generated summary:
 
 ```powershell
 Get-Content docs\sample_generation_summary.json
+Get-Content docs\baseline_forecast_summary.json
 ```
 
 ## Notes

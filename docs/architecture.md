@@ -59,6 +59,13 @@ Candidate models:
 - XGBoost with lag and calendar features;
 - optional SARIMA or LSTM only if time allows.
 
+Current baseline:
+
+- seasonal naive mean by weekday and half-hour interval;
+- train period: 2025-01-01 to 2025-01-24;
+- test period: 2025-01-25 to 2025-01-31;
+- latest metrics are stored in `docs/baseline_forecast_summary.json`.
+
 Evaluation metrics:
 
 - MAE;
