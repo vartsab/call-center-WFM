@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from collections import Counter, defaultdict
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
@@ -104,12 +105,28 @@ def build_dim_agents(agent_rows: list[dict[str, str]]) -> list[dict[str, str]]:
     ]
 
 
-def build_dim_queues(queue_rows: list[dict[str, str]]) -> list[dict[str, str]]:
+def queue_service_category_map(call_rows: list[dict[str, str]]) -> dict[str, str]:
+    counts: dict[str, Counter[str]] = defaultdict(Counter)
+    for row in call_rows:
+        counts[row["queue_id"]][row["service_category"] or "general"] += 1
+    return {
+        queue_id: category_counts.most_common(1)[0][0]
+        for queue_id, category_counts in counts.items()
+    }
+
+
+def build_dim_queues(
+    queue_rows: list[dict[str, str]],
+    service_category_by_queue: dict[str, str],
+) -> list[dict[str, str]]:
     return [
         {
             "Queue_ID": row["queue_id"],
             "Queue_Name": row["queue_name"],
-            "Service_Category": row["service_category"],
+            "Service_Category": service_category_by_queue.get(
+                row["queue_id"],
+                row["service_category"] or "general",
+            ),
             "SLA_Target_Sec": row["sla_target_sec"],
             "Target_Service_Level": row["target_service_level"],
             "Active_Flag": "1",
@@ -159,6 +176,7 @@ def main() -> None:
     agent_rows = read_csv(Path(args.agents))
     queue_rows = read_csv(Path(args.queues))
     output_dir = Path(args.output_dir)
+    service_category_by_queue = queue_service_category_map(call_rows)
 
     outputs = {
         "dim_date_sample.csv": (
@@ -192,7 +210,7 @@ def main() -> None:
             ["Agent_ID", "Agent_Name", "Skill_Group", "Employment_Type", "Active_Flag"],
         ),
         "dim_queue_sample_sql.csv": (
-            build_dim_queues(queue_rows),
+            build_dim_queues(queue_rows, service_category_by_queue),
             [
                 "Queue_ID",
                 "Queue_Name",
@@ -235,4 +253,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

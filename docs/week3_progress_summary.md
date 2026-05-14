@@ -43,7 +43,7 @@ data/processed/forecasting_input_sample.csv
 Rows:
 
 ```text
-2,784
+2,764
 ```
 
 First baseline model:
@@ -70,4 +70,3 @@ docs/baseline_forecast_summary.json
 ## Next Technical Step
 
 Configure or connect to Microsoft SQL Server, run the schema and ETL scripts, then validate the SQL views against the loaded sample.
-

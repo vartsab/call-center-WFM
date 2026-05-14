@@ -115,7 +115,7 @@ The first generation script writes:
 | `data/processed/dim_queues_sample.csv` | Queue dimension source derived from complaint types. |
 | `docs/sample_generation_summary.json` | Committed summary metrics from the latest generated sample. |
 | `data/processed/sql_load/*.csv` | SQL-load-ready dimension and fact files. |
-| `data/processed/forecasting_input_sample.csv` | 30-minute forecasting input by service category. |
+| `data/processed/forecasting_input_sample.csv` | 30-minute forecasting input by normalized queue service category. |
 | `data/processed/baseline_forecast_sample.csv` | First baseline forecast output for the holdout period. |
 | `docs/baseline_forecast_summary.json` | Committed metrics from the latest baseline forecast run. |
 

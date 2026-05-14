@@ -34,6 +34,17 @@ def read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(input_file))
 
 
+def read_queue_category_map(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+    rows = read_csv(path)
+    return {
+        row["Queue_ID"]: row["Service_Category"]
+        for row in rows
+        if row.get("Queue_ID") and row.get("Service_Category")
+    }
+
+
 def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as output_file:
@@ -45,8 +56,10 @@ def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", default="data/processed/synthetic_calls_sample.csv")
+    parser.add_argument("--queues", default="data/processed/sql_load/dim_queue_sample_sql.csv")
     parser.add_argument("--output", default="data/processed/forecasting_input_sample.csv")
     args = parser.parse_args()
+    queue_category_map = read_queue_category_map(Path(args.queues))
 
     groups: dict[tuple[str, str], dict[str, float | int | str]] = defaultdict(
         lambda: {
@@ -59,7 +72,10 @@ def main() -> None:
 
     for row in read_csv(Path(args.input)):
         start = interval_start(datetime.fromisoformat(row["call_start_datetime"]))
-        service_category = row["service_category"] or "general"
+        service_category = queue_category_map.get(
+            row["queue_id"],
+            row["service_category"] or "general",
+        )
         key = (start.isoformat(timespec="seconds"), service_category)
         group = groups[key]
         group["call_volume"] = int(group["call_volume"]) + 1
@@ -96,4 +112,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

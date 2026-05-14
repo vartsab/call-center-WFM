@@ -80,6 +80,12 @@ python src\forecasting\build_forecasting_input.py
 python src\forecasting\baseline_forecast.py
 ```
 
+Load and validate the SQL Server sample:
+
+```text
+Run the scripts listed in sql/README.md, then run sql/validation/001_validate_loaded_sample.sql.
+```
+
 View the generated summary:
 
 ```powershell
