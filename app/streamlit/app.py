@@ -57,8 +57,7 @@ SQL_QUERIES = {
             Handled_Calls,
             Avg_Handle_Time_Sec,
             Avg_Talk_Time_Sec,
-            Avg_ACW_Time_Sec,
-            SLA_Rate
+            Avg_ACW_Time_Sec
         FROM dbo.vw_Agent_Performance
     """,
 }
@@ -176,7 +175,8 @@ def normalize_sql_data(data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]
         agents["calendar_date"] = pd.to_datetime(agents["calendar_date"]).dt.date
         agents["handled_calls"] = pd.to_numeric(agents["handled_calls"])
         agents["avg_handle_time_sec"] = pd.to_numeric(agents["avg_handle_time_sec"])
-        agents["sla_rate"] = pd.to_numeric(agents["sla_rate"])
+        agents["avg_talk_time_sec"] = pd.to_numeric(agents["avg_talk_time_sec"])
+        agents["avg_acw_time_sec"] = pd.to_numeric(agents["avg_acw_time_sec"])
 
     return {
         "volume_30min": volume,
@@ -216,7 +216,6 @@ def csv_to_agent_performance(calls: pd.DataFrame) -> pd.DataFrame:
             avg_handle_time_sec=("handle_time_sec", "mean"),
             avg_talk_time_sec=("talk_time_sec", "mean"),
             avg_acw_time_sec=("acw_time_sec", "mean"),
-            sla_rate=("sla_met_flag", "mean"),
         )
         .sort_values("handled_calls", ascending=False)
     )
@@ -581,12 +580,13 @@ def render_agent_performance(agents: pd.DataFrame) -> None:
         .agg(
             handled_calls=("handled_calls", "sum"),
             avg_handle_time_sec=("avg_handle_time_sec", "mean"),
-            sla_rate=("sla_rate", "mean"),
+            avg_talk_time_sec=("avg_talk_time_sec", "mean"),
+            avg_acw_time_sec=("avg_acw_time_sec", "mean"),
         )
         .sort_values("handled_calls", ascending=False)
         .head(20)
     )
-    fig = px.bar(grouped, x="agent_name", y="handled_calls", color="sla_rate")
+    fig = px.bar(grouped, x="agent_name", y="handled_calls", color="avg_handle_time_sec")
     fig.update_layout(title="Top agents by handled calls", xaxis_title=None, yaxis_title="Calls")
     st.plotly_chart(fig, width="stretch")
     st.dataframe(grouped, width="stretch", hide_index=True)

@@ -42,11 +42,11 @@ Initial star schema:
 
 Initial views:
 
-- `vw_Volume_30Min`
-- `vw_Agent_Performance`
-- `vw_Service_Level`
-- `vw_Queue_Performance`
-- `vw_Forecasting_Input`
+- `vw_Volume_30Min` for interval, queue, and service-category volume and SLA metrics;
+- `vw_Agent_Performance` for handled-call volume and handle-time components;
+- `vw_Forecasting_Input` for 30-minute modeling input.
+
+Service level is treated as a queue, service-category, and staffing metric rather than an agent-level performance metric because an individual agent does not control the queue wait before the call is routed.
 
 ### Forecasting
 
@@ -110,6 +110,8 @@ Tabs:
 - Executive Summary;
 - Historical Trends;
 - Forecasting;
+- Staffing;
+- Scheduling;
 - Agent Performance;
 - Methodology.
 

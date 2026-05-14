@@ -119,3 +119,11 @@ Status: accepted.
 Decision: build the first schedule optimizer with OR-Tools CP-SAT using binary agent-shift assignment variables.
 
 Reasoning: shift scheduling is a constrained optimization problem. CP-SAT gives a transparent model for coverage, breaks, per-agent shift limits, understaffing, and overstaffing.
+
+## 2026-05-14 - Keep service level out of agent performance
+
+Status: accepted.
+
+Decision: treat service level as a queue, service-category, interval, and staffing metric rather than an agent-level performance metric.
+
+Reasoning: service level measures whether calls are answered within a target wait time. That outcome is driven by demand, routing, queue backlog, staffing, scheduling, and forecast accuracy before the call reaches an individual agent. Agent performance should focus on handled-call volume and handle-time components.

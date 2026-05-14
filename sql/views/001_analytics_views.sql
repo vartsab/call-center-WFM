@@ -75,8 +75,7 @@ SELECT
     COUNT_BIG(*) AS Handled_Calls,
     AVG(CAST(f.Handle_Time_Sec AS decimal(10, 2))) AS Avg_Handle_Time_Sec,
     AVG(CAST(f.Talk_Time_Sec AS decimal(10, 2))) AS Avg_Talk_Time_Sec,
-    AVG(CAST(f.ACW_Time_Sec AS decimal(10, 2))) AS Avg_ACW_Time_Sec,
-    AVG(CAST(f.SLA_Met_Flag AS decimal(10, 4))) AS SLA_Rate
+    AVG(CAST(f.ACW_Time_Sec AS decimal(10, 2))) AS Avg_ACW_Time_Sec
 FROM dbo.Fact_Calls AS f
 INNER JOIN dbo.Dim_Agent AS a
     ON f.Agent_ID = a.Agent_ID
@@ -89,4 +88,3 @@ GROUP BY
     a.Skill_Group,
     d.Calendar_Date;
 GO
-
