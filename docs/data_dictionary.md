@@ -120,6 +120,9 @@ The first generation script writes:
 | `docs/baseline_forecast_summary.json` | Committed metrics from the latest baseline forecast run. |
 | `data/processed/staffing_requirements_sample.csv` | Erlang C staffing requirements by 30-minute interval. |
 | `docs/staffing_requirements_summary.json` | Committed staffing summary from the latest Erlang C run. |
+| `data/processed/optimized_schedule_sample.csv` | Optimized agent shift assignments for the sample staffing horizon. |
+| `data/processed/schedule_coverage_sample.csv` | Interval-level scheduled coverage versus required staffing. |
+| `docs/scheduling_summary.json` | Committed summary from the latest scheduling optimization run. |
 
 ## Latest Generated Sample Summary
 
@@ -161,3 +164,19 @@ The first staffing calculation uses the baseline forecast, Erlang C, an 80/20 se
 | Peak base required agents | 7 |
 | Average shrinkage-adjusted agents | 4.8452 |
 | Peak shrinkage-adjusted agents | 10 |
+
+## Latest Scheduling Summary
+
+The first schedule uses OR-Tools CP-SAT with 8-hour shifts, a 30-minute break after 4 hours, hourly shift starts, and a maximum of 5 shifts per agent.
+
+| Metric | Value |
+| --- | ---: |
+| Solver status | FEASIBLE |
+| Scheduled shifts | 138 |
+| Agents scheduled | 55 |
+| Coverage intervals | 336 |
+| Understaffed agent-intervals | 0 |
+| Overstaffed agent-intervals | 442 |
+| Intervals with understaffing | 0 |
+| Peak required agents | 10 |
+| Peak scheduled agents | 11 |

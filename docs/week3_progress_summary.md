@@ -69,4 +69,4 @@ docs/baseline_forecast_summary.json
 
 ## Next Technical Step
 
-Use the Erlang C staffing requirements as the demand curve for the first shift-scheduling optimization step.
+Connect the staffing and scheduling outputs more deeply into the dashboard, then start improving the baseline forecast with a stronger time-series model.

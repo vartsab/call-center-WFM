@@ -111,3 +111,11 @@ Status: accepted.
 Decision: evaluate and export the baseline forecast on the full 30-minute calendar grid for the holdout period.
 
 Reasoning: staffing and scheduling require every planning interval, including intervals where no calls occurred. Leaving those intervals out would create gaps in the workforce requirement curve.
+
+## 2026-05-14 - Use OR-Tools CP-SAT for the first schedule optimizer
+
+Status: accepted.
+
+Decision: build the first schedule optimizer with OR-Tools CP-SAT using binary agent-shift assignment variables.
+
+Reasoning: shift scheduling is a constrained optimization problem. CP-SAT gives a transparent model for coverage, breaks, per-agent shift limits, understaffing, and overstaffing.

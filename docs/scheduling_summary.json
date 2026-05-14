@@ -1,0 +1,19 @@
+{
+  "method": "OR-Tools CP-SAT",
+  "solver_status": "FEASIBLE",
+  "objective_value": 4558.0,
+  "scheduled_shifts": 138,
+  "agents_scheduled": 55,
+  "coverage_intervals": 336,
+  "shift_hours": 8,
+  "break_after_hours": 4,
+  "start_step_minutes": 60,
+  "max_shifts_per_agent": 5,
+  "time_limit_sec": 60,
+  "total_understaffed_agent_intervals": 0,
+  "total_overstaffed_agent_intervals": 442,
+  "intervals_with_understaffing": 0,
+  "intervals_with_overstaffing": 200,
+  "peak_required_agents": 10,
+  "peak_scheduled_agents": 11
+}

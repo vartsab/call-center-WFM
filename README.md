@@ -29,6 +29,7 @@ The current implementation includes:
 - first 30-minute forecasting input builder;
 - first seasonal naive baseline forecast;
 - Erlang C staffing requirement calculator;
+- first OR-Tools shift scheduling optimizer;
 - Streamlit dashboard MVP with SQL Server and CSV fallback data access;
 - project documentation for dataset selection, data generation methodology, architecture, and data dictionary.
 
@@ -86,6 +87,12 @@ Calculate interval staffing requirements:
 
 ```powershell
 python src\workforce\erlang_c_staffing.py
+```
+
+Generate the first optimized shift schedule:
+
+```powershell
+python src\scheduling\shift_optimizer.py
 ```
 
 Load and validate the SQL Server sample:

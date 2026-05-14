@@ -508,6 +508,67 @@ def render_staffing() -> None:
     st.dataframe(display, width="stretch", hide_index=True)
 
 
+def render_scheduling() -> None:
+    summary = load_json(DOCS_DIR / "scheduling_summary.json")
+    schedule = read_csv(DATA_DIR / "optimized_schedule_sample.csv")
+    coverage = read_csv(DATA_DIR / "schedule_coverage_sample.csv")
+    if schedule.empty or coverage.empty:
+        st.info("Optimized schedule output is not available.")
+        return
+
+    schedule["shift_start_datetime"] = pd.to_datetime(schedule["shift_start_datetime"])
+    schedule["shift_end_datetime"] = pd.to_datetime(schedule["shift_end_datetime"])
+    schedule["shift_date"] = pd.to_datetime(schedule["shift_date"]).dt.date
+    coverage["interval_start_datetime"] = pd.to_datetime(coverage["interval_start_datetime"])
+    coverage["required_agents"] = pd.to_numeric(coverage["required_agents"])
+    coverage["scheduled_agents"] = pd.to_numeric(coverage["scheduled_agents"])
+    coverage["understaffed_agents"] = pd.to_numeric(coverage["understaffed_agents"])
+    coverage["overstaffed_agents"] = pd.to_numeric(coverage["overstaffed_agents"])
+
+    metric_cols = st.columns(4)
+    metric_cols[0].metric("Scheduled shifts", summary.get("scheduled_shifts", len(schedule)))
+    metric_cols[1].metric("Agents scheduled", summary.get("agents_scheduled", 0))
+    metric_cols[2].metric("Understaffed intervals", summary.get("intervals_with_understaffing", 0))
+    metric_cols[3].metric("Solver status", summary.get("solver_status", ""))
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=coverage["interval_start_datetime"],
+            y=coverage["required_agents"],
+            mode="lines",
+            name="Required",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=coverage["interval_start_datetime"],
+            y=coverage["scheduled_agents"],
+            mode="lines",
+            name="Scheduled",
+        )
+    )
+    fig.update_layout(title="Required vs scheduled coverage", xaxis_title=None, yaxis_title="Agents")
+    st.plotly_chart(fig, width="stretch")
+
+    dates = sorted(schedule["shift_date"].dropna().unique())
+    selected_date = st.selectbox("Schedule date", dates)
+    day_schedule = schedule[schedule["shift_date"] == selected_date].sort_values(
+        ["shift_start_datetime", "agent_name"]
+    )
+    timeline = px.timeline(
+        day_schedule,
+        x_start="shift_start_datetime",
+        x_end="shift_end_datetime",
+        y="agent_name",
+        color="agent_name",
+    )
+    timeline.update_yaxes(autorange="reversed")
+    timeline.update_layout(title="Daily agent schedule", xaxis_title=None, yaxis_title=None, showlegend=False)
+    st.plotly_chart(timeline, width="stretch")
+    st.dataframe(day_schedule, width="stretch", hide_index=True)
+
+
 def render_agent_performance(agents: pd.DataFrame) -> None:
     if agents.empty:
         st.info("Agent performance data is not available.")
@@ -566,6 +627,7 @@ def main() -> None:
             "Historical Trends",
             "Forecasting",
             "Staffing",
+            "Scheduling",
             "Agent Performance",
             "Methodology",
         ]
@@ -580,8 +642,10 @@ def main() -> None:
     with tabs[3]:
         render_staffing()
     with tabs[4]:
-        render_agent_performance(data["agent_performance"])
+        render_scheduling()
     with tabs[5]:
+        render_agent_performance(data["agent_performance"])
+    with tabs[6]:
         render_methodology()
 
 
