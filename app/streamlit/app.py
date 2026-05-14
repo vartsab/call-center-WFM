@@ -438,6 +438,76 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         st.plotly_chart(fig, width="stretch")
 
 
+def render_staffing() -> None:
+    summary = load_json(DOCS_DIR / "staffing_requirements_summary.json")
+    staffing = read_csv(DATA_DIR / "staffing_requirements_sample.csv")
+    if staffing.empty:
+        st.info("Staffing requirements output is not available.")
+        return
+
+    staffing["interval_start_datetime"] = pd.to_datetime(staffing["interval_start_datetime"])
+    staffing["predicted_call_volume"] = pd.to_numeric(staffing["predicted_call_volume"])
+    staffing["base_required_agents"] = pd.to_numeric(staffing["base_required_agents"])
+    staffing["shrinkage_adjusted_agents"] = pd.to_numeric(staffing["shrinkage_adjusted_agents"])
+    staffing["expected_occupancy"] = pd.to_numeric(staffing["expected_occupancy"])
+    staffing["service_level_probability"] = pd.to_numeric(staffing["service_level_probability"])
+
+    metric_cols = st.columns(4)
+    metric_cols[0].metric("Intervals", summary.get("interval_count", len(staffing)))
+    metric_cols[1].metric("Peak base FTE", summary.get("peak_base_required_agents", 0))
+    metric_cols[2].metric("Peak shrinkage FTE", summary.get("peak_shrinkage_adjusted_agents", 0))
+    metric_cols[3].metric("Avg service level", f"{summary.get('avg_service_level_probability', 0):.1%}")
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=staffing["interval_start_datetime"],
+            y=staffing["base_required_agents"],
+            mode="lines",
+            name="Base required agents",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=staffing["interval_start_datetime"],
+            y=staffing["shrinkage_adjusted_agents"],
+            mode="lines",
+            name="Shrinkage-adjusted agents",
+        )
+    )
+    fig.add_trace(
+        go.Bar(
+            x=staffing["interval_start_datetime"],
+            y=staffing["predicted_call_volume"],
+            name="Predicted calls",
+            yaxis="y2",
+            opacity=0.35,
+        )
+    )
+    fig.update_layout(
+        title="Forecasted calls and required staffing",
+        xaxis_title=None,
+        yaxis_title="Agents",
+        yaxis2={"title": "Calls", "overlaying": "y", "side": "right"},
+        legend={"orientation": "h"},
+    )
+    st.plotly_chart(fig, width="stretch")
+
+    display = staffing[
+        [
+            "interval_start_datetime",
+            "predicted_call_volume",
+            "avg_handle_time_sec",
+            "traffic_intensity_erlangs",
+            "base_required_agents",
+            "shrinkage_adjusted_agents",
+            "expected_occupancy",
+            "service_level_probability",
+        ]
+    ].copy()
+    st.dataframe(display, width="stretch", hide_index=True)
+
+
 def render_agent_performance(agents: pd.DataFrame) -> None:
     if agents.empty:
         st.info("Agent performance data is not available.")
@@ -466,9 +536,9 @@ def render_methodology() -> None:
     validation = {
         "Database": "CallCenterWFM",
         "Fact_Calls": "6,200",
-        "vw_Volume_30Min": "4,230",
-        "vw_Forecasting_Input": "2,764",
-        "vw_Agent_Performance": "1,322",
+        "vw_Volume_30Min": "4,125",
+        "vw_Forecasting_Input": "2,718",
+        "vw_Agent_Performance": "1,310",
     }
 
     left, right = st.columns(2)
@@ -495,6 +565,7 @@ def main() -> None:
             "Executive Summary",
             "Historical Trends",
             "Forecasting",
+            "Staffing",
             "Agent Performance",
             "Methodology",
         ]
@@ -507,8 +578,10 @@ def main() -> None:
     with tabs[2]:
         render_forecasting(data["forecasting_input"])
     with tabs[3]:
-        render_agent_performance(data["agent_performance"])
+        render_staffing()
     with tabs[4]:
+        render_agent_performance(data["agent_performance"])
+    with tabs[5]:
         render_methodology()
 
 

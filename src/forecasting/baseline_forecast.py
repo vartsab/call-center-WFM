@@ -7,7 +7,7 @@ import csv
 import json
 import math
 from collections import defaultdict
-from datetime import date, datetime, timedelta
+from datetime import datetime, time, timedelta
 from pathlib import Path
 
 
@@ -40,6 +40,21 @@ def aggregate_total_volume(rows: list[dict[str, str]]) -> dict[datetime, int]:
         interval = datetime.fromisoformat(row["interval_start_datetime"])
         totals[interval] += int(row["call_volume"])
     return dict(sorted(totals.items()))
+
+
+def complete_interval_series(totals: dict[datetime, int], interval_minutes: int = 30) -> dict[datetime, int]:
+    if not totals:
+        return {}
+
+    start_date = min(interval.date() for interval in totals)
+    end_date = max(interval.date() for interval in totals)
+    current = datetime.combine(start_date, time(0, 0))
+    end = datetime.combine(end_date, time(23, 30))
+    complete: dict[datetime, int] = {}
+    while current <= end:
+        complete[current] = totals.get(current, 0)
+        current += timedelta(minutes=interval_minutes)
+    return complete
 
 
 def mean(values: list[float]) -> float:
@@ -102,7 +117,7 @@ def main() -> None:
     parser.add_argument("--test-days", type=int, default=7)
     args = parser.parse_args()
 
-    totals = aggregate_total_volume(read_csv(Path(args.input)))
+    totals = complete_interval_series(aggregate_total_volume(read_csv(Path(args.input))))
     if not totals:
         raise SystemExit("No forecasting input rows found.")
 
@@ -148,4 +163,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

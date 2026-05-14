@@ -28,6 +28,7 @@ The current implementation includes:
 - initial SQL analytics views;
 - first 30-minute forecasting input builder;
 - first seasonal naive baseline forecast;
+- Erlang C staffing requirement calculator;
 - Streamlit dashboard MVP with SQL Server and CSV fallback data access;
 - project documentation for dataset selection, data generation methodology, architecture, and data dictionary.
 
@@ -79,6 +80,12 @@ Build forecasting input and run the first baseline forecast:
 ```powershell
 python src\forecasting\build_forecasting_input.py
 python src\forecasting\baseline_forecast.py
+```
+
+Calculate interval staffing requirements:
+
+```powershell
+python src\workforce\erlang_c_staffing.py
 ```
 
 Load and validate the SQL Server sample:

@@ -103,3 +103,11 @@ Status: accepted.
 Decision: allocate the 6,200-record January 2025 seed sample across days in proportion to real NYC 311 daily request counts.
 
 Reasoning: a fixed daily cap created an artificial flat daily volume pattern in the dashboard. Proportional daily sampling keeps the sample small while preserving a more realistic day-to-day demand curve.
+
+## 2026-05-14 - Fill missing forecast intervals with zero call volume
+
+Status: accepted.
+
+Decision: evaluate and export the baseline forecast on the full 30-minute calendar grid for the holdout period.
+
+Reasoning: staffing and scheduling require every planning interval, including intervals where no calls occurred. Leaving those intervals out would create gaps in the workforce requirement curve.

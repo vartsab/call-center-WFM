@@ -118,6 +118,8 @@ The first generation script writes:
 | `data/processed/forecasting_input_sample.csv` | 30-minute forecasting input by normalized queue service category. |
 | `data/processed/baseline_forecast_sample.csv` | First baseline forecast output for the holdout period. |
 | `docs/baseline_forecast_summary.json` | Committed metrics from the latest baseline forecast run. |
+| `data/processed/staffing_requirements_sample.csv` | Erlang C staffing requirements by 30-minute interval. |
+| `docs/staffing_requirements_summary.json` | Committed staffing summary from the latest Erlang C run. |
 
 ## Latest Generated Sample Summary
 
@@ -141,7 +143,21 @@ The first forecasting baseline uses the mean call volume by weekday and 30-minut
 | --- | ---: |
 | Training period | 2025-01-01 to 2025-01-24 |
 | Test period | 2025-01-25 to 2025-01-31 |
-| Test intervals | 288 |
-| MAE | 1.9219 |
-| RMSE | 2.5079 |
-| MAPE | 0.7667 |
+| Test intervals | 336 |
+| MAE | 1.8299 |
+| RMSE | 2.3866 |
+| MAPE | 0.7344 |
+
+## Latest Staffing Summary
+
+The first staffing calculation uses the baseline forecast, Erlang C, an 80/20 service target, a maximum occupancy of 85 percent, and a 30 percent shrinkage assumption.
+
+| Metric | Value |
+| --- | ---: |
+| Staffing intervals | 336 |
+| Average predicted calls | 4.3914 |
+| Peak predicted calls | 12.0000 |
+| Average base required agents | 3.1012 |
+| Peak base required agents | 7 |
+| Average shrinkage-adjusted agents | 4.8452 |
+| Peak shrinkage-adjusted agents | 10 |

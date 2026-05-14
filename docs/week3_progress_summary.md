@@ -56,10 +56,10 @@ Latest metrics:
 
 | Metric | Value |
 | --- | ---: |
-| Test intervals | 288 |
-| MAE | 1.9219 |
-| RMSE | 2.5079 |
-| MAPE | 0.7667 |
+| Test intervals | 336 |
+| MAE | 1.8299 |
+| RMSE | 2.3866 |
+| MAPE | 0.7344 |
 
 Metrics are stored in:
 
@@ -69,4 +69,4 @@ docs/baseline_forecast_summary.json
 
 ## Next Technical Step
 
-Use the validated SQL views as the input for Erlang C staffing requirements and the first shift-scheduling optimization step.
+Use the Erlang C staffing requirements as the demand curve for the first shift-scheduling optimization step.
