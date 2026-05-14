@@ -28,6 +28,7 @@ The current implementation includes:
 - initial SQL analytics views;
 - first 30-minute forecasting input builder;
 - first seasonal naive baseline forecast;
+- Streamlit dashboard MVP with SQL Server and CSV fallback data access;
 - project documentation for dataset selection, data generation methodology, architecture, and data dictionary.
 
 ## Repository Structure
@@ -84,6 +85,12 @@ Load and validate the SQL Server sample:
 
 ```text
 Run the scripts listed in sql/README.md, then run sql/validation/001_validate_loaded_sample.sql.
+```
+
+Run the dashboard:
+
+```powershell
+streamlit run app\streamlit\app.py
 ```
 
 View the generated summary:

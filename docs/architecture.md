@@ -109,10 +109,11 @@ Tabs:
 
 - Executive Summary;
 - Historical Trends;
-- Forecasting Tool;
-- Staffing Requirements;
-- Schedule Generator;
-- Data Dictionary or Methodology.
+- Forecasting;
+- Agent Performance;
+- Methodology.
+
+The current dashboard reads from SQL Server views when available and uses generated CSV files as a fallback for local demos.
 
 ## Repository Layout
 

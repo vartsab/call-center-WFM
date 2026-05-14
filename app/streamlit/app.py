@@ -1,0 +1,516 @@
+"""Streamlit dashboard for the call center workforce management capstone."""
+
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import streamlit as st
+
+
+ROOT = Path(__file__).resolve().parents[2]
+DATA_DIR = ROOT / "data" / "processed"
+DOCS_DIR = ROOT / "docs"
+
+
+SQL_QUERIES = {
+    "volume_30min": """
+        SELECT
+            Calendar_Date,
+            Time_ID,
+            Interval_Start_Time,
+            Half_Hour_Index,
+            Queue_ID,
+            Queue_Name,
+            Service_Category,
+            Offered_Calls,
+            Answered_Calls,
+            Abandoned_Calls,
+            Avg_Handle_Time_Sec,
+            Avg_Hold_Time_Sec,
+            Service_Level_Rate
+        FROM dbo.vw_Volume_30Min
+    """,
+    "forecasting_input": """
+        SELECT
+            Interval_Start_Datetime,
+            Half_Hour_Index,
+            Day_Of_Week,
+            Is_Weekend,
+            Is_Holiday,
+            Service_Category,
+            Call_Volume,
+            Avg_Handle_Time_Sec
+        FROM dbo.vw_Forecasting_Input
+    """,
+    "agent_performance": """
+        SELECT
+            Agent_ID,
+            Agent_Name,
+            Skill_Group,
+            Calendar_Date,
+            Handled_Calls,
+            Avg_Handle_Time_Sec,
+            Avg_Talk_Time_Sec,
+            Avg_ACW_Time_Sec,
+            SLA_Rate
+        FROM dbo.vw_Agent_Performance
+    """,
+}
+
+
+def page_config() -> None:
+    st.set_page_config(
+        page_title="Call Center WFM",
+        page_icon=None,
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def sql_connection_string() -> str:
+    return os.getenv(
+        "CALLCENTER_SQL_CONNECTION",
+        (
+            "DRIVER={ODBC Driver 18 for SQL Server};"
+            "SERVER=localhost;"
+            "DATABASE=CallCenterWFM;"
+            "Trusted_Connection=yes;"
+            "Encrypt=no;"
+            "TrustServerCertificate=yes;"
+        ),
+    )
+
+
+@st.cache_resource(show_spinner=False)
+def get_sql_connection() -> Any | None:
+    try:
+        import pyodbc
+    except ImportError:
+        return None
+
+    try:
+        return pyodbc.connect(sql_connection_string(), timeout=5)
+    except Exception:
+        return None
+
+
+@st.cache_data(show_spinner=False)
+def read_sql(query_key: str) -> pd.DataFrame:
+    connection = get_sql_connection()
+    if connection is None:
+        return pd.DataFrame()
+    cursor = connection.cursor()
+    cursor.execute(SQL_QUERIES[query_key])
+    columns = [column[0] for column in cursor.description]
+    rows = cursor.fetchall()
+    return pd.DataFrame.from_records(rows, columns=columns)
+
+
+@st.cache_data(show_spinner=False)
+def read_csv(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        return pd.DataFrame()
+    return pd.read_csv(path)
+
+
+def load_sql_data() -> dict[str, pd.DataFrame]:
+    return {
+        "volume_30min": read_sql("volume_30min"),
+        "forecasting_input": read_sql("forecasting_input"),
+        "agent_performance": read_sql("agent_performance"),
+    }
+
+
+def load_csv_data() -> dict[str, pd.DataFrame]:
+    calls = read_csv(DATA_DIR / "synthetic_calls_sample.csv")
+    forecasting = read_csv(DATA_DIR / "forecasting_input_sample.csv")
+    baseline = read_csv(DATA_DIR / "baseline_forecast_sample.csv")
+
+    if not calls.empty:
+        calls["call_start_datetime"] = pd.to_datetime(calls["call_start_datetime"])
+        calls["calendar_date"] = calls["call_start_datetime"].dt.date
+        calls["time_id"] = calls["call_start_datetime"].dt.strftime("%H%M").astype(int)
+        calls["interval_start_datetime"] = calls["call_start_datetime"].dt.floor("30min")
+
+    return {
+        "calls": calls,
+        "forecasting_input": forecasting,
+        "baseline": baseline,
+    }
+
+
+def normalize_sql_data(data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+    volume = data["volume_30min"].copy()
+    forecasting = data["forecasting_input"].copy()
+    agents = data["agent_performance"].copy()
+
+    if not volume.empty:
+        volume.columns = [column.lower() for column in volume.columns]
+        volume["calendar_date"] = pd.to_datetime(volume["calendar_date"]).dt.date
+        volume["offered_calls"] = pd.to_numeric(volume["offered_calls"])
+        volume["answered_calls"] = pd.to_numeric(volume["answered_calls"])
+        volume["abandoned_calls"] = pd.to_numeric(volume["abandoned_calls"])
+        volume["avg_handle_time_sec"] = pd.to_numeric(volume["avg_handle_time_sec"])
+        volume["service_level_rate"] = pd.to_numeric(volume["service_level_rate"])
+
+    if not forecasting.empty:
+        forecasting.columns = [column.lower() for column in forecasting.columns]
+        forecasting["interval_start_datetime"] = pd.to_datetime(forecasting["interval_start_datetime"])
+        forecasting["call_volume"] = pd.to_numeric(forecasting["call_volume"])
+        forecasting["avg_handle_time_sec"] = pd.to_numeric(forecasting["avg_handle_time_sec"])
+
+    if not agents.empty:
+        agents.columns = [column.lower() for column in agents.columns]
+        agents["calendar_date"] = pd.to_datetime(agents["calendar_date"]).dt.date
+        agents["handled_calls"] = pd.to_numeric(agents["handled_calls"])
+        agents["avg_handle_time_sec"] = pd.to_numeric(agents["avg_handle_time_sec"])
+        agents["sla_rate"] = pd.to_numeric(agents["sla_rate"])
+
+    return {
+        "volume_30min": volume,
+        "forecasting_input": forecasting,
+        "agent_performance": agents,
+    }
+
+
+def csv_to_volume(calls: pd.DataFrame) -> pd.DataFrame:
+    if calls.empty:
+        return pd.DataFrame()
+    grouped = (
+        calls.groupby(["calendar_date", "time_id", "service_category"], as_index=False)
+        .agg(
+            offered_calls=("call_id", "count"),
+            answered_calls=("abandoned_flag", lambda value: int((value == 0).sum())),
+            abandoned_calls=("abandoned_flag", lambda value: int((value == 1).sum())),
+            avg_handle_time_sec=("handle_time_sec", lambda value: value[value > 0].mean()),
+            service_level_rate=("sla_met_flag", "mean"),
+        )
+    )
+    grouped["avg_handle_time_sec"] = grouped["avg_handle_time_sec"].fillna(0)
+    return grouped
+
+
+def csv_to_agent_performance(calls: pd.DataFrame) -> pd.DataFrame:
+    if calls.empty:
+        return pd.DataFrame()
+    answered = calls[(calls["abandoned_flag"] == 0) & calls["agent_id"].notna()].copy()
+    if answered.empty:
+        return pd.DataFrame()
+    answered["agent_id"] = answered["agent_id"].astype(int)
+    return (
+        answered.groupby(["agent_id", "calendar_date"], as_index=False)
+        .agg(
+            handled_calls=("call_id", "count"),
+            avg_handle_time_sec=("handle_time_sec", "mean"),
+            avg_talk_time_sec=("talk_time_sec", "mean"),
+            avg_acw_time_sec=("acw_time_sec", "mean"),
+            sla_rate=("sla_met_flag", "mean"),
+        )
+        .sort_values("handled_calls", ascending=False)
+    )
+
+
+def load_data() -> tuple[str, dict[str, pd.DataFrame]]:
+    sql_data = normalize_sql_data(load_sql_data())
+    if not sql_data["volume_30min"].empty:
+        return "SQL Server", sql_data
+
+    csv_data = load_csv_data()
+    calls = csv_data["calls"]
+    return (
+        "CSV sample",
+        {
+            "volume_30min": csv_to_volume(calls),
+            "forecasting_input": csv_data["forecasting_input"],
+            "agent_performance": csv_to_agent_performance(calls),
+            "baseline": csv_data["baseline"],
+        },
+    )
+
+
+def format_number(value: float, digits: int = 0) -> str:
+    if pd.isna(value):
+        return "0"
+    if digits:
+        return f"{value:,.{digits}f}"
+    return f"{value:,.0f}"
+
+
+def render_sidebar(source: str, volume: pd.DataFrame) -> tuple[list[str], tuple[Any, Any]]:
+    st.sidebar.title("Call Center WFM")
+    st.sidebar.caption(f"Data source: {source}")
+
+    service_categories = sorted(volume["service_category"].dropna().unique()) if not volume.empty else []
+    selected_categories = st.sidebar.multiselect(
+        "Service categories",
+        options=service_categories,
+        default=service_categories,
+    )
+
+    if not volume.empty:
+        dates = sorted(volume["calendar_date"].dropna().unique())
+        selected_dates = st.sidebar.date_input(
+            "Date range",
+            value=(dates[0], dates[-1]),
+            min_value=dates[0],
+            max_value=dates[-1],
+        )
+        if len(selected_dates) == 1:
+            selected_dates = (selected_dates[0], selected_dates[0])
+    else:
+        selected_dates = (None, None)
+
+    return selected_categories, selected_dates
+
+
+def apply_filters(
+    volume: pd.DataFrame,
+    categories: list[str],
+    date_range: tuple[Any, Any],
+) -> pd.DataFrame:
+    if volume.empty:
+        return volume
+    filtered = volume.copy()
+    if categories:
+        filtered = filtered[filtered["service_category"].isin(categories)]
+    start, end = date_range
+    if start and end:
+        filtered = filtered[
+            (pd.to_datetime(filtered["calendar_date"]) >= pd.to_datetime(start))
+            & (pd.to_datetime(filtered["calendar_date"]) <= pd.to_datetime(end))
+        ]
+    return filtered
+
+
+def render_executive_summary(volume: pd.DataFrame) -> None:
+    total_calls = volume["offered_calls"].sum() if not volume.empty else 0
+    answered_calls = volume["answered_calls"].sum() if not volume.empty else 0
+    abandoned_calls = volume["abandoned_calls"].sum() if not volume.empty else 0
+    abandonment_rate = abandoned_calls / total_calls if total_calls else 0
+    service_level = (
+        (volume["service_level_rate"] * volume["offered_calls"]).sum() / total_calls
+        if total_calls
+        else 0
+    )
+    avg_aht = (
+        (volume["avg_handle_time_sec"] * volume["answered_calls"]).sum() / answered_calls
+        if answered_calls
+        else 0
+    )
+
+    cols = st.columns(5)
+    cols[0].metric("Offered calls", format_number(total_calls))
+    cols[1].metric("Answered calls", format_number(answered_calls))
+    cols[2].metric("Abandoned", format_number(abandoned_calls))
+    cols[3].metric("Abandonment", f"{abandonment_rate:.1%}")
+    cols[4].metric("Avg AHT", f"{avg_aht:,.0f}s")
+
+    daily = (
+        volume.groupby("calendar_date", as_index=False)
+        .agg(
+            offered_calls=("offered_calls", "sum"),
+            answered_calls=("answered_calls", "sum"),
+            abandoned_calls=("abandoned_calls", "sum"),
+        )
+        .sort_values("calendar_date")
+    )
+    category = (
+        volume.groupby("service_category", as_index=False)
+        .agg(offered_calls=("offered_calls", "sum"))
+        .sort_values("offered_calls", ascending=False)
+    )
+
+    left, right = st.columns([2, 1])
+    with left:
+        fig = px.line(daily, x="calendar_date", y="offered_calls", markers=True)
+        fig.update_layout(title="Daily offered calls", yaxis_title="Calls", xaxis_title=None)
+        st.plotly_chart(fig, width="stretch")
+    with right:
+        fig = px.bar(category, x="offered_calls", y="service_category", orientation="h")
+        fig.update_layout(title="Service category mix", xaxis_title="Calls", yaxis_title=None)
+        st.plotly_chart(fig, width="stretch")
+
+    st.caption(f"Weighted service level: {service_level:.1%}")
+
+
+def render_historical_trends(volume: pd.DataFrame) -> None:
+    interval = (
+        volume.groupby("time_id", as_index=False)
+        .agg(
+            offered_calls=("offered_calls", "sum"),
+            avg_handle_time_sec=("avg_handle_time_sec", "mean"),
+            service_level_rate=("service_level_rate", "mean"),
+        )
+        .sort_values("time_id")
+    )
+    interval["time_label"] = interval["time_id"].astype(str).str.zfill(4)
+    interval["time_label"] = interval["time_label"].str[:2] + ":" + interval["time_label"].str[2:]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=interval["time_label"], y=interval["offered_calls"], name="Calls"))
+    fig.add_trace(
+        go.Scatter(
+            x=interval["time_label"],
+            y=interval["service_level_rate"],
+            name="SLA rate",
+            yaxis="y2",
+            mode="lines",
+        )
+    )
+    fig.update_layout(
+        title="Intraday demand and service level",
+        xaxis_title=None,
+        yaxis_title="Calls",
+        yaxis2={"title": "SLA rate", "overlaying": "y", "side": "right", "tickformat": ".0%"},
+        legend={"orientation": "h"},
+    )
+    st.plotly_chart(fig, width="stretch")
+
+    heatmap = volume.groupby(["calendar_date", "time_id"], as_index=False).agg(
+        offered_calls=("offered_calls", "sum")
+    )
+    heatmap["time_label"] = heatmap["time_id"].astype(str).str.zfill(4)
+    heatmap["time_label"] = heatmap["time_label"].str[:2] + ":" + heatmap["time_label"].str[2:]
+    pivot = heatmap.pivot(index="calendar_date", columns="time_label", values="offered_calls").fillna(0)
+    fig = px.imshow(pivot, aspect="auto", labels={"color": "Calls"})
+    fig.update_layout(title="30-minute call volume heatmap", xaxis_title=None, yaxis_title=None)
+    st.plotly_chart(fig, width="stretch")
+
+
+def render_forecasting(forecasting: pd.DataFrame) -> None:
+    summary = load_json(DOCS_DIR / "baseline_forecast_summary.json")
+
+    metric_cols = st.columns(4)
+    metric_cols[0].metric("Test intervals", summary.get("test_intervals", 0))
+    metric_cols[1].metric("MAE", summary.get("mae", 0))
+    metric_cols[2].metric("RMSE", summary.get("rmse", 0))
+    metric_cols[3].metric("MAPE", f"{summary.get('mape', 0):.1%}")
+
+    baseline = read_csv(DATA_DIR / "baseline_forecast_sample.csv")
+    if baseline.empty:
+        st.info("Baseline forecast output is not available.")
+        return
+
+    baseline["interval_start_datetime"] = pd.to_datetime(baseline["interval_start_datetime"])
+    baseline["actual_call_volume"] = pd.to_numeric(baseline["actual_call_volume"])
+    baseline["predicted_call_volume"] = pd.to_numeric(baseline["predicted_call_volume"])
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=baseline["interval_start_datetime"],
+            y=baseline["actual_call_volume"],
+            mode="lines",
+            name="Actual",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=baseline["interval_start_datetime"],
+            y=baseline["predicted_call_volume"],
+            mode="lines",
+            name="Baseline",
+        )
+    )
+    fig.update_layout(title="Baseline forecast holdout period", xaxis_title=None, yaxis_title="Calls")
+    st.plotly_chart(fig, width="stretch")
+
+    if not forecasting.empty:
+        top = (
+            forecasting.groupby("service_category", as_index=False)
+            .agg(call_volume=("call_volume", "sum"))
+            .sort_values("call_volume", ascending=False)
+        )
+        fig = px.bar(top, x="service_category", y="call_volume")
+        fig.update_layout(title="Forecasting input by category", xaxis_title=None, yaxis_title="Calls")
+        st.plotly_chart(fig, width="stretch")
+
+
+def render_agent_performance(agents: pd.DataFrame) -> None:
+    if agents.empty:
+        st.info("Agent performance data is not available.")
+        return
+    display = agents.copy()
+    if "agent_name" not in display.columns:
+        display["agent_name"] = "Agent " + display["agent_id"].astype(str)
+    grouped = (
+        display.groupby(["agent_id", "agent_name"], as_index=False)
+        .agg(
+            handled_calls=("handled_calls", "sum"),
+            avg_handle_time_sec=("avg_handle_time_sec", "mean"),
+            sla_rate=("sla_rate", "mean"),
+        )
+        .sort_values("handled_calls", ascending=False)
+        .head(20)
+    )
+    fig = px.bar(grouped, x="agent_name", y="handled_calls", color="sla_rate")
+    fig.update_layout(title="Top agents by handled calls", xaxis_title=None, yaxis_title="Calls")
+    st.plotly_chart(fig, width="stretch")
+    st.dataframe(grouped, width="stretch", hide_index=True)
+
+
+def render_methodology() -> None:
+    sample = load_json(DOCS_DIR / "sample_generation_summary.json")
+    validation = {
+        "Database": "CallCenterWFM",
+        "Fact_Calls": "6,200",
+        "vw_Volume_30Min": "4,230",
+        "vw_Forecasting_Input": "2,764",
+        "vw_Agent_Performance": "1,322",
+    }
+
+    left, right = st.columns(2)
+    with left:
+        st.subheader("Synthetic sample")
+        st.json(sample)
+    with right:
+        st.subheader("SQL validation")
+        st.table(pd.DataFrame(validation.items(), columns=["Object", "Value"]))
+
+
+def main() -> None:
+    page_config()
+    source, data = load_data()
+    volume = data["volume_30min"]
+
+    categories, date_range = render_sidebar(source, volume)
+    filtered_volume = apply_filters(volume, categories, date_range)
+
+    st.title("Call Center Workforce Management")
+
+    tabs = st.tabs(
+        [
+            "Executive Summary",
+            "Historical Trends",
+            "Forecasting",
+            "Agent Performance",
+            "Methodology",
+        ]
+    )
+
+    with tabs[0]:
+        render_executive_summary(filtered_volume)
+    with tabs[1]:
+        render_historical_trends(filtered_volume)
+    with tabs[2]:
+        render_forecasting(data["forecasting_input"])
+    with tabs[3]:
+        render_agent_performance(data["agent_performance"])
+    with tabs[4]:
+        render_methodology()
+
+
+if __name__ == "__main__":
+    main()
