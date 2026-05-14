@@ -124,8 +124,7 @@ Current sample characteristics:
 - source rows: 6,200;
 - synthetic agents: 60;
 - queues: 101;
-- abandonment rate: 6.61 percent;
-- average handle time for answered calls: 517.57 seconds;
-- distinct 30-minute intervals: 1,321;
-- maximum calls in one interval: 17.
-
+- abandonment rate: 6.69 percent;
+- average handle time for answered calls: 519.82 seconds;
+- distinct 30-minute intervals: 1,325;
+- maximum calls in one interval: 19.

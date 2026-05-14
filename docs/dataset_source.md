@@ -48,7 +48,8 @@ Most public 311 datasets do not include agent-level call center metadata. That l
 The first working sample should be small enough for rapid iteration:
 
 - default date range: January 2025;
-- current sample strategy: up to 200 rows per day for January 2025;
+- current sample strategy: 6,200 records allocated across January 2025 days in proportion to real NYC 311 daily request counts;
+- current daily sample range: 138 to 268 records per day;
 - current generated source rows: 6,200;
 - output: `data/raw/nyc_311_sample.csv`;
 - generated output: `data/processed/synthetic_calls_sample.csv`.

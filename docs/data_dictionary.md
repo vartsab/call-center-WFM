@@ -121,17 +121,17 @@ The first generation script writes:
 
 ## Latest Generated Sample Summary
 
-The first generated sample was created from a January 2025 NYC 311 extract with up to 200 records per day.
+The latest generated sample was created from a January 2025 NYC 311 extract with 6,200 records allocated across days in proportion to real daily request counts.
 
 | Metric | Value |
 | --- | ---: |
 | Source rows | 6,200 |
 | Synthetic agents | 60 |
 | Queues | 101 |
-| Abandonment rate | 0.0661 |
-| Average handle time, answered calls | 517.57 sec |
-| Distinct 30-minute intervals | 1,321 |
-| Maximum calls in one interval | 17 |
+| Abandonment rate | 0.0669 |
+| Average handle time, answered calls | 519.82 sec |
+| Distinct 30-minute intervals | 1,325 |
+| Maximum calls in one interval | 19 |
 
 ## Latest Baseline Forecast Summary
 
@@ -141,7 +141,7 @@ The first forecasting baseline uses the mean call volume by weekday and 30-minut
 | --- | ---: |
 | Training period | 2025-01-01 to 2025-01-24 |
 | Test period | 2025-01-25 to 2025-01-31 |
-| Test intervals | 301 |
-| MAE | 1.6544 |
-| RMSE | 2.2243 |
-| MAPE | 0.5174 |
+| Test intervals | 288 |
+| MAE | 1.9219 |
+| RMSE | 2.5079 |
+| MAPE | 0.7667 |

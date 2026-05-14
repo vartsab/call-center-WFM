@@ -6,8 +6,8 @@
   "queues_path": "data/processed/dim_queues_sample.csv",
   "agent_count": 60,
   "queue_count": 101,
-  "abandonment_rate": 0.0661,
-  "average_handle_time_sec_answered": 517.57,
-  "interval_count": 1321,
-  "max_calls_in_interval": 17
+  "abandonment_rate": 0.0669,
+  "average_handle_time_sec_answered": 519.82,
+  "interval_count": 1325,
+  "max_calls_in_interval": 19
 }

@@ -95,3 +95,11 @@ Status: accepted.
 Decision: implement the first forecast as a seasonal naive mean by weekday and 30-minute interval.
 
 Reasoning: a baseline model is necessary for evaluating later Prophet, XGBoost, or other time-series models. It also provides a quick, explainable first forecasting artifact for the capstone.
+
+## 2026-05-14 - Use proportional daily sampling for the MVP dataset
+
+Status: accepted.
+
+Decision: allocate the 6,200-record January 2025 seed sample across days in proportion to real NYC 311 daily request counts.
+
+Reasoning: a fixed daily cap created an artificial flat daily volume pattern in the dashboard. Proportional daily sampling keeps the sample small while preserving a more realistic day-to-day demand curve.

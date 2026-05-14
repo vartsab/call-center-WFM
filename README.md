@@ -59,7 +59,7 @@ The public dataset provides real service request timestamps, categories, agencie
 Download a small January 2025 sample:
 
 ```powershell
-python src\data_acquisition\download_nyc_311_sample.py --start-date 2025-01-01 --end-date 2025-01-31 --daily-limit 200 --limit 6200
+python src\data_acquisition\download_nyc_311_sample.py --start-date 2025-01-01 --end-date 2025-01-31 --target-total 6200
 ```
 
 Generate synthetic call center records:

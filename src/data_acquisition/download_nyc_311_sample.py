@@ -7,8 +7,10 @@ that is small enough for local SQL and modeling iteration.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 from datetime import UTC, date, datetime, timedelta
+from io import StringIO
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import urlopen
@@ -47,6 +49,20 @@ def build_url(start_date: str, end_date: str, limit: int) -> str:
     return f"{API_URL}?{urlencode(query)}"
 
 
+def build_daily_counts_url(start_date: str, end_date: str) -> str:
+    day_expression = "date_trunc_ymd(created_date)"
+    query = {
+        "$select": f"{day_expression} as day,count(*) as record_count",
+        "$where": (
+            f"created_date between '{start_date}T00:00:00' "
+            f"and '{end_date}T23:59:59'"
+        ),
+        "$group": day_expression,
+        "$order": "day",
+    }
+    return f"{API_URL}?{urlencode(query)}"
+
+
 def fetch_csv(url: str) -> bytes:
     with urlopen(url, timeout=120) as response:
         return response.read()
@@ -71,14 +87,55 @@ def date_range(start_date: str, end_date: str) -> list[date]:
 
 
 def download_daily_sample(start_date: str, end_date: str, daily_limit: int, output_path: Path) -> tuple[int, list[str]]:
+    days = date_range(start_date, end_date)
+    limits = {day.isoformat(): daily_limit for day in days}
+    return download_daily_sample_with_limits(limits, output_path)
+
+
+def fetch_daily_counts(start_date: str, end_date: str) -> tuple[dict[str, int], str]:
+    url = build_daily_counts_url(start_date, end_date)
+    payload = fetch_csv(url).decode("utf-8-sig")
+    rows = csv.DictReader(StringIO(payload))
+    counts: dict[str, int] = {}
+    for row in rows:
+        day = row["day"][:10]
+        counts[day] = int(row["record_count"])
+    return counts, url
+
+
+def allocate_daily_limits(daily_counts: dict[str, int], target_total: int) -> dict[str, int]:
+    if target_total <= 0:
+        raise ValueError("target_total must be positive")
+    total_count = sum(daily_counts.values())
+    if total_count <= 0:
+        return {day: 0 for day in daily_counts}
+
+    raw_allocations = {
+        day: (count / total_count) * target_total
+        for day, count in daily_counts.items()
+    }
+    limits = {day: int(value) for day, value in raw_allocations.items()}
+    remaining = target_total - sum(limits.values())
+    by_remainder = sorted(
+        raw_allocations.items(),
+        key=lambda item: item[1] - int(item[1]),
+        reverse=True,
+    )
+    for day, _ in by_remainder[:remaining]:
+        limits[day] += 1
+    return limits
+
+
+def download_daily_sample_with_limits(daily_limits: dict[str, int], output_path: Path) -> tuple[int, list[str]]:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     urls: list[str] = []
     header: bytes | None = None
     data_lines: list[bytes] = []
 
-    for current_date in date_range(start_date, end_date):
-        day = current_date.isoformat()
-        url = build_url(day, day, daily_limit)
+    for day, limit in sorted(daily_limits.items()):
+        if limit <= 0:
+            continue
+        url = build_url(day, day, limit)
         urls.append(url)
         payload = fetch_csv(url)
         lines = payload.splitlines()
@@ -108,6 +165,12 @@ def main() -> None:
         help="If positive, download up to this many rows for each day in the date range.",
     )
     parser.add_argument(
+        "--target-total",
+        type=int,
+        default=0,
+        help="If positive, allocate approximately this many rows across days proportional to real daily 311 counts.",
+    )
+    parser.add_argument(
         "--output",
         default="data/raw/nyc_311_sample.csv",
         help="Output CSV path.",
@@ -123,7 +186,14 @@ def main() -> None:
     metadata_path = Path(args.metadata_output)
 
     query_urls: list[str]
-    if args.daily_limit > 0:
+    daily_counts: dict[str, int] = {}
+    daily_limits: dict[str, int] = {}
+    daily_counts_url = ""
+    if args.target_total > 0:
+        daily_counts, daily_counts_url = fetch_daily_counts(args.start_date, args.end_date)
+        daily_limits = allocate_daily_limits(daily_counts, args.target_total)
+        record_count, query_urls = download_daily_sample_with_limits(daily_limits, output_path)
+    elif args.daily_limit > 0:
         record_count, query_urls = download_daily_sample(
             args.start_date,
             args.end_date,
@@ -144,6 +214,10 @@ def main() -> None:
         "end_date": args.end_date,
         "limit": args.limit,
         "daily_limit": args.daily_limit,
+        "target_total": args.target_total,
+        "daily_counts_url": daily_counts_url,
+        "daily_counts": daily_counts,
+        "daily_limits": daily_limits,
         "output_path": str(output_path),
         "record_count": record_count,
         "downloaded_at_utc": datetime.now(UTC).isoformat(),

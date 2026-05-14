@@ -43,7 +43,7 @@ data/processed/forecasting_input_sample.csv
 Rows:
 
 ```text
-2,764
+2,718
 ```
 
 First baseline model:
@@ -56,10 +56,10 @@ Latest metrics:
 
 | Metric | Value |
 | --- | ---: |
-| Test intervals | 301 |
-| MAE | 1.6544 |
-| RMSE | 2.2243 |
-| MAPE | 0.5174 |
+| Test intervals | 288 |
+| MAE | 1.9219 |
+| RMSE | 2.5079 |
+| MAPE | 0.7667 |
 
 Metrics are stored in:
 
@@ -69,4 +69,4 @@ docs/baseline_forecast_summary.json
 
 ## Next Technical Step
 
-Configure or connect to Microsoft SQL Server, run the schema and ETL scripts, then validate the SQL views against the loaded sample.
+Use the validated SQL views as the input for Erlang C staffing requirements and the first shift-scheduling optimization step.
