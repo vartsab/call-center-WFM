@@ -28,6 +28,34 @@ The raw analytics views expose:
 - `vw_Raw_NYC_311_Daily_Summary`
 - `vw_Raw_NYC_311_Complaint_Type_Summary`
 
+## Full Synthetic Warehouse Load
+
+After the raw table is loaded, run:
+
+```text
+sql/etl/004_load_full_synthetic_warehouse_from_raw.sql
+```
+
+This script rebuilds the dimensional warehouse from the full raw table:
+
+- one synthetic call per raw 311 request;
+- 160 synthetic agents;
+- one queue per observed complaint type;
+- deterministic synthetic hold time, talk time, ACW, abandonment, SLA, and agent assignment.
+
+Optional display-name update for the synthetic agent roster:
+
+```powershell
+python src\data_generation\write_agent_name_update_sql.py --output sql\etl\005_update_agent_names.sql --agent-count 160
+Invoke-Sqlcmd -ServerInstance localhost -Database CallCenterWFM -InputFile sql\etl\005_update_agent_names.sql
+```
+
+Export the operational forecasting input used by the future staffing calculator:
+
+```powershell
+Invoke-Sqlcmd -ServerInstance localhost -Database CallCenterWFM -InputFile sql\exports\002_export_operational_forecasting_input_for_powershell.sql -QueryTimeout 300 | Export-Csv -Path data\processed\full_operational_forecasting_input.csv -NoTypeInformation
+```
+
 ## Synthetic Warehouse Sample Load
 
 Run the SQL scripts in this order after generating the sample CSV files:

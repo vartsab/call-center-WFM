@@ -69,6 +69,19 @@ Models are selected by lowest holdout MAE.
 
 The selected model is histogram gradient boosting. Random forest is close, while Poisson regression performs worst on the full-history holdout. This result replaces the earlier January-sample result, where the very small demand range made Poisson regression look better than it does on the full operational history.
 
+## Future Planning Forecast
+
+The selected histogram gradient boosting model is retrained on the full 2023-2025 feature matrix and used to forecast the January 2026 planning horizon.
+
+| Metric | Value |
+| --- | ---: |
+| Forecast period | 2026-01-01 to 2026-01-31 |
+| Forecast intervals | 1,488 |
+| Average predicted calls | 204.4150 |
+| Peak predicted calls | 386.1923 |
+
+Future holiday features are generated with the same US federal holiday calendar used in the holdout evaluation. The previous-week lag is seeded from observed 2025 history and then rolled forward recursively inside the January 2026 horizon.
+
 ## Output
 
 The full-history model writes:
@@ -76,6 +89,14 @@ The full-history model writes:
 ```text
 data/processed/full_sklearn_best_forecast.csv
 docs/full_sklearn_model_comparison_summary.json
+```
+
+The future planning model writes:
+
+```text
+data/processed/future_sklearn_forecast.csv
+data/processed/future_forecast_features.csv
+docs/future_forecast_summary.json
 ```
 
 Raw and processed CSV outputs remain local generated artifacts and are not committed to version control.

@@ -26,6 +26,7 @@ The current implementation includes:
 - SQL-load-ready dimension and fact file builder;
 - initial SQL Server warehouse schema;
 - full raw SQL Server landing table for 10.3M public service records;
+- full synthetic SQL Server warehouse load for 10.3M call-center records;
 - SQL Server staging and load scripts;
 - initial SQL analytics views;
 - first 30-minute forecasting input builder;
@@ -145,15 +146,28 @@ After loading, create raw-table indexes:
 Run sql/raw/003_create_raw_nyc_311_indexes.sql.
 ```
 
-Build the full forecasting, staffing, and scheduling artifacts:
+Load the full synthetic warehouse:
+
+```text
+Run sql/etl/004_load_full_synthetic_warehouse_from_raw.sql.
+```
+
+Build the full historical model-evaluation artifacts:
 
 ```powershell
 python src\forecasting\build_full_forecasting_input_from_sql.py
 python src\forecasting\build_feature_matrix.py --input data\processed\full_forecasting_input.csv --output data\processed\full_forecast_features.csv
 python src\forecasting\baseline_forecast.py --input data\processed\full_forecasting_input.csv --output data\processed\full_baseline_forecast.csv --summary-output docs\full_baseline_forecast_summary.json --test-days 90
 python src\forecasting\sklearn_model_compare.py --input data\processed\full_forecast_features.csv --output data\processed\full_sklearn_best_forecast.csv --summary-output docs\full_sklearn_model_comparison_summary.json --test-days 90
-python src\workforce\erlang_c_staffing.py --forecast data\processed\full_sklearn_best_forecast.csv --output data\processed\full_staffing_requirements.csv --summary-output docs\full_staffing_requirements_summary.json
-python src\scheduling\horizon_shift_template_optimizer.py --agent-count 500 --time-limit-sec 180
+```
+
+Build the January 2026 planning artifacts:
+
+```powershell
+Invoke-Sqlcmd -ServerInstance localhost -Database CallCenterWFM -InputFile sql\exports\002_export_operational_forecasting_input_for_powershell.sql -QueryTimeout 300 | Export-Csv -Path data\processed\full_operational_forecasting_input.csv -NoTypeInformation
+python src\forecasting\future_feature_forecast.py --input data\processed\full_forecast_features.csv --forecast-output data\processed\future_sklearn_forecast.csv --feature-output data\processed\future_forecast_features.csv --summary-output docs\future_forecast_summary.json --start-date 2026-01-01 --end-date 2026-01-31 --model hist_gradient_boosting
+python src\workforce\erlang_c_staffing.py --forecast data\processed\future_sklearn_forecast.csv --forecasting-input data\processed\full_operational_forecasting_input.csv --output data\processed\future_staffing_requirements.csv --summary-output docs\future_staffing_requirements_summary.json
+python src\scheduling\agent_roster_optimizer.py --requirements data\processed\future_staffing_requirements.csv --schedule-output data\processed\future_optimized_schedule.csv --coverage-output data\processed\future_schedule_coverage.csv --summary-output docs\future_scheduling_summary.json --agent-count 160 --max-shifts-per-agent-per-week 5 --min-rest-hours 11 --weekly-time-limit-sec 30
 ```
 
 ## Notes

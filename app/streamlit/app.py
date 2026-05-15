@@ -16,6 +16,7 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "data" / "processed"
 DOCS_DIR = ROOT / "docs"
+SQL_CACHE_VERSION = "future_jan2026_160_christie"
 
 
 SQL_QUERIES = {
@@ -59,6 +60,15 @@ SQL_QUERIES = {
             Avg_Talk_Time_Sec,
             Avg_ACW_Time_Sec
         FROM dbo.vw_Agent_Performance
+    """,
+    "agent_dimension": """
+        SELECT
+            Agent_ID,
+            Agent_Name,
+            Skill_Group,
+            Employment_Type,
+            Active_Flag
+        FROM dbo.Dim_Agent
     """,
 }
 
@@ -114,7 +124,7 @@ def get_sql_connection() -> Any | None:
 
 
 @st.cache_data(show_spinner=False)
-def read_sql(query_key: str) -> pd.DataFrame:
+def read_sql_cached(query_key: str, cache_version: str) -> pd.DataFrame:
     connection = get_sql_connection()
     if connection is None:
         return pd.DataFrame()
@@ -125,10 +135,18 @@ def read_sql(query_key: str) -> pd.DataFrame:
     return pd.DataFrame.from_records(rows, columns=columns)
 
 
-@st.cache_data(show_spinner=False)
 def read_csv(path: Path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
+    return read_csv_cached(str(path), path.stat().st_mtime_ns)
+
+
+def read_sql(query_key: str) -> pd.DataFrame:
+    return read_sql_cached(query_key, SQL_CACHE_VERSION)
+
+
+@st.cache_data(show_spinner=False)
+def read_csv_cached(path: str, cache_version: int) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
@@ -145,6 +163,7 @@ def load_sql_data() -> dict[str, pd.DataFrame]:
         "volume_30min": read_sql("volume_30min"),
         "forecasting_input": read_sql("forecasting_input"),
         "agent_performance": read_sql("agent_performance"),
+        "agent_dimension": read_sql("agent_dimension"),
     }
 
 
@@ -170,6 +189,7 @@ def normalize_sql_data(data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]
     volume = data["volume_30min"].copy()
     forecasting = data["forecasting_input"].copy()
     agents = data["agent_performance"].copy()
+    agent_dimension = data["agent_dimension"].copy()
 
     if not volume.empty:
         volume.columns = [column.lower() for column in volume.columns]
@@ -194,10 +214,16 @@ def normalize_sql_data(data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]
         agents["avg_talk_time_sec"] = pd.to_numeric(agents["avg_talk_time_sec"])
         agents["avg_acw_time_sec"] = pd.to_numeric(agents["avg_acw_time_sec"])
 
+    if not agent_dimension.empty:
+        agent_dimension.columns = [column.lower() for column in agent_dimension.columns]
+        agent_dimension["agent_id"] = pd.to_numeric(agent_dimension["agent_id"])
+        agent_dimension["active_flag"] = pd.to_numeric(agent_dimension["active_flag"])
+
     return {
         "volume_30min": volume,
         "forecasting_input": forecasting,
         "agent_performance": agents,
+        "agent_dimension": agent_dimension,
     }
 
 
@@ -250,6 +276,7 @@ def load_data() -> tuple[str, dict[str, pd.DataFrame]]:
             "volume_30min": csv_to_volume(calls),
             "forecasting_input": csv_data["forecasting_input"],
             "agent_performance": csv_to_agent_performance(calls),
+            "agent_dimension": pd.DataFrame(),
             "baseline": csv_data["baseline"],
         },
     )
@@ -417,6 +444,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
             DOCS_DIR / "sklearn_model_comparison_summary.json",
         ]
     )
+    future_summary = load_first_json([DOCS_DIR / "future_forecast_summary.json"])
 
     metric_cols = st.columns(4)
     metric_cols[0].metric("Test intervals", summary.get("test_intervals", 0))
@@ -442,6 +470,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
             DATA_DIR / "sklearn_best_forecast_sample.csv",
         ]
     )
+    future_forecast = read_first_csv([DATA_DIR / "future_sklearn_forecast.csv"])
     if baseline.empty:
         st.info("Baseline forecast output is not available.")
         return
@@ -482,6 +511,27 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
     fig.update_layout(title="Forecast holdout period", xaxis_title=None, yaxis_title="Calls")
     st.plotly_chart(fig, width="stretch")
 
+    if not future_forecast.empty:
+        future_forecast["interval_start_datetime"] = pd.to_datetime(
+            future_forecast["interval_start_datetime"]
+        )
+        future_forecast["predicted_call_volume"] = pd.to_numeric(
+            future_forecast["predicted_call_volume"]
+        )
+        st.subheader("Future planning forecast")
+        future_cols = st.columns(4)
+        future_cols[0].metric("Forecast intervals", future_summary.get("forecast_intervals", len(future_forecast)))
+        future_cols[1].metric("Forecast start", future_summary.get("forecast_start", ""))
+        future_cols[2].metric("Avg calls", f"{future_summary.get('avg_predicted_calls', 0):,.1f}")
+        future_cols[3].metric("Peak calls", f"{future_summary.get('peak_predicted_calls', 0):,.1f}")
+        fig = px.line(
+            future_forecast,
+            x="interval_start_datetime",
+            y="predicted_call_volume",
+        )
+        fig.update_layout(title="Future 30-minute call forecast", xaxis_title=None, yaxis_title="Calls")
+        st.plotly_chart(fig, width="stretch")
+
     if not forecasting.empty:
         top = (
             forecasting.groupby("service_category", as_index=False)
@@ -496,12 +546,14 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
 def render_staffing() -> None:
     summary = load_first_json(
         [
+            DOCS_DIR / "future_staffing_requirements_summary.json",
             DOCS_DIR / "full_staffing_requirements_summary.json",
             DOCS_DIR / "staffing_requirements_summary.json",
         ]
     )
     staffing = read_first_csv(
         [
+            DATA_DIR / "future_staffing_requirements.csv",
             DATA_DIR / "full_staffing_requirements.csv",
             DATA_DIR / "staffing_requirements_sample.csv",
         ]
@@ -576,18 +628,21 @@ def render_staffing() -> None:
 def render_scheduling() -> None:
     summary = load_first_json(
         [
+            DOCS_DIR / "future_scheduling_summary.json",
             DOCS_DIR / "full_scheduling_summary.json",
             DOCS_DIR / "scheduling_summary.json",
         ]
     )
     schedule = read_first_csv(
         [
+            DATA_DIR / "future_optimized_schedule.csv",
             DATA_DIR / "full_optimized_schedule.csv",
             DATA_DIR / "optimized_schedule_sample.csv",
         ]
     )
     coverage = read_first_csv(
         [
+            DATA_DIR / "future_schedule_coverage.csv",
             DATA_DIR / "full_schedule_coverage.csv",
             DATA_DIR / "schedule_coverage_sample.csv",
         ]
@@ -598,18 +653,36 @@ def render_scheduling() -> None:
 
     schedule["shift_start_datetime"] = pd.to_datetime(schedule["shift_start_datetime"])
     schedule["shift_end_datetime"] = pd.to_datetime(schedule["shift_end_datetime"])
+    schedule["break_start_datetime"] = pd.to_datetime(schedule["break_start_datetime"])
+    schedule["break_end_datetime"] = pd.to_datetime(schedule["break_end_datetime"])
     schedule["shift_date"] = pd.to_datetime(schedule["shift_date"]).dt.date
     coverage["interval_start_datetime"] = pd.to_datetime(coverage["interval_start_datetime"])
     coverage["required_agents"] = pd.to_numeric(coverage["required_agents"])
     coverage["scheduled_agents"] = pd.to_numeric(coverage["scheduled_agents"])
     coverage["understaffed_agents"] = pd.to_numeric(coverage["understaffed_agents"])
     coverage["overstaffed_agents"] = pd.to_numeric(coverage["overstaffed_agents"])
+    coverage_achieved = summary.get("coverage_achieved_rate")
+    if coverage_achieved is None:
+        total_required = coverage["required_agents"].sum()
+        coverage_achieved = (
+            (total_required - coverage["understaffed_agents"].sum()) / total_required
+            if total_required
+            else 0
+        )
 
-    metric_cols = st.columns(4)
+    metric_cols = st.columns(7)
     metric_cols[0].metric("Scheduled shifts", summary.get("scheduled_shifts", len(schedule)))
     metric_cols[1].metric("Agent pool", summary.get("agent_pool_size", summary.get("agents_scheduled", 0)))
-    metric_cols[2].metric("Understaffed intervals", summary.get("intervals_with_understaffing", 0))
-    metric_cols[3].metric("Solver status", summary.get("solver_status", ""))
+    metric_cols[2].metric("Full roster est.", summary.get("estimated_full_coverage_agents", 0))
+    metric_cols[3].metric("Peak required", summary.get("peak_required_agents", 0))
+    metric_cols[4].metric("Peak scheduled", summary.get("peak_scheduled_agents", 0))
+    metric_cols[5].metric("Coverage achieved", f"{coverage_achieved:.1%}")
+    metric_cols[6].metric("Understaffed intervals", summary.get("intervals_with_understaffing", 0))
+    st.caption(
+        "Roster rules: one shift per agent per day, "
+        f"max {summary.get('max_shifts_per_agent_per_week', 5)} shifts per week, "
+        f"{summary.get('min_rest_hours', 11)}h minimum rest."
+    )
 
     fig = go.Figure()
     fig.add_trace(
@@ -628,7 +701,17 @@ def render_scheduling() -> None:
             name="Scheduled",
         )
     )
+    fig.add_trace(
+        go.Bar(
+            x=coverage["interval_start_datetime"],
+            y=coverage["understaffed_agents"],
+            name="Understaffed",
+            opacity=0.35,
+            yaxis="y2",
+        )
+    )
     fig.update_layout(title="Required vs scheduled coverage", xaxis_title=None, yaxis_title="Agents")
+    fig.update_layout(yaxis2={"title": "Gap", "overlaying": "y", "side": "right"})
     st.plotly_chart(fig, width="stretch")
 
     dates = sorted(schedule["shift_date"].dropna().unique())
@@ -636,26 +719,100 @@ def render_scheduling() -> None:
     day_schedule = schedule[schedule["shift_date"] == selected_date].sort_values(
         ["shift_start_datetime", "agent_name"]
     )
-    timeline = px.timeline(
-        day_schedule,
-        x_start="shift_start_datetime",
-        x_end="shift_end_datetime",
-        y="agent_name",
-        color="agent_name",
+    day_schedule = day_schedule.assign(
+        shift_window=day_schedule["shift_start_datetime"].dt.strftime("%H:%M")
+        + "-"
+        + day_schedule["shift_end_datetime"].dt.strftime("%H:%M")
     )
-    timeline.update_yaxes(autorange="reversed")
-    timeline.update_layout(title="Daily agent schedule", xaxis_title=None, yaxis_title=None, showlegend=False)
-    st.plotly_chart(timeline, width="stretch")
-    st.dataframe(day_schedule, width="stretch", hide_index=True)
+    day_coverage = coverage[coverage["interval_start_datetime"].dt.date == selected_date]
+    shift_mix = (
+        day_schedule.groupby("shift_window", as_index=False)
+        .agg(agent_count=("agent_id", "count"))
+        .sort_values("shift_window")
+    )
+    if not shift_mix.empty:
+        fig = px.bar(shift_mix, x="shift_window", y="agent_count")
+        fig.update_layout(title="Daily shift mix", xaxis_title=None, yaxis_title="Agents")
+        st.plotly_chart(fig, width="stretch")
+
+    if not day_coverage.empty:
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=day_coverage["interval_start_datetime"],
+                y=day_coverage["required_agents"],
+                mode="lines",
+                name="Required",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=day_coverage["interval_start_datetime"],
+                y=day_coverage["scheduled_agents"],
+                mode="lines",
+                name="Scheduled",
+            )
+        )
+        fig.add_trace(
+            go.Bar(
+                x=day_coverage["interval_start_datetime"],
+                y=day_coverage["understaffed_agents"],
+                name="Understaffed",
+                opacity=0.35,
+            )
+        )
+        fig.update_layout(title="Selected-day coverage", xaxis_title=None, yaxis_title="Agents")
+        st.plotly_chart(fig, width="stretch")
+
+    shift_options = ["All"] + shift_mix["shift_window"].tolist()
+    selected_shift = st.selectbox("Shift window", shift_options)
+    filtered_day_schedule = (
+        day_schedule
+        if selected_shift == "All"
+        else day_schedule[day_schedule["shift_window"] == selected_shift]
+    )
+    roster_display = filtered_day_schedule[
+        [
+            "agent_id",
+            "agent_name",
+            "shift_window",
+            "break_start_datetime",
+            "break_end_datetime",
+            "covered_intervals",
+        ]
+    ].copy()
+    roster_display["break_start_datetime"] = roster_display["break_start_datetime"].dt.strftime("%H:%M")
+    roster_display["break_end_datetime"] = roster_display["break_end_datetime"].dt.strftime("%H:%M")
+    st.dataframe(roster_display, width="stretch", hide_index=True)
+
+    with st.expander("Daily timeline"):
+        timeline = px.timeline(
+            filtered_day_schedule,
+            x_start="shift_start_datetime",
+            x_end="shift_end_datetime",
+            y="agent_name",
+            color="shift_window",
+        )
+        timeline.update_yaxes(autorange="reversed")
+        timeline.update_layout(
+            title="Daily agent schedule",
+            xaxis_title=None,
+            yaxis_title=None,
+            height=min(900, max(360, len(filtered_day_schedule) * 18)),
+            showlegend=True,
+        )
+        st.plotly_chart(timeline, width="stretch")
 
 
-def render_agent_performance(agents: pd.DataFrame) -> None:
+def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame) -> None:
     if agents.empty:
         st.info("Agent performance data is not available.")
         return
     display = agents.copy()
     if "agent_name" not in display.columns:
         display["agent_name"] = "Agent " + display["agent_id"].astype(str)
+    total_agents = len(agent_dimension) if not agent_dimension.empty else display["agent_id"].nunique()
+    agents_with_calls = display["agent_id"].nunique()
     grouped = (
         display.groupby(["agent_id", "agent_name"], as_index=False)
         .agg(
@@ -665,12 +822,29 @@ def render_agent_performance(agents: pd.DataFrame) -> None:
             avg_acw_time_sec=("avg_acw_time_sec", "mean"),
         )
         .sort_values("handled_calls", ascending=False)
-        .head(20)
     )
-    fig = px.bar(grouped, x="agent_name", y="handled_calls", color="avg_handle_time_sec")
+
+    metric_cols = st.columns(4)
+    metric_cols[0].metric("Total agents", total_agents)
+    metric_cols[1].metric("Agents with calls", agents_with_calls)
+    metric_cols[2].metric("Handled calls", format_number(grouped["handled_calls"].sum()))
+    metric_cols[3].metric("Avg AHT", f"{grouped['avg_handle_time_sec'].mean():,.0f}s")
+
+    if not agent_dimension.empty:
+        skill_mix = (
+            agent_dimension.groupby("skill_group", as_index=False)
+            .agg(agent_count=("agent_id", "count"))
+            .sort_values("agent_count", ascending=False)
+        )
+        fig = px.bar(skill_mix, x="skill_group", y="agent_count")
+        fig.update_layout(title="Agent pool by skill group", xaxis_title=None, yaxis_title="Agents")
+        st.plotly_chart(fig, width="stretch")
+
+    top_agents = grouped.head(20)
+    fig = px.bar(top_agents, x="agent_name", y="handled_calls", color="avg_handle_time_sec")
     fig.update_layout(title="Top agents by handled calls", xaxis_title=None, yaxis_title="Calls")
     st.plotly_chart(fig, width="stretch")
-    st.dataframe(grouped, width="stretch", hide_index=True)
+    st.dataframe(top_agents, width="stretch", hide_index=True)
 
 
 def render_methodology() -> None:
@@ -678,12 +852,16 @@ def render_methodology() -> None:
     full_dataset = load_json(DOCS_DIR / "full_dataset_summary.json")
     validation = {
         "Database": "CallCenterWFM",
-        "Fact_Calls": "6,200",
+        "Dim_Date": "1,096",
+        "Dim_Time": "48",
+        "Dim_Queue": "217",
+        "Dim_Agent": "160",
+        "Fact_Calls": "10,336,480",
         "Raw_NYC_311_Service_Requests": "10,336,480",
         "vw_Raw_NYC_311_Volume_30Min": "52,603",
-        "vw_Volume_30Min": "4,125",
-        "vw_Forecasting_Input": "2,718",
-        "vw_Agent_Performance": "1,310",
+        "vw_Volume_30Min": "2,230,984",
+        "vw_Forecasting_Input": "252,790",
+        "vw_Agent_Performance": "175,359",
     }
 
     left, right = st.columns(2)
@@ -728,7 +906,7 @@ def main() -> None:
     with tabs[4]:
         render_scheduling()
     with tabs[5]:
-        render_agent_performance(data["agent_performance"])
+        render_agent_performance(data["agent_performance"], data["agent_dimension"])
     with tabs[6]:
         render_methodology()
 

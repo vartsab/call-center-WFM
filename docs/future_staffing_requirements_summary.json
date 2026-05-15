@@ -1,0 +1,21 @@
+{
+  "method": "Erlang C",
+  "forecast_input": "data\\processed\\future_sklearn_forecast.csv",
+  "output": "data\\processed\\future_staffing_requirements.csv",
+  "interval_count": 1488,
+  "start": "2026-01-01T00:00:00",
+  "end": "2026-01-31T23:30:00",
+  "interval_minutes": 30,
+  "sla_target_sec": 20,
+  "target_service_level": 0.8,
+  "max_occupancy": 0.85,
+  "shrinkage_rate": 0.3,
+  "avg_predicted_calls": 204.415,
+  "peak_predicted_calls": 386.1923,
+  "avg_base_required_agents": 71.7836,
+  "peak_base_required_agents": 132,
+  "avg_shrinkage_adjusted_agents": 103.0108,
+  "peak_shrinkage_adjusted_agents": 189,
+  "avg_expected_occupancy": 0.8359,
+  "avg_service_level_probability": 0.9167
+}

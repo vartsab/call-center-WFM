@@ -6,15 +6,15 @@ The scheduling step converts interval staffing requirements into an agent shift 
 
 ## Input
 
-The current full-history optimizer uses:
+The current planning roster optimizer uses:
 
-- `data/processed/full_staffing_requirements.csv` for shrinkage-adjusted required agents;
-- a 500-agent planning pool;
-- 30-minute planning intervals for the 2025-10-03 to 2025-12-31 forecast horizon.
+- `data/processed/future_staffing_requirements.csv` for shrinkage-adjusted required agents;
+- a 160-agent planning pool;
+- 30-minute planning intervals for the 2026-01-01 to 2026-01-31 future forecast horizon.
 
 ## Optimization Model
 
-The full-history optimizer uses Google OR-Tools CP-SAT with horizon-wide shift-template counts. A template represents an 8-hour shift with a 30-minute break after 4 hours. The model chooses the number of agents assigned to each shift template across the full forecast horizon.
+The full-history roster uses Google OR-Tools CP-SAT to choose weekly shift counts by start time, then assigns those shifts to named agents while enforcing human roster rules. A shift represents an 8-hour work window with a 30-minute break after 4 hours.
 
 Current shift assumptions:
 
@@ -23,40 +23,48 @@ Current shift assumptions:
 | Shift window | 8 hours |
 | Break | 30 minutes after 4 hours |
 | Shift start options | hourly |
-| Understaffing | hard constraint, zero allowed |
-| Solver time limit | 180 seconds |
+| Agent pool | 160 total agents |
+| Maximum shifts | 5 per agent per week |
+| Daily limit | 1 shift per agent per day |
+| Minimum rest | 11 hours between shifts |
+| Understaffing | allowed with a high penalty |
+| Solver time limit | 20 seconds per week |
 
-The objective minimizes overstaffing and total scheduled shifts while preserving required coverage in every interval.
+The objective minimizes understaffing first, then overstaffing, then total scheduled shifts. Understaffing is allowed because the approved 160-person workforce pool is materially below the full-coverage roster estimate produced by the January 2026 demand curve.
 
-## Latest Full-History Result
+## Latest January 2026 Planning Result
 
 | Metric | Value |
 | --- | ---: |
 | Solver status | FEASIBLE |
-| Scheduled shifts | 33,544 |
-| Agent pool size | 500 |
-| Coverage intervals | 4,320 |
-| Understaffed agent-intervals | 0 |
-| Overstaffed agent-intervals | 58,778 |
-| Intervals with understaffing | 0 |
-| Intervals with overstaffing | 2,861 |
-| Peak required agents | 193 |
-| Peak scheduled agents | 267 |
+| Scheduled shifts | 3,427 |
+| Agent pool size | 160 |
+| Full-coverage roster estimate | 462 |
+| Coverage intervals | 1,488 |
+| Understaffed agent-intervals | 101,875 |
+| Overstaffed agent-intervals | 0 |
+| Intervals with understaffing | 1,395 |
+| Intervals with overstaffing | 0 |
+| Peak required agents | 189 |
+| Peak scheduled agents | 160 |
+| Coverage achieved | 33.54% |
+| One-shift-per-agent-per-day violations | 0 |
+| Weekly shift-limit violations | 0 |
+| Rest violations | 0 |
 
-This replaces the earlier daily decomposition run. The horizon-wide optimizer reduced total overstaffing and removed all understaffed intervals across the 90-day holdout schedule.
+This schedule is a legal human roster for the future planning month. It also shows an important planning finding: a 160-person total employee pool is not sufficient to cover the 24/7 staffing curve produced by the forecast and Erlang C calculation.
 
 ## Output
 
 The generated local files are:
 
 ```text
-data/processed/full_optimized_schedule.csv
-data/processed/full_schedule_coverage.csv
-docs/full_scheduling_summary.json
+data/processed/future_optimized_schedule.csv
+data/processed/future_schedule_coverage.csv
+docs/future_scheduling_summary.json
 ```
 
 ## Limitations
 
-- The current full-history optimizer uses anonymous shift-template counts before assigning generated agent IDs.
 - Skill-based routing is not yet enforced in the schedule.
 - Labor-law rules are simplified to shift length, break placement, and shift start options.

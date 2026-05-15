@@ -20,14 +20,14 @@ localhost / TheLaptop
 | --- | ---: |
 | `Raw_NYC_311_Service_Requests` | 10,336,480 |
 | `vw_Raw_NYC_311_Volume_30Min` | 52,603 |
-| `Dim_Date` | 31 |
+| `Dim_Date` | 1,096 |
 | `Dim_Time` | 48 |
-| `Dim_Queue` | 101 |
-| `Dim_Agent` | 60 |
-| `Fact_Calls` | 6,200 |
-| `vw_Volume_30Min` | 4,125 |
-| `vw_Forecasting_Input` | 2,718 |
-| `vw_Agent_Performance` | 1,310 |
+| `Dim_Queue` | 217 |
+| `Dim_Agent` | 160 |
+| `Fact_Calls` | 10,336,480 |
+| `vw_Volume_30Min` | 2,230,984 |
+| `vw_Forecasting_Input` | 252,790 |
+| `vw_Agent_Performance` | 175,359 |
 
 ## Raw NYC 311 Validation
 
@@ -53,12 +53,12 @@ Yearly row counts:
 
 | Metric | Value |
 | --- | ---: |
-| Offered calls | 6,200 |
-| Answered calls | 5,785 |
-| Abandoned calls | 415 |
-| Abandonment rate | 6.69% |
-| Average answered handle time | 519.82 sec |
-| SLA rate | 20.00% |
+| Offered calls | 10,336,480 |
+| Answered calls | 9,527,782 |
+| Abandoned calls | 808,698 |
+| Abandonment rate | 7.82% |
+| Average answered handle time | 532.50 sec |
+| SLA rate | 22.57% |
 
 ## View Reconciliation
 
@@ -66,23 +66,23 @@ The totals from `vw_Volume_30Min` reconcile with `Fact_Calls`:
 
 | Metric | Value |
 | --- | ---: |
-| View offered calls | 6,200 |
-| View answered calls | 5,785 |
-| View abandoned calls | 415 |
+| View offered calls | 10,336,480 |
+| View answered calls | 9,527,782 |
+| View abandoned calls | 808,698 |
 
 ## Service Category Summary
 
 | Service category | Offered calls | Avg service level | Avg AHT |
 | --- | ---: | ---: | ---: |
-| housing | 3,913 | 0.2147 | 555.11 |
-| transportation | 1,023 | 0.1937 | 448.93 |
-| general | 876 | 0.1802 | 481.04 |
-| public_safety | 360 | 0.2055 | 437.36 |
-| sanitation | 28 | 0.2222 | 390.35 |
+| housing | 3,469,112 | 0.2435 | 600.85 |
+| general | 3,175,514 | 0.2194 | 525.88 |
+| transportation | 2,617,130 | 0.2239 | 487.87 |
+| public_safety | 763,458 | 0.2349 | 450.20 |
+| sanitation | 311,266 | 0.2257 | 400.11 |
 
 ## Notes
 
-- The warehouse schema, staging tables, bulk load, transform script, and analytics views executed successfully.
+- The full synthetic warehouse load from the raw 311 table executed successfully.
 - The full raw 311 table loaded successfully through the Python pyodbc loader and was indexed after loading.
 - The full raw analytics views reconcile back to the raw table total.
 - `vw_Forecasting_Input` uses normalized service categories from `Dim_Queue`, and the Python forecasting input builder was aligned to the same grain.

@@ -37,6 +37,7 @@ class Template:
     start_index: int
     end_index: int
     break_index: int
+    active_indexes: tuple[int, ...]
     covered_indexes: tuple[int, ...]
 
 
@@ -73,17 +74,26 @@ def build_templates(
 ) -> list[Template]:
     templates: list[Template] = []
     template_id = 0
-    latest_start = interval_count - shift_intervals
-    for start in range(0, latest_start + 1, start_step_intervals):
+    earliest_start = -(shift_intervals - start_step_intervals)
+    latest_start = interval_count - start_step_intervals
+    for start in range(earliest_start, latest_start + 1, start_step_intervals):
         end = start + shift_intervals
         break_index = start + break_after_intervals
-        covered = tuple(index for index in range(start, end) if index != break_index)
+        active = tuple(index for index in range(start, end) if 0 <= index < interval_count)
+        covered = tuple(
+            index
+            for index in range(start, end)
+            if index != break_index and 0 <= index < interval_count
+        )
+        if not active or not covered:
+            continue
         templates.append(
             Template(
                 template_id=template_id,
                 start_index=start,
                 end_index=end,
                 break_index=break_index,
+                active_indexes=active,
                 covered_indexes=covered,
             )
         )
@@ -94,6 +104,7 @@ def build_templates(
 def solve_horizon(
     required: list[int],
     templates: list[Template],
+    agent_count: int,
     time_limit_sec: int,
     allow_understaffing: bool,
 ) -> tuple[list[int], list[int], list[int], list[int], str, float]:
@@ -109,16 +120,21 @@ def solve_horizon(
     under_vars = []
     over_vars = []
     templates_by_interval: list[list[int]] = [[] for _ in required]
+    active_templates_by_interval: list[list[int]] = [[] for _ in required]
     for template_index, template in enumerate(templates):
         for interval_index in template.covered_indexes:
             templates_by_interval[interval_index].append(template_index)
+        for interval_index in template.active_indexes:
+            active_templates_by_interval[interval_index].append(template_index)
 
     for interval_index, required_agents in enumerate(required):
         coverage_terms = [counts[index] for index in templates_by_interval[interval_index]]
+        active_terms = [counts[index] for index in active_templates_by_interval[interval_index]]
         under_limit = peak_required if allow_understaffing else 0
         under = model.NewIntVar(0, under_limit, f"under_{interval_index}")
         over = model.NewIntVar(0, max_template_count * len(templates), f"over_{interval_index}")
         model.Add(sum(coverage_terms) + under - over == required_agents)
+        model.Add(sum(active_terms) <= agent_count)
         under_vars.append(under)
         over_vars.append(over)
 
@@ -146,7 +162,9 @@ def assign_agents(
     counts: list[int],
     agent_count: int,
 ) -> list[dict[str, str]]:
-    available_agents = [(0, agent_id) for agent_id in range(1, agent_count + 1)]
+    horizon_start = intervals[0]
+    earliest_start = min(template.start_index for template in templates)
+    available_agents = [(earliest_start, agent_id) for agent_id in range(1, agent_count + 1)]
     heapq.heapify(available_agents)
     rows: list[dict[str, str]] = []
 
@@ -155,9 +173,9 @@ def assign_agents(
             if not available_agents or available_agents[0][0] > template.start_index:
                 raise SystemExit(f"Agent pool too small. Increase above {agent_count}.")
             _, agent_id = heapq.heappop(available_agents)
-            shift_start = intervals[template.start_index]
-            shift_end = intervals[template.end_index - 1] + timedelta(minutes=30)
-            break_start = intervals[template.break_index]
+            shift_start = horizon_start + timedelta(minutes=30 * template.start_index)
+            shift_end = horizon_start + timedelta(minutes=30 * template.end_index)
+            break_start = horizon_start + timedelta(minutes=30 * template.break_index)
             break_end = break_start + timedelta(minutes=30)
             rows.append(
                 {
@@ -181,7 +199,7 @@ def main() -> None:
     parser.add_argument("--schedule-output", default="data/processed/full_optimized_schedule.csv")
     parser.add_argument("--coverage-output", default="data/processed/full_schedule_coverage.csv")
     parser.add_argument("--summary-output", default="docs/full_scheduling_summary.json")
-    parser.add_argument("--agent-count", type=int, default=500)
+    parser.add_argument("--agent-count", type=int, default=160)
     parser.add_argument("--shift-hours", type=int, default=8)
     parser.add_argument("--break-after-hours", type=int, default=4)
     parser.add_argument("--start-step-minutes", type=int, default=60)
@@ -203,6 +221,7 @@ def main() -> None:
     counts, scheduled, under, over, status, objective = solve_horizon(
         required=required,
         templates=templates,
+        agent_count=args.agent_count,
         time_limit_sec=args.time_limit_sec,
         allow_understaffing=args.allow_understaffing,
     )
@@ -232,6 +251,7 @@ def main() -> None:
         "objective_value": round(objective, 2),
         "scheduled_shifts": sum(counts),
         "agent_pool_size": args.agent_count,
+        "agent_capacity_enforced": True,
         "coverage_intervals": len(coverage_rows),
         "shift_hours": args.shift_hours,
         "break_after_hours": args.break_after_hours,
@@ -243,6 +263,11 @@ def main() -> None:
         "intervals_with_overstaffing": sum(value > 0 for value in over),
         "peak_required_agents": max(required),
         "peak_scheduled_agents": max(scheduled),
+        "peak_understaffed_agents": max(under),
+        "coverage_achieved_rate": round(
+            (sum(required) - sum(under)) / sum(required),
+            4,
+        ) if sum(required) else 0,
         "schedule_output": args.schedule_output,
         "coverage_output": args.coverage_output,
     }

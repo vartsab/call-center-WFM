@@ -137,6 +137,15 @@ The project keeps raw and processed CSV outputs local. The code and committed su
 | `data/processed/full_optimized_schedule.csv` | Full-history optimized shift assignments. |
 | `data/processed/full_schedule_coverage.csv` | Full-history scheduled coverage versus required staffing. |
 | `docs/full_scheduling_summary.json` | Full-history scheduling summary. |
+| `data/processed/full_operational_forecasting_input.csv` | Full synthetic SQL view export with interval volume and average handle time for staffing. |
+| `data/processed/future_forecast_features.csv` | January 2026 future feature matrix. |
+| `data/processed/future_sklearn_forecast.csv` | January 2026 selected-model call-volume forecast. |
+| `docs/future_forecast_summary.json` | January 2026 future forecast summary. |
+| `data/processed/future_staffing_requirements.csv` | January 2026 Erlang C staffing requirements. |
+| `docs/future_staffing_requirements_summary.json` | January 2026 staffing summary. |
+| `data/processed/future_optimized_schedule.csv` | January 2026 legal roster schedule for the 160-agent planning scenario. |
+| `data/processed/future_schedule_coverage.csv` | January 2026 scheduled coverage versus required staffing. |
+| `docs/future_scheduling_summary.json` | January 2026 scheduling summary. |
 
 ## Latest Generated Sample Summary
 
@@ -180,30 +189,32 @@ The full-history feature-based comparison uses calendar, previous-week lag, and 
 
 ## Latest Staffing Summary
 
-The latest full-history staffing calculation uses the selected feature-based forecast, Erlang C, an 80/20 service target, a maximum occupancy of 85 percent, and a 30 percent shrinkage assumption.
+The latest staffing calculation uses the January 2026 future forecast, Erlang C, an 80/20 service target, a maximum occupancy of 85 percent, and a 30 percent shrinkage assumption.
 
 | Metric | Value |
 | --- | ---: |
-| Staffing intervals | 4,320 |
-| Average predicted calls | 208.3222 |
-| Peak predicted calls | 382.2330 |
-| Average base required agents | 71.6819 |
-| Peak base required agents | 135 |
-| Average shrinkage-adjusted agents | 102.8662 |
-| Peak shrinkage-adjusted agents | 193 |
+| Staffing intervals | 1,488 |
+| Average predicted calls | 204.4150 |
+| Peak predicted calls | 386.1923 |
+| Average base required agents | 71.7836 |
+| Peak base required agents | 132 |
+| Average shrinkage-adjusted agents | 103.0108 |
+| Peak shrinkage-adjusted agents | 189 |
 
 ## Latest Scheduling Summary
 
-The latest schedule uses OR-Tools CP-SAT with horizon-wide 8-hour shift templates, a 30-minute break after 4 hours, hourly shift starts, and zero understaffing as a hard constraint.
+The latest schedule uses OR-Tools CP-SAT with 8-hour shifts, a 30-minute break after 4 hours, hourly shift starts, a 160-agent pool, one shift per agent per day, a maximum of 5 shifts per agent per week, and an 11-hour minimum rest rule.
 
 | Metric | Value |
 | --- | ---: |
 | Solver status | FEASIBLE |
-| Scheduled shifts | 33,544 |
-| Agent pool size | 500 |
-| Coverage intervals | 4,320 |
-| Understaffed agent-intervals | 0 |
-| Overstaffed agent-intervals | 58,778 |
-| Intervals with understaffing | 0 |
-| Peak required agents | 193 |
-| Peak scheduled agents | 267 |
+| Scheduled shifts | 3,427 |
+| Agent pool size | 160 |
+| Full-coverage roster estimate | 462 |
+| Coverage intervals | 1,488 |
+| Understaffed agent-intervals | 101,875 |
+| Overstaffed agent-intervals | 0 |
+| Intervals with understaffing | 1,395 |
+| Peak required agents | 189 |
+| Peak scheduled agents | 160 |
+| Coverage achieved | 33.54% |
