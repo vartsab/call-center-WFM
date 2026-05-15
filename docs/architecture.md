@@ -4,7 +4,9 @@
 
 ```text
 Public 311 data
-    -> acquisition and cleaning
+    -> full 2023-2025 raw extraction
+    -> SQL Server raw landing table
+    -> 30-minute forecasting aggregate
     -> synthetic call center metadata generation
     -> SQL Server staging tables
     -> dimensional warehouse tables
@@ -20,13 +22,18 @@ Public 311 data
 
 ### Data Layer
 
-- Seed data: public city service records.
+- Seed data: public city service records from NYC 311.
+- Full forecasting history: 10,336,480 raw service requests from 2023-01-01 through 2025-12-31 loaded into SQL Server.
 - Generated fields: call start time, answer time, talk time, after-call work, hold time, abandonment flag, agent assignment, queue, SLA status.
 - Grain: one row per simulated call/contact.
 
 ### Database Layer
 
 Target platform: Microsoft SQL Server Express or Developer edition.
+
+Raw landing table:
+
+- `Raw_NYC_311_Service_Requests`
 
 Initial star schema:
 
@@ -46,6 +53,12 @@ Initial views:
 - `vw_Agent_Performance` for handled-call volume and handle-time components;
 - `vw_Forecasting_Input` for 30-minute modeling input.
 
+Full raw-history views:
+
+- `vw_Raw_NYC_311_Volume_30Min` for 30-minute demand from the 10.3M-row raw table;
+- `vw_Raw_NYC_311_Daily_Summary` for daily public-service demand;
+- `vw_Raw_NYC_311_Complaint_Type_Summary` for source complaint mix.
+
 Service level is treated as a queue, service-category, and staffing metric rather than an agent-level performance metric because an individual agent does not control the queue wait before the call is routed.
 
 ### Forecasting
@@ -62,9 +75,15 @@ Candidate models:
 Current baseline:
 
 - seasonal naive mean by weekday and half-hour interval;
-- train period: 2025-01-01 to 2025-01-24;
-- test period: 2025-01-25 to 2025-01-31;
-- latest metrics are stored in `docs/baseline_forecast_summary.json`.
+- train period: 2023-01-01 to 2025-10-02;
+- test period: 2025-10-03 to 2025-12-31;
+- latest full-history metrics are stored in `docs/full_baseline_forecast_summary.json`.
+
+Current selected feature model:
+
+- histogram gradient boosting;
+- selected by lowest holdout MAE on the full-history 90-day test period;
+- latest metrics are stored in `docs/full_sklearn_model_comparison_summary.json`.
 
 Evaluation metrics:
 
@@ -89,19 +108,19 @@ Inputs:
 
 Use a mixed integer linear programming model with OR-Tools.
 
-Initial constraints:
+Current full-history constraints:
 
 - shift templates;
-- max one shift per agent per day;
+- horizon-wide shift-template counts;
 - coverage by 30-minute interval;
-- optional lunch and break rules;
+- 8-hour shifts with a 30-minute break;
 - optional skill group eligibility.
 
 Objective:
 
-- minimize undercoverage with a high penalty;
-- minimize overcoverage with a lower penalty;
-- optionally minimize total scheduled hours.
+- enforce zero undercoverage in the default full-history schedule;
+- minimize overcoverage;
+- minimize total scheduled shifts.
 
 ### Streamlit App
 

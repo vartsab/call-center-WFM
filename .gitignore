@@ -16,6 +16,7 @@ env/
 data/raw/*
 data/processed/*
 data/external/*
+sql/raw/*_generated.sql
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/external/.gitkeep

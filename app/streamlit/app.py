@@ -78,6 +78,14 @@ def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def load_first_json(paths: list[Path]) -> dict[str, Any]:
+    for path in paths:
+        summary = load_json(path)
+        if summary:
+            return summary
+    return {}
+
+
 def sql_connection_string() -> str:
     return os.getenv(
         "CALLCENTER_SQL_CONNECTION",
@@ -122,6 +130,14 @@ def read_csv(path: Path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
     return pd.read_csv(path)
+
+
+def read_first_csv(paths: list[Path]) -> pd.DataFrame:
+    for path in paths:
+        data = read_csv(path)
+        if not data.empty:
+            return data
+    return pd.DataFrame()
 
 
 def load_sql_data() -> dict[str, pd.DataFrame]:
@@ -389,8 +405,18 @@ def render_historical_trends(volume: pd.DataFrame) -> None:
 
 
 def render_forecasting(forecasting: pd.DataFrame) -> None:
-    summary = load_json(DOCS_DIR / "baseline_forecast_summary.json")
-    model_summary = load_json(DOCS_DIR / "sklearn_model_comparison_summary.json")
+    summary = load_first_json(
+        [
+            DOCS_DIR / "full_baseline_forecast_summary.json",
+            DOCS_DIR / "baseline_forecast_summary.json",
+        ]
+    )
+    model_summary = load_first_json(
+        [
+            DOCS_DIR / "full_sklearn_model_comparison_summary.json",
+            DOCS_DIR / "sklearn_model_comparison_summary.json",
+        ]
+    )
 
     metric_cols = st.columns(4)
     metric_cols[0].metric("Test intervals", summary.get("test_intervals", 0))
@@ -404,8 +430,18 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
             st.subheader("Model comparison")
             st.dataframe(model_rows, width="stretch", hide_index=True)
 
-    baseline = read_csv(DATA_DIR / "baseline_forecast_sample.csv")
-    feature_forecast = read_csv(DATA_DIR / "sklearn_best_forecast_sample.csv")
+    baseline = read_first_csv(
+        [
+            DATA_DIR / "full_baseline_forecast.csv",
+            DATA_DIR / "baseline_forecast_sample.csv",
+        ]
+    )
+    feature_forecast = read_first_csv(
+        [
+            DATA_DIR / "full_sklearn_best_forecast.csv",
+            DATA_DIR / "sklearn_best_forecast_sample.csv",
+        ]
+    )
     if baseline.empty:
         st.info("Baseline forecast output is not available.")
         return
@@ -458,8 +494,18 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
 
 
 def render_staffing() -> None:
-    summary = load_json(DOCS_DIR / "staffing_requirements_summary.json")
-    staffing = read_csv(DATA_DIR / "staffing_requirements_sample.csv")
+    summary = load_first_json(
+        [
+            DOCS_DIR / "full_staffing_requirements_summary.json",
+            DOCS_DIR / "staffing_requirements_summary.json",
+        ]
+    )
+    staffing = read_first_csv(
+        [
+            DATA_DIR / "full_staffing_requirements.csv",
+            DATA_DIR / "staffing_requirements_sample.csv",
+        ]
+    )
     if staffing.empty:
         st.info("Staffing requirements output is not available.")
         return
@@ -528,9 +574,24 @@ def render_staffing() -> None:
 
 
 def render_scheduling() -> None:
-    summary = load_json(DOCS_DIR / "scheduling_summary.json")
-    schedule = read_csv(DATA_DIR / "optimized_schedule_sample.csv")
-    coverage = read_csv(DATA_DIR / "schedule_coverage_sample.csv")
+    summary = load_first_json(
+        [
+            DOCS_DIR / "full_scheduling_summary.json",
+            DOCS_DIR / "scheduling_summary.json",
+        ]
+    )
+    schedule = read_first_csv(
+        [
+            DATA_DIR / "full_optimized_schedule.csv",
+            DATA_DIR / "optimized_schedule_sample.csv",
+        ]
+    )
+    coverage = read_first_csv(
+        [
+            DATA_DIR / "full_schedule_coverage.csv",
+            DATA_DIR / "schedule_coverage_sample.csv",
+        ]
+    )
     if schedule.empty or coverage.empty:
         st.info("Optimized schedule output is not available.")
         return
@@ -546,7 +607,7 @@ def render_scheduling() -> None:
 
     metric_cols = st.columns(4)
     metric_cols[0].metric("Scheduled shifts", summary.get("scheduled_shifts", len(schedule)))
-    metric_cols[1].metric("Agents scheduled", summary.get("agents_scheduled", 0))
+    metric_cols[1].metric("Agent pool", summary.get("agent_pool_size", summary.get("agents_scheduled", 0)))
     metric_cols[2].metric("Understaffed intervals", summary.get("intervals_with_understaffing", 0))
     metric_cols[3].metric("Solver status", summary.get("solver_status", ""))
 
@@ -614,9 +675,12 @@ def render_agent_performance(agents: pd.DataFrame) -> None:
 
 def render_methodology() -> None:
     sample = load_json(DOCS_DIR / "sample_generation_summary.json")
+    full_dataset = load_json(DOCS_DIR / "full_dataset_summary.json")
     validation = {
         "Database": "CallCenterWFM",
         "Fact_Calls": "6,200",
+        "Raw_NYC_311_Service_Requests": "10,336,480",
+        "vw_Raw_NYC_311_Volume_30Min": "52,603",
         "vw_Volume_30Min": "4,125",
         "vw_Forecasting_Input": "2,718",
         "vw_Agent_Performance": "1,310",
@@ -624,8 +688,8 @@ def render_methodology() -> None:
 
     left, right = st.columns(2)
     with left:
-        st.subheader("Synthetic sample")
-        st.json(sample)
+        st.subheader("Dataset summaries")
+        st.json({"full_nyc_311_extract": full_dataset, "synthetic_sample": sample})
     with right:
         st.subheader("SQL validation")
         st.table(pd.DataFrame(validation.items(), columns=["Object", "Value"]))

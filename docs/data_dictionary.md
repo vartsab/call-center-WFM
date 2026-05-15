@@ -105,11 +105,12 @@ Initial seed dataset: NYC 311 Service Requests from 2020 to Present.
 
 ## Generated Sample Outputs
 
-The first generation script writes:
+The project keeps raw and processed CSV outputs local. The code and committed summary files document how to reproduce them.
 
 | Output | Description |
 | --- | --- |
 | `data/raw/nyc_311_sample.csv` | Downloaded public 311 seed sample. |
+| `data/raw/nyc_311_full/*.csv` | Full 2023-2025 NYC 311 raw extract chunks. |
 | `data/raw/nyc_311_sample_metadata.json` | Query metadata for reproducibility. |
 | `data/processed/synthetic_calls_sample.csv` | Simulated call-level fact source. |
 | `data/processed/dim_agents_sample.csv` | Synthetic agent dimension source. |
@@ -127,6 +128,15 @@ The first generation script writes:
 | `data/processed/optimized_schedule_sample.csv` | Optimized agent shift assignments for the sample staffing horizon. |
 | `data/processed/schedule_coverage_sample.csv` | Interval-level scheduled coverage versus required staffing. |
 | `docs/scheduling_summary.json` | Committed summary from the latest scheduling optimization run. |
+| `data/processed/full_forecasting_input.csv` | Full-history SQL-derived 30-minute demand input. |
+| `data/processed/full_forecast_features.csv` | Full-history holiday-aware forecasting feature matrix. |
+| `data/processed/full_sklearn_best_forecast.csv` | Selected full-history model forecast for the holdout period. |
+| `docs/full_sklearn_model_comparison_summary.json` | Full-history model comparison metrics. |
+| `data/processed/full_staffing_requirements.csv` | Full-history Erlang C staffing requirements. |
+| `docs/full_staffing_requirements_summary.json` | Full-history staffing summary. |
+| `data/processed/full_optimized_schedule.csv` | Full-history optimized shift assignments. |
+| `data/processed/full_schedule_coverage.csv` | Full-history scheduled coverage versus required staffing. |
+| `docs/full_scheduling_summary.json` | Full-history scheduling summary. |
 
 ## Latest Generated Sample Summary
 
@@ -144,56 +154,56 @@ The latest generated sample was created from a January 2025 NYC 311 extract with
 
 ## Latest Baseline Forecast Summary
 
-The first forecasting baseline uses the mean call volume by weekday and 30-minute interval from the training period.
+The full-history seasonal naive baseline uses the mean call volume by weekday and 30-minute interval from the training period.
 
 | Metric | Value |
 | --- | ---: |
-| Training period | 2025-01-01 to 2025-01-24 |
-| Test period | 2025-01-25 to 2025-01-31 |
-| Test intervals | 336 |
-| MAE | 1.8299 |
-| RMSE | 2.3866 |
-| MAPE | 0.7344 |
+| Training period | 2023-01-01 to 2025-10-02 |
+| Test period | 2025-10-03 to 2025-12-31 |
+| Test intervals | 4,320 |
+| MAE | 41.1254 |
+| RMSE | 57.3621 |
+| MAPE | 0.2356 |
 
 ## Latest Feature Forecast Summary
 
-The first feature-based comparison uses calendar, previous-week lag, and US federal holiday features. The selected model is the model with the lowest holdout MAE.
+The full-history feature-based comparison uses calendar, previous-week lag, and US federal holiday features. The selected model is the model with the lowest holdout MAE.
 
 | Metric | Value |
 | --- | ---: |
-| Selected model | poisson |
+| Selected model | hist_gradient_boosting |
 | Feature count | 11 |
-| Test intervals | 336 |
-| MAE | 1.5504 |
-| RMSE | 1.9901 |
-| MAPE | 0.5715 |
+| Test intervals | 4,320 |
+| MAE | 34.8872 |
+| RMSE | 49.7414 |
+| MAPE | 0.2216 |
 
 ## Latest Staffing Summary
 
-The latest staffing calculation uses the selected feature-based forecast, Erlang C, an 80/20 service target, a maximum occupancy of 85 percent, and a 30 percent shrinkage assumption.
+The latest full-history staffing calculation uses the selected feature-based forecast, Erlang C, an 80/20 service target, a maximum occupancy of 85 percent, and a 30 percent shrinkage assumption.
 
 | Metric | Value |
 | --- | ---: |
-| Staffing intervals | 336 |
-| Average predicted calls | 3.7575 |
-| Peak predicted calls | 8.2835 |
-| Average base required agents | 2.8720 |
-| Peak base required agents | 5 |
-| Average shrinkage-adjusted agents | 4.4702 |
-| Peak shrinkage-adjusted agents | 8 |
+| Staffing intervals | 4,320 |
+| Average predicted calls | 208.3222 |
+| Peak predicted calls | 382.2330 |
+| Average base required agents | 71.6819 |
+| Peak base required agents | 135 |
+| Average shrinkage-adjusted agents | 102.8662 |
+| Peak shrinkage-adjusted agents | 193 |
 
 ## Latest Scheduling Summary
 
-The first schedule uses OR-Tools CP-SAT with 8-hour shifts, a 30-minute break after 4 hours, hourly shift starts, and a maximum of 5 shifts per agent.
+The latest schedule uses OR-Tools CP-SAT with horizon-wide 8-hour shift templates, a 30-minute break after 4 hours, hourly shift starts, and zero understaffing as a hard constraint.
 
 | Metric | Value |
 | --- | ---: |
 | Solver status | FEASIBLE |
-| Scheduled shifts | 123 |
-| Agents scheduled | 55 |
-| Coverage intervals | 336 |
+| Scheduled shifts | 33,544 |
+| Agent pool size | 500 |
+| Coverage intervals | 4,320 |
 | Understaffed agent-intervals | 0 |
-| Overstaffed agent-intervals | 343 |
+| Overstaffed agent-intervals | 58,778 |
 | Intervals with understaffing | 0 |
-| Peak required agents | 8 |
-| Peak scheduled agents | 10 |
+| Peak required agents | 193 |
+| Peak scheduled agents | 267 |

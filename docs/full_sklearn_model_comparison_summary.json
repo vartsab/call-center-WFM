@@ -1,0 +1,61 @@
+{
+  "model_family": "scikit-learn feature model comparison",
+  "selected_model": "hist_gradient_boosting",
+  "selection_metric": "mae",
+  "feature_count": 11,
+  "features": [
+    "half_hour_sin",
+    "half_hour_cos",
+    "day_of_week_sin",
+    "day_of_week_cos",
+    "day_of_month",
+    "week_of_year",
+    "month",
+    "is_weekend",
+    "is_federal_holiday",
+    "days_to_nearest_federal_holiday",
+    "lag_336_intervals"
+  ],
+  "train_start": "2023-01-01",
+  "train_end": "2025-10-02",
+  "test_start": "2025-10-03",
+  "test_end": "2025-12-31",
+  "models": [
+    {
+      "model": "hist_gradient_boosting",
+      "test_intervals": 4320,
+      "mae": 34.8872,
+      "rmse": 49.7414,
+      "mape": 0.2216
+    },
+    {
+      "model": "random_forest",
+      "test_intervals": 4320,
+      "mae": 35.7124,
+      "rmse": 50.868,
+      "mape": 0.2254
+    },
+    {
+      "model": "gradient_boosting",
+      "test_intervals": 4320,
+      "mae": 38.233,
+      "rmse": 54.0725,
+      "mape": 0.242
+    },
+    {
+      "model": "ridge",
+      "test_intervals": 4320,
+      "mae": 42.0608,
+      "rmse": 59.0505,
+      "mape": 0.272
+    },
+    {
+      "model": "poisson",
+      "test_intervals": 4320,
+      "mae": 47.9825,
+      "rmse": 71.4876,
+      "mape": 0.3055
+    }
+  ],
+  "output": "data\\processed\\full_sklearn_best_forecast.csv"
+}

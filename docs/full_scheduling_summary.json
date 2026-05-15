@@ -1,0 +1,20 @@
+{
+  "method": "OR-Tools CP-SAT horizon-wide shift-template optimization",
+  "solver_status": "FEASIBLE",
+  "objective_value": 621324.0,
+  "scheduled_shifts": 33544,
+  "agent_pool_size": 500,
+  "coverage_intervals": 4320,
+  "shift_hours": 8,
+  "break_after_hours": 4,
+  "start_step_minutes": 60,
+  "allow_understaffing": false,
+  "total_understaffed_agent_intervals": 0,
+  "total_overstaffed_agent_intervals": 58778,
+  "intervals_with_understaffing": 0,
+  "intervals_with_overstaffing": 2861,
+  "peak_required_agents": 193,
+  "peak_scheduled_agents": 267,
+  "schedule_output": "data/processed/full_optimized_schedule.csv",
+  "coverage_output": "data/processed/full_schedule_coverage.csv"
+}

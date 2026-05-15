@@ -1,0 +1,135 @@
+{
+  "dataset": "NYC 311 Service Requests",
+  "source_period": {
+    "first_date": "2023-01-01",
+    "last_date": "2025-12-31",
+    "date_count": 1096
+  },
+  "extract": {
+    "chunk_files": 225,
+    "source_record_count": 10336480,
+    "observed_record_count": 10336480,
+    "average_daily_records": 9431.09,
+    "max_daily_records": 17962
+  },
+  "sql_raw_table": {
+    "database": "CallCenterWFM",
+    "schema": "dbo",
+    "table": "Raw_NYC_311_Service_Requests",
+    "loaded_record_count": 10336480,
+    "min_created_date": "2023-01-01T00:00:00.000",
+    "max_created_date": "2025-12-31T23:59:28.000"
+  },
+  "sql_raw_views": {
+    "vw_Raw_NYC_311_Volume_30Min": {
+      "row_count": 52603,
+      "total_requests": 10336480,
+      "first_interval": "2023-01-01T00:00:00",
+      "last_interval": "2025-12-31T23:30:00"
+    },
+    "vw_Raw_NYC_311_Daily_Summary": "daily raw demand summary",
+    "vw_Raw_NYC_311_Complaint_Type_Summary": "complaint-type source mix"
+  },
+  "yearly_counts": [
+    {
+      "year": 2023,
+      "record_count": 3224722
+    },
+    {
+      "year": 2024,
+      "record_count": 3456770
+    },
+    {
+      "year": 2025,
+      "record_count": 3654988
+    }
+  ],
+  "top_complaint_types": [
+    {
+      "complaint_type": "Illegal Parking",
+      "record_count": 1559794
+    },
+    {
+      "complaint_type": "Noise - Residential",
+      "record_count": 1141098
+    },
+    {
+      "complaint_type": "HEAT/HOT WATER",
+      "record_count": 812019
+    },
+    {
+      "complaint_type": "Blocked Driveway",
+      "record_count": 509345
+    },
+    {
+      "complaint_type": "Noise - Street/Sidewalk",
+      "record_count": 483499
+    },
+    {
+      "complaint_type": "UNSANITARY CONDITION",
+      "record_count": 355293
+    },
+    {
+      "complaint_type": "PLUMBING",
+      "record_count": 207846
+    },
+    {
+      "complaint_type": "Street Condition",
+      "record_count": 205582
+    },
+    {
+      "complaint_type": "Abandoned Vehicle",
+      "record_count": 203175
+    },
+    {
+      "complaint_type": "Noise - Commercial",
+      "record_count": 200054
+    },
+    {
+      "complaint_type": "Water System",
+      "record_count": 196944
+    },
+    {
+      "complaint_type": "PAINT/PLASTER",
+      "record_count": 185015
+    },
+    {
+      "complaint_type": "Dirty Condition",
+      "record_count": 169822
+    },
+    {
+      "complaint_type": "Noise",
+      "record_count": 163955
+    },
+    {
+      "complaint_type": "Derelict Vehicles",
+      "record_count": 143719
+    }
+  ],
+  "borough_counts": [
+    {
+      "borough": "BROOKLYN",
+      "record_count": 3124257
+    },
+    {
+      "borough": "QUEENS",
+      "record_count": 2481925
+    },
+    {
+      "borough": "BRONX",
+      "record_count": 2202326
+    },
+    {
+      "borough": "MANHATTAN",
+      "record_count": 2133135
+    },
+    {
+      "borough": "STATEN ISLAND",
+      "record_count": 383591
+    },
+    {
+      "borough": "Unspecified",
+      "record_count": 11246
+    }
+  ]
+}

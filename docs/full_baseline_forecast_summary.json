@@ -1,0 +1,12 @@
+{
+  "model": "seasonal naive mean by weekday and half-hour interval",
+  "train_start": "2023-01-01",
+  "train_end": "2025-10-02",
+  "test_start": "2025-10-03",
+  "test_end": "2025-12-31",
+  "test_intervals": 4320,
+  "mae": 41.1254,
+  "rmse": 57.3621,
+  "mape": 0.2356,
+  "output": "data\\processed\\full_baseline_forecast.csv"
+}

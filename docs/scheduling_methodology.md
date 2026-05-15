@@ -6,15 +6,15 @@ The scheduling step converts interval staffing requirements into an agent shift 
 
 ## Input
 
-The first optimizer uses:
+The current full-history optimizer uses:
 
-- `data/processed/staffing_requirements_sample.csv` for shrinkage-adjusted required agents;
-- `data/processed/dim_agents_sample.csv` for the available synthetic agent pool;
-- 30-minute planning intervals.
+- `data/processed/full_staffing_requirements.csv` for shrinkage-adjusted required agents;
+- a 500-agent planning pool;
+- 30-minute planning intervals for the 2025-10-03 to 2025-12-31 forecast horizon.
 
 ## Optimization Model
 
-The first version uses Google OR-Tools CP-SAT. Decision variables indicate whether an agent is assigned to a candidate shift.
+The full-history optimizer uses Google OR-Tools CP-SAT with horizon-wide shift-template counts. A template represents an 8-hour shift with a 30-minute break after 4 hours. The model chooses the number of agents assigned to each shift template across the full forecast horizon.
 
 Current shift assumptions:
 
@@ -23,50 +23,40 @@ Current shift assumptions:
 | Shift window | 8 hours |
 | Break | 30 minutes after 4 hours |
 | Shift start options | hourly |
-| Maximum shifts per agent | 5 per horizon |
-| Maximum shifts per agent per day | 1 |
+| Understaffing | hard constraint, zero allowed |
+| Solver time limit | 180 seconds |
 
-The objective minimizes:
+The objective minimizes overstaffing and total scheduled shifts while preserving required coverage in every interval.
 
-1. understaffing;
-2. overstaffing;
-3. total assigned shifts.
-
-Understaffing receives the strongest penalty because missing required coverage is worse than moderate overstaffing in a service-level planning context.
-
-## Latest Result
-
-The latest sample run produced:
+## Latest Full-History Result
 
 | Metric | Value |
 | --- | ---: |
 | Solver status | FEASIBLE |
-| Scheduled shifts | 123 |
-| Agents scheduled | 55 |
-| Coverage intervals | 336 |
+| Scheduled shifts | 33,544 |
+| Agent pool size | 500 |
+| Coverage intervals | 4,320 |
 | Understaffed agent-intervals | 0 |
-| Overstaffed agent-intervals | 343 |
+| Overstaffed agent-intervals | 58,778 |
 | Intervals with understaffing | 0 |
-| Peak required agents | 8 |
-| Peak scheduled agents | 10 |
+| Intervals with overstaffing | 2,861 |
+| Peak required agents | 193 |
+| Peak scheduled agents | 267 |
+
+This replaces the earlier daily decomposition run. The horizon-wide optimizer reduced total overstaffing and removed all understaffed intervals across the 90-day holdout schedule.
 
 ## Output
 
 The generated local files are:
 
 ```text
-data/processed/optimized_schedule_sample.csv
-data/processed/schedule_coverage_sample.csv
-```
-
-The committed summary file is:
-
-```text
-docs/scheduling_summary.json
+data/processed/full_optimized_schedule.csv
+data/processed/full_schedule_coverage.csv
+docs/full_scheduling_summary.json
 ```
 
 ## Limitations
 
-- The first optimizer uses generic shift patterns and does not yet model agent-specific availability.
+- The current full-history optimizer uses anonymous shift-template counts before assigning generated agent IDs.
 - Skill-based routing is not yet enforced in the schedule.
-- Labor-law rules are simplified to maximum shifts, daily shift count, and a break window.
+- Labor-law rules are simplified to shift length, break placement, and shift start options.

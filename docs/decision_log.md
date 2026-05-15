@@ -138,8 +138,40 @@ Reasoning: public-service contact volume can change around holidays. Holiday fea
 
 ## 2026-05-14 - Select feature-based Poisson regression for the first proper forecast
 
-Status: accepted for current sample.
+Status: superseded by full-history model comparison on 2026-05-15.
 
 Decision: compare multiple scikit-learn models and use the lowest-MAE model output for downstream staffing.
 
-Reasoning: the feature-based Poisson model outperformed the seasonal naive baseline on MAE, RMSE, and MAPE in the current holdout. Poisson regression is also a defensible first model for count forecasting.
+Reasoning: the feature-based Poisson model outperformed the seasonal naive baseline on MAE, RMSE, and MAPE in the small January sample. This result was treated as an early benchmark only.
+
+## 2026-05-15 - Move forecasting to the full 2023-2025 NYC 311 history
+
+Status: accepted.
+
+Decision: download the 2023-01-01 to 2025-12-31 NYC 311 records, load all 10,336,480 rows into SQL Server, and build the 30-minute forecasting input from the SQL raw table.
+
+Reasoning: the January 2025 sample was useful for the first end-to-end MVP but too small for a credible forecasting and workforce planning model. The full three-year history gives realistic seasonality, holiday effects, trend shifts, and high-volume operational patterns.
+
+## 2026-05-15 - Use a SQL raw landing table for the full public extract
+
+Status: accepted.
+
+Decision: create `dbo.Raw_NYC_311_Service_Requests` as a varchar landing table and load it with a Python pyodbc batch loader.
+
+Reasoning: SQL Server bulk insert was unreliable in the local environment for the generated chunk files. A controlled pyodbc loader successfully loaded and validated all 10,336,480 records, after which indexing was applied.
+
+## 2026-05-15 - Select histogram gradient boosting for full-history forecasting
+
+Status: accepted.
+
+Decision: select histogram gradient boosting for the full-history 90-day holdout forecast.
+
+Reasoning: on the full 2023-2025 interval history, histogram gradient boosting produced the lowest holdout MAE. Random forest was close, while Poisson regression performed worst among the compared models.
+
+## 2026-05-15 - Enforce zero understaffing in the full schedule
+
+Status: accepted.
+
+Decision: make zero understaffing a hard constraint in the full-horizon schedule optimizer.
+
+Reasoning: the schedule is intended for service-level planning, so covering required staffing in every interval is more important than marginally reducing overstaffing.

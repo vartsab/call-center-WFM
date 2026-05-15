@@ -21,15 +21,18 @@ The system is designed to support:
 The current implementation includes:
 
 - NYC 311 sample acquisition script;
+- full 2023-2025 NYC 311 acquisition and raw SQL load scripts;
 - synthetic call center data generation script;
 - SQL-load-ready dimension and fact file builder;
 - initial SQL Server warehouse schema;
+- full raw SQL Server landing table for 10.3M public service records;
 - SQL Server staging and load scripts;
 - initial SQL analytics views;
 - first 30-minute forecasting input builder;
-- first seasonal naive baseline forecast;
+- full-history seasonal naive baseline forecast;
+- full-history feature model comparison with holiday and lag features;
 - Erlang C staffing requirement calculator;
-- first OR-Tools shift scheduling optimizer;
+- OR-Tools shift scheduling optimizers;
 - Streamlit dashboard MVP with SQL Server and CSV fallback data access;
 - project documentation for dataset selection, data generation methodology, architecture, and data dictionary.
 
@@ -52,9 +55,11 @@ tests/                  tests
 
 ## Data Source
 
-The first seed dataset is NYC Open Data's 311 Service Requests from 2020 to Present, accessed through the public Socrata API.
+The seed dataset is NYC Open Data's 311 Service Requests from 2020 to Present, accessed through the public Socrata API.
 
 The public dataset provides real service request timestamps, categories, agencies, boroughs, statuses, and location fields. Operational call center fields that are not available publicly, such as handle time, wait time, abandonment, SLA status, and agent assignment, are generated synthetically and documented in `docs/data_generation_methodology.md`.
+
+The current full-history extract covers 2023-01-01 through 2025-12-31 and contains 10,336,480 records loaded into SQL Server. Raw and processed data files are generated locally and excluded from version control.
 
 ## Quick Start
 
@@ -116,6 +121,41 @@ Get-Content docs\sample_generation_summary.json
 Get-Content docs\baseline_forecast_summary.json
 ```
 
+## Full-History Workflow
+
+Download the full 2023-2025 public extract:
+
+```powershell
+python src\data_acquisition\download_nyc_311_full.py --start-date 2023-01-01 --end-date 2025-12-31
+```
+
+Create and load the SQL raw table:
+
+```text
+Run sql/raw/001_create_raw_nyc_311.sql, then:
+```
+
+```powershell
+python src\data_acquisition\load_raw_nyc_311_pyodbc.py --truncate --batch-size 10000
+```
+
+After loading, create raw-table indexes:
+
+```text
+Run sql/raw/003_create_raw_nyc_311_indexes.sql.
+```
+
+Build the full forecasting, staffing, and scheduling artifacts:
+
+```powershell
+python src\forecasting\build_full_forecasting_input_from_sql.py
+python src\forecasting\build_feature_matrix.py --input data\processed\full_forecasting_input.csv --output data\processed\full_forecast_features.csv
+python src\forecasting\baseline_forecast.py --input data\processed\full_forecasting_input.csv --output data\processed\full_baseline_forecast.csv --summary-output docs\full_baseline_forecast_summary.json --test-days 90
+python src\forecasting\sklearn_model_compare.py --input data\processed\full_forecast_features.csv --output data\processed\full_sklearn_best_forecast.csv --summary-output docs\full_sklearn_model_comparison_summary.json --test-days 90
+python src\workforce\erlang_c_staffing.py --forecast data\processed\full_sklearn_best_forecast.csv --output data\processed\full_staffing_requirements.csv --summary-output docs\full_staffing_requirements_summary.json
+python src\scheduling\horizon_shift_template_optimizer.py --agent-count 500 --time-limit-sec 180
+```
+
 ## Notes
 
-Raw and processed data files are excluded from version control. The repository stores code, SQL scripts, and documentation needed to reproduce the sample pipeline.
+Raw and processed data files are excluded from version control. The repository stores code, SQL scripts, and documentation needed to reproduce the pipeline.

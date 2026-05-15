@@ -1,6 +1,6 @@
 # SQL Validation Summary
 
-Validation date: 2026-05-14
+Validation date: 2026-05-15
 
 Database:
 
@@ -18,6 +18,8 @@ localhost / TheLaptop
 
 | Object | Row count |
 | --- | ---: |
+| `Raw_NYC_311_Service_Requests` | 10,336,480 |
+| `vw_Raw_NYC_311_Volume_30Min` | 52,603 |
 | `Dim_Date` | 31 |
 | `Dim_Time` | 48 |
 | `Dim_Queue` | 101 |
@@ -26,6 +28,26 @@ localhost / TheLaptop
 | `vw_Volume_30Min` | 4,125 |
 | `vw_Forecasting_Input` | 2,718 |
 | `vw_Agent_Performance` | 1,310 |
+
+## Raw NYC 311 Validation
+
+The full raw table was loaded from the 2023-01-01 to 2025-12-31 NYC 311 extract.
+
+| Metric | Value |
+| --- | ---: |
+| Raw rows | 10,336,480 |
+| 30-minute view rows | 52,603 |
+| 30-minute view total requests | 10,336,480 |
+| Minimum created date | 2023-01-01T00:00:00.000 |
+| Maximum created date | 2025-12-31T23:59:28.000 |
+
+Yearly row counts:
+
+| Year | Rows |
+| --- | ---: |
+| 2023 | 3,224,722 |
+| 2024 | 3,456,770 |
+| 2025 | 3,654,988 |
 
 ## Fact Table KPIs
 
@@ -61,5 +83,7 @@ The totals from `vw_Volume_30Min` reconcile with `Fact_Calls`:
 ## Notes
 
 - The warehouse schema, staging tables, bulk load, transform script, and analytics views executed successfully.
+- The full raw 311 table loaded successfully through the Python pyodbc loader and was indexed after loading.
+- The full raw analytics views reconcile back to the raw table total.
 - `vw_Forecasting_Input` uses normalized service categories from `Dim_Queue`, and the Python forecasting input builder was aligned to the same grain.
 - The validation script is stored in `sql/validation/001_validate_loaded_sample.sql`.

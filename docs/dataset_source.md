@@ -18,13 +18,42 @@ Project use:
 - preserve realistic daily, weekly, seasonal, and service-category patterns;
 - synthetically generate missing call center operational fields such as wait time, talk time, after-call work, abandonment, SLA status, and agent assignment.
 
+## Full Extract Now Used
+
+The project now uses a full local extract for 2023-01-01 through 2025-12-31.
+
+| Metric | Value |
+| --- | ---: |
+| Raw extracted records | 10,336,480 |
+| Chunk files | 225 |
+| Date count | 1,096 |
+| Average daily records | 9,431.09 |
+| Maximum daily records | 17,962 |
+| SQL raw table rows | 10,336,480 |
+
+Yearly source volume:
+
+| Year | Records |
+| --- | ---: |
+| 2023 | 3,224,722 |
+| 2024 | 3,456,770 |
+| 2025 | 3,654,988 |
+
+The raw extract is loaded into:
+
+```text
+dbo.Raw_NYC_311_Service_Requests
+```
+
+Raw CSV chunks and processed modeling files are excluded from version control.
+
 ## Why This Dataset Fits
 
 The project needs realistic inbound demand rather than a perfectly complete call center dataset. Public 311 records are suitable because they contain real request timestamps, service categories, agencies, boroughs, and status fields. These fields are enough to create the operational arrival curve and queue mix for a city service contact center.
 
 Most public 311 datasets do not include agent-level call center metadata. That limitation is acceptable for this engineering project because synthetic operational fields can be generated with transparent assumptions and then used to demonstrate database design, dashboarding, forecasting, Erlang C staffing, and shift optimization.
 
-## Initial Fields To Extract
+## Extracted Fields
 
 | Field | Use |
 | --- | --- |
@@ -45,21 +74,18 @@ Most public 311 datasets do not include agent-level call center metadata. That l
 
 ## Sample Strategy
 
-The first working sample should be small enough for rapid iteration:
+The smaller January 2025 synthetic call sample remains in the project as a fast development fixture for SQL schema work, agent-level metrics, and dashboard fallback mode. It is no longer the main forecasting history.
 
-- default date range: January 2025;
-- current sample strategy: 6,200 records allocated across January 2025 days in proportion to real NYC 311 daily request counts;
-- current daily sample range: 138 to 268 records per day;
-- current generated source rows: 6,200;
-- output: `data/raw/nyc_311_sample.csv`;
-- generated output: `data/processed/synthetic_calls_sample.csv`.
+Current sample fixture:
 
-The sample can be scaled later after the acquisition, generation, SQL, and dashboard paths are stable.
+- date range: January 2025;
+- generated source rows: 6,200;
+- generated output: `data/processed/synthetic_calls_sample.csv`;
+- SQL fact rows: 6,200.
 
 ## Known Limitations
 
 - A 311 service request is not guaranteed to be a phone call; records may originate from web, mobile, or other channels.
 - True talk time, wait time, ACW, abandonment, and agent assignment are not public fields.
 - Synthetic assumptions must be disclosed in the methodology and reports.
-- The first synthetic generator preserves the real source date but simulates the call start time within that date to avoid API ordering artifacts in the MVP sample.
 - Results should be framed as a realistic operational simulation seeded by real city-service demand, not as a claim about actual NYC 311 call center staffing.

@@ -1,5 +1,35 @@
 # SQL Server Load Order
 
+## Full Raw NYC 311 Load
+
+The full public extract is loaded into a raw landing table before the forecasting aggregate is built.
+
+1. Run `sql/raw/001_create_raw_nyc_311.sql`.
+2. Load the generated raw chunks with:
+
+```powershell
+python src\data_acquisition\load_raw_nyc_311_pyodbc.py --truncate --batch-size 10000
+```
+
+3. Run `sql/raw/003_create_raw_nyc_311_indexes.sql`.
+4. Run `sql/raw/004_create_raw_nyc_311_views.sql`.
+
+The loaded raw table is:
+
+```text
+dbo.Raw_NYC_311_Service_Requests
+```
+
+The validated full load contains 10,336,480 rows from 2023-01-01 through 2025-12-31.
+
+The raw analytics views expose:
+
+- `vw_Raw_NYC_311_Volume_30Min`
+- `vw_Raw_NYC_311_Daily_Summary`
+- `vw_Raw_NYC_311_Complaint_Type_Summary`
+
+## Synthetic Warehouse Sample Load
+
 Run the SQL scripts in this order after generating the sample CSV files:
 
 1. `sql/schema/001_create_call_center_warehouse.sql`
