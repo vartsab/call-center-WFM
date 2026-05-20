@@ -135,11 +135,11 @@ docs/screenshots/
 | Forecasting and evaluation | 85% |
 | Erlang C staffing | 90% |
 | Schedule optimization | 75% |
-| Streamlit product dashboard | 80% |
+| Streamlit product dashboard | 84% |
 | Documentation evidence | 80% |
-| Demo packaging | 70% |
-| Final report and presentation | 45% |
+| Demo packaging | 85% |
+| Final report and presentation | 55% |
 
-Overall technical product coverage: approximately 83%.
+Overall technical product coverage: approximately 86%.
 
-Overall capstone submission package coverage: approximately 74%.
+Overall capstone submission package coverage: approximately 80%.

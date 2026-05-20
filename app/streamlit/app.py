@@ -16,7 +16,7 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "data" / "processed"
 DOCS_DIR = ROOT / "docs"
-SQL_CACHE_VERSION = "future_jan2026_160_christie"
+SQL_CACHE_VERSION = "demo_aggregated_20260520"
 
 
 SQL_QUERIES = {
@@ -24,42 +24,80 @@ SQL_QUERIES = {
         SELECT
             Calendar_Date,
             Time_ID,
-            Interval_Start_Time,
+            MIN(Interval_Start_Time) AS Interval_Start_Time,
             Half_Hour_Index,
-            Queue_ID,
-            Queue_Name,
+            CAST(NULL AS int) AS Queue_ID,
+            'All Queues' AS Queue_Name,
             Service_Category,
-            Offered_Calls,
-            Answered_Calls,
-            Abandoned_Calls,
-            Avg_Handle_Time_Sec,
-            Avg_Hold_Time_Sec,
-            Service_Level_Rate
+            SUM(Offered_Calls) AS Offered_Calls,
+            SUM(Answered_Calls) AS Answered_Calls,
+            SUM(Abandoned_Calls) AS Abandoned_Calls,
+            CASE
+                WHEN SUM(Answered_Calls) > 0
+                THEN SUM(Avg_Handle_Time_Sec * Answered_Calls) / SUM(Answered_Calls)
+                ELSE 0
+            END AS Avg_Handle_Time_Sec,
+            CASE
+                WHEN SUM(Offered_Calls) > 0
+                THEN SUM(Avg_Hold_Time_Sec * Offered_Calls) / SUM(Offered_Calls)
+                ELSE 0
+            END AS Avg_Hold_Time_Sec,
+            CASE
+                WHEN SUM(Offered_Calls) > 0
+                THEN SUM(Service_Level_Rate * Offered_Calls) / SUM(Offered_Calls)
+                ELSE 0
+            END AS Service_Level_Rate
         FROM dbo.vw_Volume_30Min
+        GROUP BY
+            Calendar_Date,
+            Time_ID,
+            Half_Hour_Index,
+            Service_Category
     """,
     "forecasting_input": """
         SELECT
-            Interval_Start_Datetime,
-            Half_Hour_Index,
-            Day_Of_Week,
-            Is_Weekend,
-            Is_Holiday,
+            MIN(Interval_Start_Datetime) AS Interval_Start_Datetime,
+            0 AS Half_Hour_Index,
+            'All' AS Day_Of_Week,
+            CAST(0 AS bit) AS Is_Weekend,
+            CAST(0 AS bit) AS Is_Holiday,
             Service_Category,
-            Call_Volume,
-            Avg_Handle_Time_Sec
+            SUM(Call_Volume) AS Call_Volume,
+            CASE
+                WHEN SUM(Call_Volume) > 0
+                THEN SUM(Avg_Handle_Time_Sec * Call_Volume) / SUM(Call_Volume)
+                ELSE 0
+            END AS Avg_Handle_Time_Sec
         FROM dbo.vw_Forecasting_Input
+        GROUP BY Service_Category
     """,
     "agent_performance": """
         SELECT
             Agent_ID,
             Agent_Name,
             Skill_Group,
-            Calendar_Date,
-            Handled_Calls,
-            Avg_Handle_Time_Sec,
-            Avg_Talk_Time_Sec,
-            Avg_ACW_Time_Sec
+            MIN(Calendar_Date) AS Calendar_Date,
+            SUM(Handled_Calls) AS Handled_Calls,
+            CASE
+                WHEN SUM(Handled_Calls) > 0
+                THEN SUM(Avg_Handle_Time_Sec * Handled_Calls) / SUM(Handled_Calls)
+                ELSE 0
+            END AS Avg_Handle_Time_Sec,
+            CASE
+                WHEN SUM(Handled_Calls) > 0
+                THEN SUM(Avg_Talk_Time_Sec * Handled_Calls) / SUM(Handled_Calls)
+                ELSE 0
+            END AS Avg_Talk_Time_Sec,
+            CASE
+                WHEN SUM(Handled_Calls) > 0
+                THEN SUM(Avg_ACW_Time_Sec * Handled_Calls) / SUM(Handled_Calls)
+                ELSE 0
+            END AS Avg_ACW_Time_Sec
         FROM dbo.vw_Agent_Performance
+        GROUP BY
+            Agent_ID,
+            Agent_Name,
+            Skill_Group
     """,
     "agent_dimension": """
         SELECT
@@ -290,6 +328,17 @@ def format_number(value: float, digits: int = 0) -> str:
     return f"{value:,.0f}"
 
 
+def format_compact_number(value: float) -> str:
+    if pd.isna(value):
+        return "0"
+    absolute = abs(value)
+    if absolute >= 1_000_000:
+        return f"{value / 1_000_000:.2f}M"
+    if absolute >= 1_000:
+        return f"{value / 1_000:.1f}K"
+    return f"{value:,.0f}"
+
+
 def render_sidebar(source: str, volume: pd.DataFrame) -> tuple[list[str], tuple[Any, Any]]:
     st.sidebar.title("Call Center WFM")
     st.sidebar.caption(f"Data source: {source}")
@@ -353,9 +402,9 @@ def render_executive_summary(volume: pd.DataFrame) -> None:
     )
 
     cols = st.columns(5)
-    cols[0].metric("Offered calls", format_number(total_calls))
-    cols[1].metric("Answered calls", format_number(answered_calls))
-    cols[2].metric("Abandoned", format_number(abandoned_calls))
+    cols[0].metric("Offered calls", format_compact_number(total_calls))
+    cols[1].metric("Answered calls", format_compact_number(answered_calls))
+    cols[2].metric("Abandoned", format_compact_number(abandoned_calls))
     cols[3].metric("Abandonment", f"{abandonment_rate:.1%}")
     cols[4].metric("Avg AHT", f"{avg_aht:,.0f}s")
 
@@ -671,13 +720,13 @@ def render_scheduling() -> None:
         )
 
     metric_cols = st.columns(7)
-    metric_cols[0].metric("Scheduled shifts", summary.get("scheduled_shifts", len(schedule)))
-    metric_cols[1].metric("Agent pool", summary.get("agent_pool_size", summary.get("agents_scheduled", 0)))
-    metric_cols[2].metric("Full roster est.", summary.get("estimated_full_coverage_agents", 0))
-    metric_cols[3].metric("Peak required", summary.get("peak_required_agents", 0))
-    metric_cols[4].metric("Peak scheduled", summary.get("peak_scheduled_agents", 0))
-    metric_cols[5].metric("Coverage achieved", f"{coverage_achieved:.1%}")
-    metric_cols[6].metric("Understaffed intervals", summary.get("intervals_with_understaffing", 0))
+    metric_cols[0].metric("Shifts", summary.get("scheduled_shifts", len(schedule)))
+    metric_cols[1].metric("Agents", summary.get("agent_pool_size", summary.get("agents_scheduled", 0)))
+    metric_cols[2].metric("Full roster", summary.get("estimated_full_coverage_agents", 0))
+    metric_cols[3].metric("Peak need", summary.get("peak_required_agents", 0))
+    metric_cols[4].metric("Peak plan", summary.get("peak_scheduled_agents", 0))
+    metric_cols[5].metric("Coverage", f"{coverage_achieved:.1%}")
+    metric_cols[6].metric("Gap intervals", summary.get("intervals_with_understaffing", 0))
     st.caption(
         "Roster rules: one shift per agent per day, "
         f"max {summary.get('max_shifts_per_agent_per_week', 5)} shifts per week, "

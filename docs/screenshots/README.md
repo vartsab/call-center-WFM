@@ -2,18 +2,16 @@
 
 Store final report screenshots in this folder.
 
-Recommended filenames:
+Captured baseline filenames:
 
 ```text
 01_executive_summary.png
 02_historical_trends.png
-03_forecasting_model_comparison.png
-04_future_forecast.png
-05_staffing_requirements.png
-06_scheduling_coverage.png
-07_daily_roster.png
-08_agent_performance.png
-09_methodology_validation.png
+03_forecasting.png
+04_staffing_requirements.png
+05_scheduling_coverage.png
+06_agent_performance.png
+07_methodology_validation.png
 ```
 
 Before using screenshots in the explanatory note, verify that:
