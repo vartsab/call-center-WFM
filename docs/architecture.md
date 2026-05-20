@@ -6,15 +6,14 @@
 Public 311 data
     -> full 2023-2025 raw extraction
     -> SQL Server raw landing table
-    -> 30-minute forecasting aggregate
-    -> synthetic call center metadata generation
-    -> SQL Server staging tables
+    -> full synthetic call-center metadata generation
     -> dimensional warehouse tables
     -> dashboard/model SQL views
     -> Streamlit dashboard
-    -> forecasting pipeline
+    -> historical forecasting evaluation
+    -> future planning forecast
     -> Erlang C staffing calculator
-    -> MILP schedule optimizer
+    -> legal roster optimizer
     -> schedule visualization
 ```
 
@@ -108,19 +107,36 @@ Inputs:
 
 Use a mixed integer linear programming model with OR-Tools.
 
-Current full-history constraints:
+Current planning constraints:
 
-- shift templates;
-- horizon-wide shift-template counts;
+- January 2026 future planning horizon;
+- 160-agent named roster;
+- weekly shift-count optimization;
+- agent-level roster assignment;
 - coverage by 30-minute interval;
 - 8-hour shifts with a 30-minute break;
-- optional skill group eligibility.
+- one shift per agent per day;
+- maximum 5 shifts per agent per week;
+- 11-hour minimum rest;
+- optional skill group eligibility for future expansion.
 
 Objective:
 
-- enforce zero undercoverage in the default full-history schedule;
+- minimize understaffing first;
 - minimize overcoverage;
 - minimize total scheduled shifts.
+
+The approved 160-agent scenario is intentionally shown as a constrained planning case. The January 2026 staffing curve implies a much larger full-coverage roster estimate, so the dashboard reports both the legal 160-agent roster and the remaining coverage gap.
+
+### Productization Layer
+
+The current product is a local analytical application:
+
+- SQL Server stores the raw table, dimensional warehouse, and analytics views;
+- Python scripts rebuild forecasting, staffing, and scheduling artifacts;
+- Streamlit provides the demonstration interface.
+
+An optional MLOps layer can be added with MLflow for experiment tracking and model artifacts. MLflow should support model evaluation and reproducibility, while Streamlit remains the user-facing product.
 
 ### Streamlit App
 
