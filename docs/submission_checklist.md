@@ -30,6 +30,8 @@
 - [x] Technology choice note documented.
 - [x] Demo script documented.
 - [x] First full explanatory note draft prepared.
+- [x] Expanded literature, market, and competitor review drafted.
+- [x] Word explanatory note draft generated with dashboard screenshots.
 - [x] Presentation outline drafted.
 
 ## Validation
@@ -45,8 +47,9 @@
 
 - [ ] Review Week 3-6 Word reports manually in Microsoft Word.
 - [ ] Add supervisor feedback if it exists.
-- [ ] Insert selected screenshots into the explanatory note.
-- [ ] Polish explanatory note in the official Word template.
+- [ ] Review the generated explanatory note Word draft manually.
+- [ ] Replace title-page placeholders with official student/supervisor details.
+- [ ] Polish bibliography formatting in Word.
 - [ ] Prepare final presentation slides.
 - [ ] Run final dashboard demo rehearsal.
 - [ ] Export final documents to PDF.
@@ -56,6 +59,6 @@
 | Area | Coverage |
 | --- | ---: |
 | Technical product | 86% |
-| Capstone submission package | 90% |
+| Capstone submission package | 93% |
 | Demo readiness | 89% |
-| Final report and presentation | 74% |
+| Final report and presentation | 82% |

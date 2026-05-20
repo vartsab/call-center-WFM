@@ -24,6 +24,8 @@ Completed:
 - demo launch and planning pipeline scripts;
 - Week 1-6 progress report drafts;
 - first full explanatory note draft;
+- Word explanatory note draft with embedded dashboard screenshots;
+- expanded literature, market, and competitor review;
 - final presentation outline;
 - submission checklist.
 
@@ -82,6 +84,11 @@ Word reports:
 - `docs/reporting/word/Звіт_тиждень_5.docx`
 - `docs/reporting/word/Звіт_тиждень_6.docx`
 
+Final report draft:
+
+- `docs/final/Пояснювальна_записка_чернетка.docx`
+- `docs/explanatory_note_draft.md`
+
 Dashboard screenshots:
 
 - `docs/screenshots/01_executive_summary.png`
@@ -97,15 +104,15 @@ Dashboard screenshots:
 | Area | Coverage |
 | --- | ---: |
 | Technical product | 86% |
-| Capstone submission package | 90% |
+| Capstone submission package | 93% |
 | Demo readiness | 89% |
-| Final report and presentation | 74% |
+| Final report and presentation | 82% |
 
 ## Recommended Next Steps
 
-1. Manually open and inspect Week 3-6 Word reports in Microsoft Word.
-2. Insert selected screenshots into the explanatory note.
-3. Polish the explanatory note draft into the official Word template.
+1. Manually open `docs/final/Пояснювальна_записка_чернетка.docx` in Microsoft Word and inspect spacing, page breaks, image sizing, and table wrapping.
+2. Replace title-page placeholders with official student, supervisor, and submission details.
+3. Polish bibliography formatting according to the program's required citation style.
 4. Prepare presentation slides from `docs/presentation_outline.md`.
 5. Rehearse the dashboard demo using `scripts/run_dashboard.ps1`.
 6. Export final Word and presentation artifacts to PDF.

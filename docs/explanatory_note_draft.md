@@ -103,7 +103,7 @@
 
 У першому розділі визначено проблему workforce planning для контакт-центру, сформульовано мету й завдання проєкту та обґрунтовано його практичну цінність. Проєкт позиціонується як інженерна система, що поєднує дані, прогнозування та оптимізацію для підтримки управлінських рішень.
 
-# Розділ 2. Дослідження технологічного середовища
+# Розділ 2. Дослідження ринку та технологічного середовища
 
 ## 2.1. Аналіз проблеми
 
@@ -111,13 +111,69 @@
 
 Особливість workforce management полягає в тому, що рішення потрібно приймати на рівні коротких інтервалів. Денний або тижневий total volume недостатній для планування, оскільки пікове навантаження може виникати лише в окремі години. Тому у проєкті використано 30-хвилинну гранулярність, яка є типовою для contact center planning.
 
-## 2.2. Ринковий контекст і технологічне середовище
+Класична література з управління контакт-центрами описує такі системи як соціотехнічні середовища, де поведінка клієнтів, робота агентів, черги, технології маршрутизації та цільові показники якості взаємно впливають одне на одного. Gans, Koole and Mandelbaum підкреслюють, що традиційні операційні моделі є корисними для contact center management, але мають обмеження, якщо їх застосовувати без урахування реальної поведінки клієнтів і працівників [1]. Це важливо для цього проєкту: dashboard не повинен лише показувати красиві KPI, він має пояснювати, як forecasting, staffing і scheduling впливають на service level та cost.
+
+Сучасна практика WFM зазвичай розділяє задачу на кілька етапів: прогнозування contact volume і AHT, розрахунок required staffing, створення графіків, intraday monitoring та schedule adherence. Koole and Li описують call center workforce planning як окрему практичну та наукову область, у якій потрібно оцінювати методи не тільки за математичною якістю, а й за придатністю до реального планування [2]. Саме тому у цьому проєкті forecasting не підміняє staffing: модель машинного навчання прогнозує попит, Erlang C переводить попит у потребу в операторах, а optimizer перетворює staffing curve у schedule.
+
+## 2.2. Огляд літератури щодо прогнозування, staffing і scheduling
+
+У задачах call center forecasting ключовою одиницею є arrival rate або кількість звернень за короткий інтервал. Aldor-Noiman, Feigin and Mandelbaum розглядають workload forecasting як задачу прогнозування arrival process і показують, що в модель можуть включатися зовнішні фактори, наприклад події або billing cycles [3]. Для міського сервісного середовища аналогічну роль можуть мати holidays, day-of-week, seasonality, extreme weather або city events. У поточній реалізації враховано US federal holidays, cyclical time features і previous-week lag; у майбутньому модель можна розширити подіями та погодою.
+
+Інше дослідження Aldor-Noiman et al. щодо inhomogeneous Poisson processes підкреслює, що accurate forecasting of call arrival rates є базовою передумовою efficient staffing [4]. Цей висновок безпосередньо підтримує архітектуру проєкту: спочатку формується interval-level forecasting input, потім виконується model comparison, і лише після цього результат передається в Erlang C.
+
+У літературі та практиці contact center planning часто використовуються:
+
+- сезонні naive або moving-average baseline models;
+- exponential smoothing та double-seasonal methods;
+- regression або generalized linear models;
+- Poisson-based arrival models;
+- tree-based machine learning models;
+- simulation and queueing models for staffing;
+- mathematical optimization for scheduling.
+
+Для магістерського інженерного проєкту важливо не просто обрати складну модель, а порівняти її з baseline. У цьому проєкті seasonal naive baseline виконує роль мінімального benchmark. Feature-based models оцінюються на holdout-періоді за MAE, RMSE і MAPE. У full-history test найкращий результат показала histogram gradient boosting model, тоді як Poisson regression, яка могла виглядати прийнятно на малому sample, показала слабший результат на повному 2023-2025 dataset.
+
+Для staffing у contact center domain традиційно використовуються queueing models. Erlang C залишається поширеним стандартом для inbound call center planning, коли потрібно оцінити кількість агентів для заданого arrival volume, AHT, service-level target і occupancy constraint. Водночас у літературі вказується, що Erlang C має припущення та обмеження: він спрощує поведінку abandonments, повторних звернень, multiskill routing і non-stationary demand. Тому в цьому проєкті Erlang C використовується як прозорий і пояснюваний staffing layer, а не як абсолютна модель реальності.
+
+Scheduling є окремою задачею operations research. Якщо forecasting відповідає на питання "скільки звернень очікується", а staffing - "скільки операторів потрібно", scheduling відповідає на питання "які конкретні люди в які зміни мають працювати". У практичних WFM-системах scheduling повинен враховувати shift templates, breaks, weekly limits, rest rules, availability, time off, skills і business hours. У поточній реалізації використано OR-Tools CP-SAT, тому constraints та objective function залишаються прозорими для пояснення у дипломній роботі.
+
+## 2.3. Ринковий контекст і технологічне середовище
 
 Сучасні WFM-рішення зазвичай включають historical reporting, demand forecasting, staffing calculation, schedule generation і adherence monitoring. Комерційні платформи можуть бути дорогими та закритими для внутрішньої методологічної перевірки. У навчальному проєкті важливо створити прозору систему, де кожен крок можна пояснити, відтворити й протестувати.
 
 Обраний підхід використовує відкриті public-service data, локальну SQL Server database, Python-модулі для моделювання та Streamlit dashboard. Такий стек дає достатню наближеність до enterprise-практики, але залишається доступним для демонстрації на локальній машині.
 
-## 2.3. Аналіз архітектур і технологій
+Публічний dataset NYC 311 є доречним для такого проєкту, тому що він містить реальні service requests з complaint type, agency, location і timestamp fields. Офіційний опис dataset зазначає, що кожен рядок містить інформацію про service request, включно з complaint type, responding agency та geographic location, але не розкриває персональні дані заявника [5]. Це дає хорошу основу для моделювання demand, однак не дає фактичних call-center metrics. Тому обрано hybrid data strategy: real public demand plus synthetic operational enrichment.
+
+## 2.4. Аналіз конкурентів і подібних продуктів
+
+Ринок contact center WFM є зрілим: великі платформи вже мають forecasting, scheduling, adherence і agent self-service. Це означає, що новизна навчального продукту не полягає в тому, що він першим автоматизує WFM. Його новизна полягає в прозорому, відтворюваному, explainable workflow, який демонструє весь шлях від public data до staffing decision.
+
+Нижче наведено порівняння з основними класами конкурентів.
+
+| Продукт / клас | Типові можливості | Сильні сторони | Обмеження для навчального / дослідницького проєкту |
+| --- | --- | --- | --- |
+| NICE CXone WFM | Forecasting, schedule generation, time-off, adherence, shift bidding | Enterprise-grade WFM ecosystem, інтеграція з CXone | Закрита методологія, vendor lock-in, складність відтворення моделей |
+| Genesys Cloud WFM | Forecasts, forecast-based schedules, schedule adherence, time-off management | Глибока інтеграція з contact-center platform | Залежність від Genesys environment та внутрішньої data model |
+| Talkdesk WFM | CVO/AHT forecasting, staffing calculation, scheduling, intraday insights | Документація чітко описує workflow forecast -> staffing -> schedule | Методологія моделювання частково закрита, продукт потребує платформи Talkdesk |
+| Amazon Connect forecasting/capacity/scheduling | ML forecasting, capacity planning, scheduling, adherence | Cloud-native, інтеграція з AWS ecosystem | Потребує Amazon Connect setup та хмарної інфраструктури |
+| Verint WFM | Forecasting, scheduling, multichannel resource planning, employee self-service | Сильний enterprise WFM та engagement layer | Комерційна платформа, складно показати внутрішню логіку студентського рішення |
+| Calabrio WFM | Forecasting, optimized scheduling, intraday optimization, agent engagement | Сильна орієнтація на scheduling quality та agent experience | Закритий commercial stack, менша прозорість алгоритмів |
+| Five9 Essentials WFM | Forecasting, scheduling, real-time adherence, agent tools | Contact-center suite with WFM module | Залежність від Five9 ecosystem |
+| Spreadsheets / manual planning | Ручні forecasts, Erlang calculators, manual schedules | Дешево, зрозуміло для малого центру | Високий manual effort, слабка відтворюваність, обмежена інтеграція |
+
+Офіційна документація конкурентів підтверджує, що ринкові продукти вирішують ту саму загальну задачу. Genesys описує WFM як інструмент для forecasting, schedule generation, adherence monitoring і time-off management [6]. NICE CXone WFM дозволяє forecast a schedule, edit it and generate it for agents [7]. Talkdesk документація прямо розділяє CVO forecasting, AHT forecasting, required staffing і scheduling inputs [8]. Amazon Connect описує forecasting, capacity planning і scheduling як workflow для того, щоб мати правильну кількість агентів у правильний час [9]. Verint і Calabrio також позиціонують WFM навколо accurate forecasting, optimized scheduling, service goals і employee experience [10], [11]. Five9 Essentials WFM підкреслює scheduling та real-time adherence як частину WFM-модуля [12].
+
+Отже, ринкова релевантність проєкту підтверджується тим, що такі функції є стандартними для провідних contact center platforms. Водночас студентський продукт має іншу цінність:
+
+- він є прозорим: кожен крок описано в SQL, Python або документації;
+- він використовує реальний public dataset, доступний для перевірки;
+- він демонструє data warehouse, forecasting, staffing і scheduling в одному pipeline;
+- він не приховує modeling assumptions;
+- він підходить для навчальної, дослідницької та prototype demonstration мети;
+- він може бути адаптований для інших public-service або healthcare scenarios.
+
+## 2.5. Аналіз архітектур і технологій
 
 Для data layer використано публічний dataset NYC 311 Service Requests. Він містить реальні timestamps, complaint types, borough, statuses та інші поля, які відображають міський сервісний попит. Водночас dataset не містить call-center operational fields, тому такі поля як talk time, hold time, ACW, abandonment, SLA і agent assignment створюються синтетично.
 
@@ -125,7 +181,34 @@
 
 Для forecasting використано scikit-learn model comparison. Моделі оцінювалися на holdout-періоді за MAE, RMSE і MAPE. Для staffing застосовано Erlang C, оскільки це стандартний математичний підхід для inbound queue planning. Для scheduling застосовано OR-Tools CP-SAT, що дозволяє явно задавати обмеження та objective function.
 
-## 2.4. Сучасні проблеми розробки
+На відміну від багатьох commercial WFM systems, архітектура проєкту не є black-box. SQL views показують, які метрики потрапляють у dashboard. Forecasting scripts показують feature engineering та model selection. Staffing module окремо реалізує Erlang C. Scheduling module явно задає constraints. Це робить продукт придатним для академічної демонстрації, де важлива не тільки функціональність, а й пояснюваність.
+
+## 2.6. Релевантність, новизна та подальший розвиток продукту
+
+Релевантність продукту визначається трьома факторами.
+
+По-перше, contact center workforce planning є реальною бізнес-проблемою: організації повинні підтримувати service level без надмірного staffing cost. По-друге, public-service organizations мають великі datasets, але не завжди мають готову WFM-аналітику. По-третє, навіть коли commercial tools існують, їх внутрішня логіка часто недоступна для навчального аналізу.
+
+Новизна цього проєкту для навчального та демонстраційного середовища полягає в такому:
+
+- використання повного 2023-2025 NYC 311 extract як реального demand foundation;
+- synthetic enrichment, який перетворює public service requests на call-center analytical dataset;
+- поєднання SQL Server warehouse, Streamlit dashboard, ML forecasting, Erlang C і OR-Tools в одному pipeline;
+- порівняння моделей на full-history holdout;
+- окреме розділення historical evaluation і future workforce planning;
+- explicit reporting of coverage gap для constrained 160-agent scenario.
+
+Потенційний розвиток продукту:
+
+- додати реальні або benchmark AHT assumptions для різних queue types;
+- додати weather, city events і emergency indicators як exogenous forecast features;
+- реалізувати skill-based multiqueue scheduling;
+- додати scenario planning для SLA, shrinkage, roster size і hours of operation;
+- додати MLflow для experiment tracking та model registry;
+- підготувати cloud-friendly deployment на PostgreSQL або managed database;
+- додати automated report export для WFM manager.
+
+## 2.7. Сучасні проблеми розробки
 
 Під час створення подібної системи виникають кілька типових проблем:
 
@@ -140,7 +223,7 @@
 
 ## Висновки до другого розділу
 
-У другому розділі розглянуто технологічне середовище contact center workforce management. Обґрунтовано використання public-service data як demand seed, SQL Server як warehouse, Python/scikit-learn для forecasting, Erlang C для staffing і OR-Tools для scheduling. Показано, що задача потребує поєднання кількох методів, а не одного ізольованого алгоритму.
+У другому розділі розглянуто літературу, ринок і технологічне середовище contact center workforce management. Аналіз показує, що подібні задачі зазвичай вирішуються через послідовність forecasting, staffing, scheduling і adherence monitoring. Провідні commercial platforms підтверджують ринкову релевантність такого workflow, але їхні методології часто залишаються закритими. Запропонований продукт є релевантним як прозорий, відтворюваний і навчально-дослідницький аналог enterprise WFM workflow.
 
 # Розділ 3. Методологія проєктування
 
@@ -325,7 +408,7 @@ Dashboard читає SQL Server views, а для локальної демонс
 | Abandonment rate | 7.82% |
 | Average answered handle time | 532.50 sec |
 
-Для фінальної версії документа сюди потрібно вставити screenshot `docs/screenshots/01_executive_summary.png`.
+![Рисунок 4.1. Executive summary dashboard](screenshots/01_executive_summary.png)
 
 ## 4.2. Етапи проєктування
 
@@ -370,7 +453,7 @@ Future planning forecast сформовано для 2026-01-01 - 2026-01-31.
 | Average predicted calls | 204.4150 |
 | Peak predicted calls | 386.1923 |
 
-Для фінальної версії документа сюди потрібно вставити screenshot `docs/screenshots/03_forecasting.png`.
+![Рисунок 4.2. Forecasting dashboard](screenshots/03_forecasting.png)
 
 ### Staffing results
 
@@ -386,7 +469,7 @@ Erlang C staffing calculation для січня 2026 року:
 | Average expected occupancy | 0.8359 |
 | Average service-level probability | 0.9167 |
 
-Для фінальної версії документа сюди потрібно вставити screenshot `docs/screenshots/04_staffing_requirements.png`.
+![Рисунок 4.3. Staffing requirements dashboard](screenshots/04_staffing_requirements.png)
 
 ### Scheduling results
 
@@ -410,7 +493,7 @@ Legal roster scenario:
 
 Результат показує, що 160-agent roster може бути побудований без порушень правил, але він недостатній для повного покриття 24/7 попиту. Це важливий planning insight, а не помилка optimizer: система демонструє gap між approved staffing pool і required staffing curve.
 
-Для фінальної версії документа сюди потрібно вставити screenshot `docs/screenshots/05_scheduling_coverage.png`.
+![Рисунок 4.4. Schedule coverage dashboard](screenshots/05_scheduling_coverage.png)
 
 ### Dashboard results
 
@@ -426,6 +509,10 @@ Dashboard дає 360-degree view of call center performance:
 - methodology and validation evidence.
 
 Для фінальної версії документа потрібно вставити screenshots з папки `docs/screenshots`.
+
+![Рисунок 4.5. Agent performance dashboard](screenshots/06_agent_performance.png)
+
+![Рисунок 4.6. Methodology and validation dashboard](screenshots/07_methodology_validation.png)
 
 ## 4.4. Шляхи вирішення труднощів і перспективи розвитку
 
@@ -489,16 +576,24 @@ Dashboard дає 360-degree view of call center performance:
 - підкреслити, що service level є queue/staffing metric, а не agent-level metric;
 - розглядати MLflow або інший experiment tracking layer як optional future improvement після завершення основного submission package.
 
-## Робоча бібліографія для фінального оформлення
+## Бібліографія
 
-Фінальна версія має містити оформлену бібліографію за вимогами програми. Мінімальний набір джерел для перевірки перед PDF-export:
-
-- NYC Open Data. 311 Service Requests from 2020 to Present.
-- Microsoft. SQL Server documentation.
-- Streamlit documentation.
-- scikit-learn documentation.
-- Google OR-Tools documentation.
-- Класичні матеріали щодо Erlang C та contact center workforce management.
+1. Gans, N., Koole, G., Mandelbaum, A. Telephone Call Centers: Tutorial, Review, and Research Prospects. Manufacturing & Service Operations Management, 2003. https://doi.org/10.1287/msom.5.2.79.16071
+2. Koole, G. M., Li, S. A Practice-Oriented Overview of Call Center Workforce Planning. Stochastic Systems, 2023. https://doi.org/10.1287/stsy.2021.0008
+3. Aldor-Noiman, S., Feigin, P. D., Mandelbaum, A. Workload forecasting for a call center: Methodology and a case study. https://arxiv.org/abs/1009.5741
+4. Aldor-Noiman, S., Brown, L. D., Feigin, P. D., Mandelbaum, A., Shen, H. Forecasting time series of inhomogeneous Poisson processes with application to call center workforce management. https://arxiv.org/abs/0807.4071
+5. City of New York. 311 Service Requests from 2020 to Present. https://catalog.data.gov/dataset/311-service-requests-from-2010-to-present
+6. Genesys Cloud Resource Center. Workforce management overview. https://help.genesys.cloud/articles/workforce-management-
+7. NICE CXone Help. Workforce Management. https://help.nicecxone.com/content/workforcemanagement/welcometoworkforcemanagement.htm
+8. Talkdesk Knowledge Base. Workforce Management: Overview. https://support.talkdesk.com/hc/en-us/articles/360043948512-Workforce-Management-Overview
+9. Amazon Web Services. Forecasting, capacity planning, and scheduling in Amazon Connect. https://docs.aws.amazon.com/connect/latest/adminguide/forecasting-capacity-planning-scheduling.html
+10. Verint. Workforce Forecasting & Scheduling. https://www.verint.com/workforce-management-software-wfm-solutions/forecasting-and-scheduling/
+11. Calabrio. Call Center Forecasting & Scheduling Software. https://www.calabrio.com/products/workforce-management/forecasting-scheduling-software/
+12. Five9. Essentials Workforce Management Data Sheet. https://www.five9.com/sites/default/files/2023-09/Data_Sheet_Five9_Essentials_Workforce_Management.PDF
+13. Microsoft. SQL Server documentation. https://learn.microsoft.com/sql/sql-server/
+14. Streamlit documentation. https://docs.streamlit.io/
+15. scikit-learn documentation. https://scikit-learn.org/stable/documentation.html
+16. Google OR-Tools documentation. https://developers.google.com/optimization
 
 ## Додатки
 
