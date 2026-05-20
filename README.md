@@ -64,6 +64,12 @@ The current full-history extract covers 2023-01-01 through 2025-12-31 and contai
 
 ## Quick Start
 
+Start the dashboard product demo:
+
+```powershell
+.\scripts\run_dashboard.ps1
+```
+
 Download a small January 2025 sample:
 
 ```powershell
@@ -164,11 +170,15 @@ python src\forecasting\sklearn_model_compare.py --input data\processed\full_fore
 Build the January 2026 planning artifacts:
 
 ```powershell
-Invoke-Sqlcmd -ServerInstance localhost -Database CallCenterWFM -InputFile sql\exports\002_export_operational_forecasting_input_for_powershell.sql -QueryTimeout 300 | Export-Csv -Path data\processed\full_operational_forecasting_input.csv -NoTypeInformation
-python src\forecasting\future_feature_forecast.py --input data\processed\full_forecast_features.csv --forecast-output data\processed\future_sklearn_forecast.csv --feature-output data\processed\future_forecast_features.csv --summary-output docs\future_forecast_summary.json --start-date 2026-01-01 --end-date 2026-01-31 --model hist_gradient_boosting
-python src\workforce\erlang_c_staffing.py --forecast data\processed\future_sklearn_forecast.csv --forecasting-input data\processed\full_operational_forecasting_input.csv --output data\processed\future_staffing_requirements.csv --summary-output docs\future_staffing_requirements_summary.json
-python src\scheduling\agent_roster_optimizer.py --requirements data\processed\future_staffing_requirements.csv --schedule-output data\processed\future_optimized_schedule.csv --coverage-output data\processed\future_schedule_coverage.csv --summary-output docs\future_scheduling_summary.json --agent-count 160 --max-shifts-per-agent-per-week 5 --min-rest-hours 11 --weekly-time-limit-sec 30
+.\scripts\run_planning_pipeline.ps1
 ```
+
+Demo and reporting notes:
+
+- `docs/demo_script.md`
+- `docs/technology_choice.md`
+- `docs/reporting_evidence_week3_6.md`
+- `docs/productization_plan.md`
 
 ## Notes
 
