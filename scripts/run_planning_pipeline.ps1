@@ -42,6 +42,14 @@ try {
         --output data\processed\future_staffing_requirements.csv `
         --summary-output docs\future_staffing_requirements_summary.json
 
+    Write-Host "Calculating model staffing scenarios..."
+    python src\workforce\model_staffing_scenarios.py `
+        --scenario-forecasts data\processed\future_model_scenario_forecasts.csv `
+        --forecasting-input data\processed\full_operational_forecasting_input.csv `
+        --output data\processed\future_model_staffing_scenarios.csv `
+        --summary-output docs\future_model_staffing_scenario_summary.json `
+        --agent-count $AgentCount
+
     Write-Host "Optimizing legal roster schedule..."
     python src\scheduling\agent_roster_optimizer.py `
         --requirements data\processed\future_staffing_requirements.csv `

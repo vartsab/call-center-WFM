@@ -52,6 +52,23 @@ python src\forecasting\future_feature_forecast.py `
 
 The Streamlit Forecasting tab reads the scenario file and visualizes differences between model forecast curves.
 
+## Compare Staffing Impact
+
+Forecast differences are translated into staffing scenarios with:
+
+```powershell
+python src\workforce\model_staffing_scenarios.py
+```
+
+This writes:
+
+```text
+data/processed/future_model_staffing_scenarios.csv
+docs/future_model_staffing_scenario_summary.json
+```
+
+The Streamlit Staffing tab reads the summary and compares peak shrinkage-adjusted agents and estimated full-coverage roster size by model. This makes model choice operationally visible rather than only statistically visible.
+
 ## Add A New Model
 
 1. Add the estimator to `model_candidates()` in `src/forecasting/sklearn_model_compare.py`.

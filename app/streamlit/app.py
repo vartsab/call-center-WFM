@@ -720,6 +720,7 @@ def render_staffing() -> None:
     if staffing.empty:
         st.info("Staffing requirements output is not available.")
         return
+    scenario_summary = load_json(DOCS_DIR / "future_model_staffing_scenario_summary.json")
 
     staffing["interval_start_datetime"] = pd.to_datetime(staffing["interval_start_datetime"])
     staffing["predicted_call_volume"] = pd.to_numeric(staffing["predicted_call_volume"])
@@ -768,6 +769,32 @@ def render_staffing() -> None:
         legend={"orientation": "h"},
     )
     st.plotly_chart(fig, width="stretch")
+
+    scenario_rows = pd.DataFrame(scenario_summary.get("models", []))
+    if not scenario_rows.empty:
+        st.subheader("Model impact on staffing")
+        scenario_display = scenario_rows[
+            [
+                "model",
+                "avg_predicted_calls",
+                "peak_predicted_calls",
+                "avg_shrinkage_adjusted_agents",
+                "peak_shrinkage_adjusted_agents",
+                "estimated_full_coverage_agents",
+                "approved_agent_pool_gap",
+            ]
+        ].copy()
+        scenario_display["model"] = scenario_display["model"].map(model_label)
+        st.dataframe(scenario_display, width="stretch", hide_index=True)
+        scenario_plot = scenario_display.melt(
+            id_vars="model",
+            value_vars=["peak_shrinkage_adjusted_agents", "estimated_full_coverage_agents"],
+            var_name="metric",
+            value_name="agents",
+        )
+        fig = px.bar(scenario_plot, x="model", y="agents", color="metric", barmode="group")
+        fig.update_layout(title="Staffing impact by forecast model", xaxis_title=None, yaxis_title="Agents")
+        st.plotly_chart(fig, width="stretch")
 
     display = staffing[
         [

@@ -10,6 +10,7 @@
 - [x] Forecasting model comparison completed.
 - [x] Forecasting model scenario comparison added.
 - [x] Forecasting model registry documented.
+- [x] Staffing impact comparison by forecast model added.
 - [x] Future January 2026 forecast generated.
 - [x] Erlang C staffing requirements calculated.
 - [x] Legal 160-agent schedule generated.
@@ -62,7 +63,7 @@
 
 | Area | Coverage |
 | --- | ---: |
-| Technical product | 88% |
+| Technical product | 91% |
 | Capstone submission package | 95% |
-| Demo readiness | 92% |
+| Demo readiness | 93% |
 | Final report and presentation | 88% |

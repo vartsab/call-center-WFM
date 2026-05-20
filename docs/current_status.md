@@ -19,6 +19,7 @@ Completed:
 - model comparison with selected histogram gradient boosting model;
 - interval-level holdout prediction comparison for registered models;
 - future planning scenario comparison across registered models;
+- Erlang C staffing scenario comparison across registered forecast models;
 - forecasting model registry documentation;
 - January 2026 future demand forecast;
 - Erlang C staffing calculation;
@@ -81,6 +82,16 @@ Staffing and scheduling:
 | Weekly shift-limit violations | 0 |
 | Rest violations | 0 |
 
+Model staffing scenarios:
+
+| Model | Peak shrinkage agents | Estimated full-coverage roster |
+| --- | ---: | ---: |
+| Random forest | 219 | 470 |
+| Histogram gradient boosting | 189 | 462 |
+| Gradient boosting | 163 | 450 |
+| Ridge regression | 158 | 432 |
+| Poisson regression | 193 | 419 |
+
 Testing:
 
 ```text
@@ -122,9 +133,9 @@ Dashboard screenshots:
 
 | Area | Coverage |
 | --- | ---: |
-| Technical product | 88% |
+| Technical product | 91% |
 | Capstone submission package | 95% |
-| Demo readiness | 92% |
+| Demo readiness | 93% |
 | Final report and presentation | 88% |
 
 ## Recommended Next Steps
