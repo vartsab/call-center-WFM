@@ -24,5 +24,6 @@
   "avg_predicted_calls": 204.415,
   "peak_predicted_calls": 386.1923,
   "forecast_output": "data\\processed\\future_sklearn_forecast.csv",
-  "feature_output": "data\\processed\\future_forecast_features.csv"
+  "feature_output": "data\\processed\\future_forecast_features.csv",
+  "all_models_output": "data\\processed\\future_model_scenario_forecasts.csv"
 }

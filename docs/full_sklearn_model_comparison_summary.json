@@ -57,5 +57,6 @@
       "mape": 0.3055
     }
   ],
-  "output": "data\\processed\\full_sklearn_best_forecast.csv"
+  "output": "data\\processed\\full_sklearn_best_forecast.csv",
+  "all_predictions_output": "data\\processed\\full_model_holdout_predictions.csv"
 }

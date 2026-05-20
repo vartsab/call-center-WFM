@@ -1,0 +1,37 @@
+{
+  "forecast_start": "2026-01-01",
+  "forecast_end": "2026-01-31",
+  "models": [
+    {
+      "model": "gradient_boosting",
+      "forecast_intervals": 1488,
+      "avg_predicted_calls": 199.07,
+      "peak_predicted_calls": 331.4391
+    },
+    {
+      "model": "hist_gradient_boosting",
+      "forecast_intervals": 1488,
+      "avg_predicted_calls": 204.415,
+      "peak_predicted_calls": 386.1923
+    },
+    {
+      "model": "poisson",
+      "forecast_intervals": 1488,
+      "avg_predicted_calls": 185.3209,
+      "peak_predicted_calls": 391.69
+    },
+    {
+      "model": "random_forest",
+      "forecast_intervals": 1488,
+      "avg_predicted_calls": 208.1176,
+      "peak_predicted_calls": 448.0598
+    },
+    {
+      "model": "ridge",
+      "forecast_intervals": 1488,
+      "avg_predicted_calls": 191.1717,
+      "peak_predicted_calls": 324.4033
+    }
+  ],
+  "output": "data\\processed\\future_model_scenario_forecasts.csv"
+}

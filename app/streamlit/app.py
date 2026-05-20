@@ -196,6 +196,20 @@ def read_first_csv(paths: list[Path]) -> pd.DataFrame:
     return pd.DataFrame()
 
 
+def model_label(model_name: str) -> str:
+    return model_name.replace("_", " ").title()
+
+
+def unique_values(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    output: list[str] = []
+    for value in values:
+        if value and value not in seen:
+            output.append(value)
+            seen.add(value)
+    return output
+
+
 def load_sql_data() -> dict[str, pd.DataFrame]:
     return {
         "volume_30min": read_sql("volume_30min"),
@@ -501,11 +515,15 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
     metric_cols[2].metric("RMSE", summary.get("rmse", 0))
     metric_cols[3].metric("MAPE", f"{summary.get('mape', 0):.1%}")
 
-    if model_summary:
-        model_rows = pd.DataFrame(model_summary.get("models", []))
-        if not model_rows.empty:
-            st.subheader("Model comparison")
-            st.dataframe(model_rows, width="stretch", hide_index=True)
+    model_rows = pd.DataFrame(model_summary.get("models", [])) if model_summary else pd.DataFrame()
+    model_names = model_rows["model"].tolist() if not model_rows.empty else []
+    selected_model = model_summary.get("selected_model", "") if model_summary else ""
+
+    if not model_rows.empty:
+        st.subheader("Model comparison")
+        display_rows = model_rows.copy()
+        display_rows["model"] = display_rows["model"].map(model_label)
+        st.dataframe(display_rows, width="stretch", hide_index=True)
 
     baseline = read_first_csv(
         [
@@ -520,6 +538,14 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         ]
     )
     future_forecast = read_first_csv([DATA_DIR / "future_sklearn_forecast.csv"])
+    model_predictions = read_first_csv(
+        [
+            DATA_DIR / "full_model_holdout_predictions.csv",
+            DATA_DIR / "model_holdout_predictions.csv",
+            DATA_DIR / "sklearn_model_holdout_predictions_sample.csv",
+        ]
+    )
+    future_model_scenarios = read_first_csv([DATA_DIR / "future_model_scenario_forecasts.csv"])
     if baseline.empty:
         st.info("Baseline forecast output is not available.")
         return
@@ -530,6 +556,29 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
     if not feature_forecast.empty:
         feature_forecast["interval_start_datetime"] = pd.to_datetime(feature_forecast["interval_start_datetime"])
         feature_forecast["predicted_call_volume"] = pd.to_numeric(feature_forecast["predicted_call_volume"])
+
+    if not model_predictions.empty:
+        model_predictions["interval_start_datetime"] = pd.to_datetime(
+            model_predictions["interval_start_datetime"]
+        )
+        model_predictions["actual_call_volume"] = pd.to_numeric(
+            model_predictions["actual_call_volume"]
+        )
+        model_predictions["predicted_call_volume"] = pd.to_numeric(
+            model_predictions["predicted_call_volume"]
+        )
+        available_models = model_predictions["model"].dropna().unique().tolist()
+        default_models = unique_values([
+            model for model in [selected_model, "random_forest", "gradient_boosting"] if model in available_models
+        ])
+        selected_models = st.multiselect(
+            "Holdout models",
+            options=available_models,
+            default=default_models or available_models[: min(3, len(available_models))],
+            format_func=model_label,
+        )
+    else:
+        selected_models = []
 
     fig = go.Figure()
     fig.add_trace(
@@ -548,17 +597,40 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
             name="Baseline",
         )
     )
-    if not feature_forecast.empty:
+    if selected_models and not model_predictions.empty:
+        for model in selected_models:
+            model_slice = model_predictions[model_predictions["model"] == model]
+            fig.add_trace(
+                go.Scatter(
+                    x=model_slice["interval_start_datetime"],
+                    y=model_slice["predicted_call_volume"],
+                    mode="lines",
+                    name=model_label(model),
+                )
+            )
+    elif not feature_forecast.empty:
         fig.add_trace(
             go.Scatter(
                 x=feature_forecast["interval_start_datetime"],
                 y=feature_forecast["predicted_call_volume"],
                 mode="lines",
-                name=f"Best feature model ({model_summary.get('selected_model', 'selected')})",
+                name=f"Best feature model ({model_label(selected_model or 'selected')})",
             )
         )
     fig.update_layout(title="Forecast holdout period", xaxis_title=None, yaxis_title="Calls")
     st.plotly_chart(fig, width="stretch")
+
+    if not model_rows.empty:
+        error_rows = model_rows.melt(
+            id_vars="model",
+            value_vars=[column for column in ["mae", "rmse", "mape"] if column in model_rows.columns],
+            var_name="metric",
+            value_name="value",
+        )
+        error_rows["model"] = error_rows["model"].map(model_label)
+        fig = px.bar(error_rows, x="model", y="value", color="metric", barmode="group")
+        fig.update_layout(title="Holdout error by model", xaxis_title=None, yaxis_title="Error")
+        st.plotly_chart(fig, width="stretch")
 
     if not future_forecast.empty:
         future_forecast["interval_start_datetime"] = pd.to_datetime(
@@ -573,11 +645,49 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         future_cols[1].metric("Forecast start", future_summary.get("forecast_start", ""))
         future_cols[2].metric("Avg calls", f"{future_summary.get('avg_predicted_calls', 0):,.1f}")
         future_cols[3].metric("Peak calls", f"{future_summary.get('peak_predicted_calls', 0):,.1f}")
-        fig = px.line(
-            future_forecast,
-            x="interval_start_datetime",
-            y="predicted_call_volume",
-        )
+        if not future_model_scenarios.empty:
+            future_model_scenarios["interval_start_datetime"] = pd.to_datetime(
+                future_model_scenarios["interval_start_datetime"]
+            )
+            future_model_scenarios["predicted_call_volume"] = pd.to_numeric(
+                future_model_scenarios["predicted_call_volume"]
+            )
+            scenario_models = future_model_scenarios["model"].dropna().unique().tolist()
+            scenario_default = unique_values([
+                model for model in [future_summary.get("selected_model", selected_model), "random_forest"] if model in scenario_models
+            ])
+            selected_scenarios = st.multiselect(
+                "Future planning models",
+                options=scenario_models,
+                default=scenario_default or scenario_models[: min(2, len(scenario_models))],
+                format_func=model_label,
+            )
+            scenario_plot = future_model_scenarios[
+                future_model_scenarios["model"].isin(selected_scenarios)
+            ].copy()
+            scenario_plot["model"] = scenario_plot["model"].map(model_label)
+            fig = px.line(
+                scenario_plot,
+                x="interval_start_datetime",
+                y="predicted_call_volume",
+                color="model",
+            )
+            summary_by_model = (
+                future_model_scenarios.groupby("model", as_index=False)
+                .agg(
+                    avg_calls=("predicted_call_volume", "mean"),
+                    peak_calls=("predicted_call_volume", "max"),
+                )
+                .sort_values("avg_calls", ascending=False)
+            )
+            summary_by_model["model"] = summary_by_model["model"].map(model_label)
+            st.dataframe(summary_by_model, width="stretch", hide_index=True)
+        else:
+            fig = px.line(
+                future_forecast,
+                x="interval_start_datetime",
+                y="predicted_call_volume",
+            )
         fig.update_layout(title="Future 30-minute call forecast", xaxis_title=None, yaxis_title="Calls")
         st.plotly_chart(fig, width="stretch")
 

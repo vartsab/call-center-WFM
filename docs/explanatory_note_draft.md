@@ -121,6 +121,10 @@
 
 Інше дослідження Aldor-Noiman et al. щодо inhomogeneous Poisson processes підкреслює, що accurate forecasting of call arrival rates є базовою передумовою efficient staffing [4]. Цей висновок безпосередньо підтримує архітектуру проєкту: спочатку формується interval-level forecasting input, потім виконується model comparison, і лише після цього результат передається в Erlang C.
 
+Емпіричні дослідження call-center arrivals також показують, що просте припущення про незалежний Poisson process не завжди достатнє. Brown et al. аналізують реальний телефонний контакт-центр з позиції queueing science і показують важливість arrival process, waiting time, service time, abandonment і time-varying behavior для операційного моделювання [17]. Ibrahim and L'Ecuyer порівнюють fixed-effects, mixed-effects і bivariate models для call center arrivals, що підсилює ідею: модель має враховувати як intraday pattern, так і залежності між днями або типами звернень [18].
+
+Окремий напрям літератури порівнює статистичні та machine learning approaches. Boulin у MIT thesis показує практичну цінність комбінації statistical forecasting і judgmental adjustments у sales call center context [19]. Manno et al. порівнюють deep and shallow neural networks для call center arrivals і роблять важливий для цього проєкту висновок: складніші neural approaches не завжди є автоматично кращими, а простіші моделі з продуманими features можуть бути конкурентними [20]. Тому в поточному проєкті акцент зроблено на explainable feature-based comparison, а не на демонстративно складній LSTM/Deep Learning моделі без operational benefit.
+
 У літературі та практиці contact center planning часто використовуються:
 
 - сезонні naive або moving-average baseline models;
@@ -135,7 +139,11 @@
 
 Для staffing у contact center domain традиційно використовуються queueing models. Erlang C залишається поширеним стандартом для inbound call center planning, коли потрібно оцінити кількість агентів для заданого arrival volume, AHT, service-level target і occupancy constraint. Водночас у літературі вказується, що Erlang C має припущення та обмеження: він спрощує поведінку abandonments, повторних звернень, multiskill routing і non-stationary demand. Тому в цьому проєкті Erlang C використовується як прозорий і пояснюваний staffing layer, а не як абсолютна модель реальності.
 
-Scheduling є окремою задачею operations research. Якщо forecasting відповідає на питання "скільки звернень очікується", а staffing - "скільки операторів потрібно", scheduling відповідає на питання "які конкретні люди в які зміни мають працювати". У практичних WFM-системах scheduling повинен враховувати shift templates, breaks, weekly limits, rest rules, availability, time off, skills і business hours. У поточній реалізації використано OR-Tools CP-SAT, тому constraints та objective function залишаються прозорими для пояснення у дипломній роботі.
+Robbins and Medeiros порівнюють Erlang C з simulation model, де частину класичних припущень Erlang C послаблено, і показують, що у реальних contact centers така модель може не завжди точно відтворювати performance [21]. Це не означає, що Erlang C не можна використовувати; це означає, що в дипломній роботі його потрібно чесно описати як baseline queueing-theory staffing method і винести Erlang A / discrete-event simulation у future work.
+
+Scheduling є окремою задачею operations research. Якщо forecasting відповідає на питання "скільки звернень очікується", а staffing - "скільки операторів потрібно", scheduling відповідає на питання "які конкретні люди в які зміни мають працювати". У практичних WFM-системах scheduling повинен враховувати shift templates, breaks, weekly limits, rest rules, availability, time off, skills і business hours. Koole and Li описують стандартну decomposition logic: спочатку визначають required staffing levels, потім підбирають shifts, після цього shifts assigned to agents, і далі плануються activities during scheduled work time [2]. Це прямо відповідає pipeline цього проєкту.
+
+У більш складних contact centers scheduling переходить у multi-skill / multilingual optimization. Прикладом є ILP-модель scheduling of agents in inbound multilingual call centers, де враховуються segmentation by skills та labor law restrictions [22]. Поточна реалізація ще не має повного multi-skill routing, але обрана OR-Tools CP-SAT архітектура створює основу для такого розширення.
 
 ## 2.3. Ринковий контекст і технологічне середовище
 
@@ -149,17 +157,21 @@ Scheduling є окремою задачею operations research. Якщо foreca
 
 Ринок contact center WFM є зрілим: великі платформи вже мають forecasting, scheduling, adherence і agent self-service. Це означає, що новизна навчального продукту не полягає в тому, що він першим автоматизує WFM. Його новизна полягає в прозорому, відтворюваному, explainable workflow, який демонструє весь шлях від public data до staffing decision.
 
+Фактично проєкт можна описати як відкриту експериментальну micro-version сучасного WFM suite: він не конкурує з enterprise platforms за повнотою функцій, але відтворює їхню ключову логіку у контрольованому академічному середовищі. Саме це робить його придатним для магістерського інженерного проєкту: є working artifact, архітектура, codebase, database, model pipeline, optimization module, UI, screenshots, validation і reproducibility.
+
+Тому цей проєкт не слід позиціонувати як фундаментальне академічне дослідження нового математичного методу. Його коректніше позиціонувати як магістерський інженерний проєкт: створення працюючого software/data product, який реалізує відомий клас задач у конкретному domain, з конкретною архітектурою, data pipeline, model comparison, staffing engine, schedule optimizer, dashboard, validation artifacts і документацією. Для інженерного проєкту новизна може полягати не у винайденні нового алгоритму, а в інтеграції, адаптації, прозорості, відтворюваності та корисності продукту для певного сценарію.
+
 Нижче наведено порівняння з основними класами конкурентів.
 
 | Продукт / клас | Типові можливості | Сильні сторони | Обмеження для навчального / дослідницького проєкту |
 | --- | --- | --- | --- |
 | NICE CXone WFM | Forecasting, schedule generation, time-off, adherence, shift bidding | Enterprise-grade WFM ecosystem, інтеграція з CXone | Закрита методологія, vendor lock-in, складність відтворення моделей |
-| Genesys Cloud WFM | Forecasts, forecast-based schedules, schedule adherence, time-off management | Глибока інтеграція з contact-center platform | Залежність від Genesys environment та внутрішньої data model |
+| Genesys Cloud WFM | Forecasts, forecast-based schedules, schedule adherence, time-off management | Глибока інтеграція з contact-center platform і routing | Залежність від Genesys environment та внутрішньої data model |
 | Talkdesk WFM | CVO/AHT forecasting, staffing calculation, scheduling, intraday insights | Документація чітко описує workflow forecast -> staffing -> schedule | Методологія моделювання частково закрита, продукт потребує платформи Talkdesk |
-| Amazon Connect forecasting/capacity/scheduling | ML forecasting, capacity planning, scheduling, adherence | Cloud-native, інтеграція з AWS ecosystem | Потребує Amazon Connect setup та хмарної інфраструктури |
+| Amazon Connect forecasting/capacity/scheduling | ML forecasting, capacity planning, scheduling, adherence | Cloud-native, інтеграція з AWS ecosystem, capacity planning workflows | Потребує Amazon Connect setup та хмарної інфраструктури |
 | Verint WFM | Forecasting, scheduling, multichannel resource planning, employee self-service | Сильний enterprise WFM та engagement layer | Комерційна платформа, складно показати внутрішню логіку студентського рішення |
-| Calabrio WFM | Forecasting, optimized scheduling, intraday optimization, agent engagement | Сильна орієнтація на scheduling quality та agent experience | Закритий commercial stack, менша прозорість алгоритмів |
-| Five9 Essentials WFM | Forecasting, scheduling, real-time adherence, agent tools | Contact-center suite with WFM module | Залежність від Five9 ecosystem |
+| Calabrio WFM | Forecasting, optimized scheduling, intraday management, agent engagement | Сильна орієнтація на scheduling quality, agility та agent experience | Закритий commercial stack, менша прозорість алгоритмів |
+| Five9 Essentials WFM | Forecasting, scheduling, real-time adherence, agent tools | Contact-center suite with WFM module and WFO context | Залежність від Five9 ecosystem |
 | Spreadsheets / manual planning | Ручні forecasts, Erlang calculators, manual schedules | Дешево, зрозуміло для малого центру | Високий manual effort, слабка відтворюваність, обмежена інтеграція |
 
 Офіційна документація конкурентів підтверджує, що ринкові продукти вирішують ту саму загальну задачу. Genesys описує WFM як інструмент для forecasting, schedule generation, adherence monitoring і time-off management [6]. NICE CXone WFM дозволяє forecast a schedule, edit it and generate it for agents [7]. Talkdesk документація прямо розділяє CVO forecasting, AHT forecasting, required staffing і scheduling inputs [8]. Amazon Connect описує forecasting, capacity planning і scheduling як workflow для того, щоб мати правильну кількість агентів у правильний час [9]. Verint і Calabrio також позиціонують WFM навколо accurate forecasting, optimized scheduling, service goals і employee experience [10], [11]. Five9 Essentials WFM підкреслює scheduling та real-time adherence як частину WFM-модуля [12].
@@ -170,8 +182,11 @@ Scheduling є окремою задачею operations research. Якщо foreca
 - він використовує реальний public dataset, доступний для перевірки;
 - він демонструє data warehouse, forecasting, staffing і scheduling в одному pipeline;
 - він не приховує modeling assumptions;
+- він дає можливість порівнювати різні forecasting models і використовувати обрану модель у planning pipeline;
 - він підходить для навчальної, дослідницької та prototype demonstration мети;
 - він може бути адаптований для інших public-service або healthcare scenarios.
+
+Таким чином, наявність конкурентів не зменшує цінність проєкту. Вона показує, що задача реальна, а запропонований продукт є open, explainable і reproducible аналогом enterprise workflow для навчання, демонстрації та подальших експериментів.
 
 ## 2.5. Аналіз архітектур і технологій
 
@@ -196,13 +211,17 @@ Scheduling є окремою задачею operations research. Якщо foreca
 - поєднання SQL Server warehouse, Streamlit dashboard, ML forecasting, Erlang C і OR-Tools в одному pipeline;
 - порівняння моделей на full-history holdout;
 - окреме розділення historical evaluation і future workforce planning;
-- explicit reporting of coverage gap для constrained 160-agent scenario.
+- explicit reporting of coverage gap для constrained 160-agent scenario;
+- model registry, який дозволяє додавати нові forecasting models і порівнювати їх у dashboard.
 
 Потенційний розвиток продукту:
 
 - додати реальні або benchmark AHT assumptions для різних queue types;
+- порівняти Erlang C з Erlang A та discrete-event simulation для сценаріїв з abandonment;
 - додати weather, city events і emergency indicators як exogenous forecast features;
+- додати intraday re-forecasting, коли модель оновлює прогноз протягом дня;
 - реалізувати skill-based multiqueue scheduling;
+- додати agent-centric constraints: preferences, fairness, consecutive working days, shift bidding;
 - додати scenario planning для SLA, shrinkage, roster size і hours of operation;
 - додати MLflow для experiment tracking та model registry;
 - підготувати cloud-friendly deployment на PostgreSQL або managed database;
@@ -327,6 +346,8 @@ Forecast target - кількість звернень у 30-хвилинному
 
 Було порівняно seasonal naive baseline, ridge regression, Poisson regression, gradient boosting, random forest і histogram gradient boosting. Обрано histogram gradient boosting як модель з найнижчим MAE на full-history holdout.
 
+Моделі організовані як registry у функції `model_candidates()`. Це означає, що нову модель можна додати як окремий named estimator, після чого її можна включити в holdout comparison і future planning scenario. Planning pipeline має параметр `-Model`, тому прогноз, staffing та schedule можуть бути перераховані для іншої моделі без зміни архітектури.
+
 ### Staffing
 
 Forecasted calls переводяться в required agents за Erlang C. Використано 30-хвилинний interval, target service level 80% answered within 20 seconds, maximum occupancy 85% і shrinkage 30%.
@@ -443,6 +464,8 @@ Dashboard читає SQL Server views, а для локальної демонс
 
 Histogram gradient boosting було обрано через найнижчий MAE. Random forest показав близький результат, але був трохи гіршим за основною метрикою. Poisson regression, який на ранньому sample виглядав прийнятно, на повній історії показав найгірший результат серед feature-based моделей.
 
+Dashboard також візуалізує interval-level holdout predictions для кількох моделей. Це важливо для planning workflow, тому що різні моделі можуть мати схожу середню помилку, але по-різному поводитися у peak intervals.
+
 ### Future forecast
 
 Future planning forecast сформовано для 2026-01-01 - 2026-01-31.
@@ -454,6 +477,18 @@ Future planning forecast сформовано для 2026-01-01 - 2026-01-31.
 | Peak predicted calls | 386.1923 |
 
 ![Рисунок 4.2. Forecasting dashboard](screenshots/03_forecasting.png)
+
+Додатково сформовано future model scenario comparison для всіх зареєстрованих моделей:
+
+| Model | Average predicted calls | Peak predicted calls |
+| --- | ---: | ---: |
+| Random forest | 208.1176 | 448.0598 |
+| Histogram gradient boosting | 204.4150 | 386.1923 |
+| Gradient boosting | 199.0700 | 331.4391 |
+| Ridge regression | 191.1717 | 324.4033 |
+| Poisson regression | 185.3209 | 391.6900 |
+
+Це розширює продукт від single-model forecast до model-aware planning tool: користувач може оцінити, як зміна моделі впливає на майбутній demand curve, перш ніж перераховувати staffing і schedule.
 
 ### Staffing results
 
@@ -553,6 +588,7 @@ Dashboard дає 360-degree view of call center performance:
 - реалізовано Streamlit dashboard;
 - проведено model comparison на holdout-періоді;
 - обрано histogram gradient boosting як найкращу модель;
+- додано model scenario comparison для planning forecast;
 - створено January 2026 future forecast;
 - розраховано Erlang C staffing requirements;
 - сформовано legal 160-agent schedule;
@@ -594,6 +630,12 @@ Dashboard дає 360-degree view of call center performance:
 14. Streamlit documentation. https://docs.streamlit.io/
 15. scikit-learn documentation. https://scikit-learn.org/stable/documentation.html
 16. Google OR-Tools documentation. https://developers.google.com/optimization
+17. Brown, L., Gans, N., Mandelbaum, A., Sakov, A., Shen, H., Zeltyn, S., Zhao, L. Statistical Analysis of a Telephone Call Center: A Queueing-Science Perspective. Journal of the American Statistical Association, 2005. https://doi.org/10.1198/016214504000001808
+18. Ibrahim, R., L'Ecuyer, P. Forecasting Call Center Arrivals: Fixed-Effects, Mixed-Effects, and Bivariate Models. Manufacturing & Service Operations Management, 2013. https://doi.org/10.1287/msom.1120.0405
+19. Boulin, J. M. Call Center Demand Forecasting: Improving Sales Calls Prediction Accuracy Through the Combination of Statistical Methods and Judgmental Forecast. MIT, 2010. http://hdl.handle.net/1721.1/59159
+20. Manno, A., Rossi, F., Smriglio, S., Cerone, L. Comparing deep and shallow neural networks in forecasting call center arrivals. Soft Computing, 2022. https://doi.org/10.1007/s00500-022-07055-2
+21. Robbins, T. R., Medeiros, D. J. Does the Erlang C model fit in real call centers? Winter Simulation Conference, 2010. https://pure.psu.edu/en/publications/does-the-erlang-c-model-fit-in-real-call-centers/
+22. Buriol, L. S., et al. Scheduling of agents in inbound multilingual call centers. Brazilian Journal of Operations & Production Management, 2017. https://bjopm.org.br/bjopm/article/download/V14N2A11/html?inline=1
 
 ## Додатки
 

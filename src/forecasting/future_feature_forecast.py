@@ -20,6 +20,13 @@ except ImportError:
     from us_federal_holidays import nearest_holiday_distance, us_federal_holidays
 
 
+SCENARIO_FORECAST_FIELDS = [
+    "model",
+    "interval_start_datetime",
+    "predicted_call_volume",
+]
+
+
 def read_csv(path: Path) -> list[dict[str, str]]:
     with path.open("r", newline="", encoding="utf-8-sig") as input_file:
         return list(csv.DictReader(input_file))
@@ -114,28 +121,13 @@ def train_model(rows: list[dict[str, str]], model_name: str) -> Any:
     return model
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input", default="data/processed/full_forecast_features.csv")
-    parser.add_argument("--forecast-output", default="data/processed/future_sklearn_forecast.csv")
-    parser.add_argument("--feature-output", default="data/processed/future_forecast_features.csv")
-    parser.add_argument("--summary-output", default="docs/future_forecast_summary.json")
-    parser.add_argument("--start-date", default="2026-01-01")
-    parser.add_argument("--end-date", default="2026-01-31")
-    parser.add_argument("--model", default="hist_gradient_boosting")
-    args = parser.parse_args()
-
-    historical_rows = read_csv(Path(args.input))
-    if not historical_rows:
-        raise SystemExit(f"No historical feature rows found at {args.input}.")
-
-    model = train_model(historical_rows, args.model)
-    start_date = parse_date(args.start_date)
-    end_date = parse_date(args.end_date)
-    intervals = iter_half_hours(start_date, end_date)
-    years = [datetime.fromisoformat(row["interval_start_datetime"]).year for row in historical_rows]
-    holidays = us_federal_holidays(min(years + [start_date.year]), max(years + [end_date.year]))
-
+def forecast_horizon(
+    historical_rows: list[dict[str, str]],
+    model_name: str,
+    intervals: list[datetime],
+    holidays: dict[date, str],
+) -> tuple[list[dict[str, str]], list[dict[str, str]], list[float]]:
+    model = train_model(historical_rows, model_name)
     volume_lookup = {
         datetime.fromisoformat(row["interval_start_datetime"]): float(row["actual_call_volume"])
         for row in historical_rows
@@ -161,8 +153,81 @@ def main() -> None:
             }
         )
 
+    return feature_rows, forecast_rows, predictions
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", default="data/processed/full_forecast_features.csv")
+    parser.add_argument("--forecast-output", default="data/processed/future_sklearn_forecast.csv")
+    parser.add_argument("--feature-output", default="data/processed/future_forecast_features.csv")
+    parser.add_argument("--summary-output", default="docs/future_forecast_summary.json")
+    parser.add_argument("--all-models-output", default="")
+    parser.add_argument("--all-models-summary-output", default="")
+    parser.add_argument("--start-date", default="2026-01-01")
+    parser.add_argument("--end-date", default="2026-01-31")
+    parser.add_argument("--model", default="hist_gradient_boosting")
+    args = parser.parse_args()
+
+    historical_rows = read_csv(Path(args.input))
+    if not historical_rows:
+        raise SystemExit(f"No historical feature rows found at {args.input}.")
+
+    start_date = parse_date(args.start_date)
+    end_date = parse_date(args.end_date)
+    intervals = iter_half_hours(start_date, end_date)
+    years = [datetime.fromisoformat(row["interval_start_datetime"]).year for row in historical_rows]
+    holidays = us_federal_holidays(min(years + [start_date.year]), max(years + [end_date.year]))
+
+    feature_rows, forecast_rows, predictions = forecast_horizon(
+        historical_rows=historical_rows,
+        model_name=args.model,
+        intervals=intervals,
+        holidays=holidays,
+    )
+
     write_csv(Path(args.feature_output), feature_rows, FEATURE_MATRIX_FIELDS)
     write_csv(Path(args.forecast_output), forecast_rows, FORECAST_FIELDS)
+    scenario_summary_rows: list[dict[str, Any]] = []
+    if args.all_models_output:
+        scenario_rows: list[dict[str, str]] = []
+        for model_name in sorted(model_candidates()):
+            _, model_forecast_rows, model_predictions = forecast_horizon(
+                historical_rows=historical_rows,
+                model_name=model_name,
+                intervals=intervals,
+                holidays=holidays,
+            )
+            scenario_rows.extend(
+                {
+                    "model": model_name,
+                    "interval_start_datetime": row["interval_start_datetime"],
+                    "predicted_call_volume": row["predicted_call_volume"],
+                }
+                for row in model_forecast_rows
+            )
+            scenario_summary_rows.append(
+                {
+                    "model": model_name,
+                    "forecast_intervals": len(model_forecast_rows),
+                    "avg_predicted_calls": round(rolling_mean(model_predictions), 4),
+                    "peak_predicted_calls": round(max(model_predictions), 4) if model_predictions else 0,
+                }
+            )
+        write_csv(Path(args.all_models_output), scenario_rows, SCENARIO_FORECAST_FIELDS)
+        if args.all_models_summary_output:
+            Path(args.all_models_summary_output).write_text(
+                json.dumps(
+                    {
+                        "forecast_start": start_date.isoformat(),
+                        "forecast_end": end_date.isoformat(),
+                        "models": scenario_summary_rows,
+                        "output": args.all_models_output,
+                    },
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
     summary = {
         "model_family": "scikit-learn feature model",
         "selected_model": args.model,
@@ -178,6 +243,7 @@ def main() -> None:
         "peak_predicted_calls": round(max(predictions), 4) if predictions else 0,
         "forecast_output": args.forecast_output,
         "feature_output": args.feature_output,
+        "all_models_output": args.all_models_output,
     }
     Path(args.summary_output).write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, indent=2))

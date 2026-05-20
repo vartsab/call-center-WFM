@@ -29,6 +29,8 @@ try {
         --forecast-output data\processed\future_sklearn_forecast.csv `
         --feature-output data\processed\future_forecast_features.csv `
         --summary-output docs\future_forecast_summary.json `
+        --all-models-output data\processed\future_model_scenario_forecasts.csv `
+        --all-models-summary-output docs\future_model_scenario_summary.json `
         --start-date $StartDate `
         --end-date $EndDate `
         --model $Model

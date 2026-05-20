@@ -17,6 +17,9 @@ Completed:
 - Streamlit dashboard with SQL Server access and generated-artifact support;
 - holiday-aware full-history forecasting feature matrix;
 - model comparison with selected histogram gradient boosting model;
+- interval-level holdout prediction comparison for registered models;
+- future planning scenario comparison across registered models;
+- forecasting model registry documentation;
 - January 2026 future demand forecast;
 - Erlang C staffing calculation;
 - legal 160-agent roster optimizer;
@@ -51,6 +54,16 @@ Forecasting:
 | Holdout RMSE | 49.7414 |
 | Holdout MAPE | 0.2216 |
 | Future forecast horizon | 2026-01-01 to 2026-01-31 |
+
+Future model scenarios:
+
+| Model | Avg predicted calls | Peak predicted calls |
+| --- | ---: | ---: |
+| Random forest | 208.1176 | 448.0598 |
+| Histogram gradient boosting | 204.4150 | 386.1923 |
+| Gradient boosting | 199.0700 | 331.4391 |
+| Ridge regression | 191.1717 | 324.4033 |
+| Poisson regression | 185.3209 | 391.6900 |
 
 Staffing and scheduling:
 
@@ -103,9 +116,9 @@ Dashboard screenshots:
 
 | Area | Coverage |
 | --- | ---: |
-| Technical product | 86% |
+| Technical product | 88% |
 | Capstone submission package | 93% |
-| Demo readiness | 89% |
+| Demo readiness | 91% |
 | Final report and presentation | 82% |
 
 ## Recommended Next Steps

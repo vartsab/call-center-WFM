@@ -34,6 +34,11 @@ FORECAST_FIELDS = [
     "absolute_percentage_error",
 ]
 
+MODEL_FORECAST_FIELDS = [
+    "model",
+    *FORECAST_FIELDS,
+]
+
 
 def read_csv(path: Path) -> list[dict[str, str]]:
     with path.open("r", newline="", encoding="utf-8-sig") as input_file:
@@ -43,7 +48,8 @@ def read_csv(path: Path) -> list[dict[str, str]]:
 def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as output_file:
-        writer = csv.DictWriter(output_file, fieldnames=FORECAST_FIELDS)
+        fieldnames = MODEL_FORECAST_FIELDS if rows and "model" in rows[0] else FORECAST_FIELDS
+        writer = csv.DictWriter(output_file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
 
@@ -145,6 +151,7 @@ def main() -> None:
     parser.add_argument("--input", default="data/processed/forecast_features_sample.csv")
     parser.add_argument("--output", default="data/processed/sklearn_best_forecast_sample.csv")
     parser.add_argument("--summary-output", default="docs/sklearn_model_comparison_summary.json")
+    parser.add_argument("--all-predictions-output", default="")
     parser.add_argument("--test-days", type=int, default=7)
     args = parser.parse_args()
 
@@ -158,6 +165,7 @@ def main() -> None:
     x_test = [feature_vector(row) for row in test_rows]
 
     results: list[dict[str, Any]] = []
+    all_forecast_rows: list[dict[str, str]] = []
     best_forecast_rows: list[dict[str, str]] = []
     best_metric = float("inf")
     best_model_name = ""
@@ -167,6 +175,14 @@ def main() -> None:
         predictions = list(model.predict(x_test))
         forecast_rows = build_forecast_rows(test_rows, predictions)
         model_metrics = metrics(forecast_rows)
+        if args.all_predictions_output:
+            all_forecast_rows.extend(
+                {
+                    "model": model_name,
+                    **row,
+                }
+                for row in forecast_rows
+            )
         results.append(
             {
                 "model": model_name,
@@ -179,6 +195,8 @@ def main() -> None:
             best_forecast_rows = forecast_rows
 
     write_csv(Path(args.output), best_forecast_rows)
+    if args.all_predictions_output:
+        write_csv(Path(args.all_predictions_output), all_forecast_rows)
     summary = {
         "model_family": "scikit-learn feature model comparison",
         "selected_model": best_model_name,
@@ -191,6 +209,7 @@ def main() -> None:
         "test_end": test_rows[-1]["calendar_date"],
         "models": sorted(results, key=lambda row: float(row["mae"])),
         "output": args.output,
+        "all_predictions_output": args.all_predictions_output,
     }
     Path(args.summary_output).write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, indent=2))

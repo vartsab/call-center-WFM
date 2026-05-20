@@ -8,6 +8,8 @@
 - [x] SQL analytics views created and validated.
 - [x] Streamlit dashboard implemented.
 - [x] Forecasting model comparison completed.
+- [x] Forecasting model scenario comparison added.
+- [x] Forecasting model registry documented.
 - [x] Future January 2026 forecast generated.
 - [x] Erlang C staffing requirements calculated.
 - [x] Legal 160-agent schedule generated.
@@ -58,7 +60,7 @@
 
 | Area | Coverage |
 | --- | ---: |
-| Technical product | 86% |
+| Technical product | 88% |
 | Capstone submission package | 93% |
-| Demo readiness | 89% |
+| Demo readiness | 91% |
 | Final report and presentation | 82% |
