@@ -147,9 +147,28 @@ The project keeps raw and processed CSV outputs local. The code and committed su
 | `data/processed/future_schedule_coverage.csv` | January 2026 scheduled coverage versus required staffing. |
 | `docs/future_scheduling_summary.json` | January 2026 scheduling summary. |
 
-## Latest Generated Sample Summary
+## Latest Full Warehouse Summary
 
-The latest generated sample was created from a January 2025 NYC 311 extract with 6,200 records allocated across days in proportion to real daily request counts.
+The main analytical dataset is the SQL Server warehouse generated from the full 2023-2025 NYC 311 raw table.
+
+| Metric | Value |
+| --- | ---: |
+| Source period | 2023-01-01 to 2025-12-31 |
+| Raw source rows | 10,336,480 |
+| Fact calls | 10,336,480 |
+| Dates | 1,096 |
+| Time intervals | 48 |
+| Queues | 217 |
+| Agents | 160 |
+| Answered calls | 9,527,782 |
+| Abandoned calls | 808,698 |
+| Abandonment rate | 7.82% |
+| Average answered handle time | 532.50 sec |
+| SLA rate | 22.57% |
+
+## Development Fixture Summary
+
+The January 2025 generated sample remains as a small local development fixture for fast testing and CSV fallback mode. It is not the main forecasting or staffing dataset.
 
 | Metric | Value |
 | --- | ---: |

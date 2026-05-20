@@ -91,19 +91,23 @@ For each answered call:
 
 ## Agent And Queue Simulation
 
-The first synthetic sample uses 60 agents distributed across five skill groups:
+The full SQL warehouse uses 160 synthetic agents distributed across five skill groups:
 
-- housing;
-- sanitation;
-- transportation;
-- public_safety;
-- general.
+| Skill Group | Agent ID Range | Agent Count |
+| --- | ---: | ---: |
+| housing | 1-32 | 32 |
+| sanitation | 33-59 | 27 |
+| transportation | 60-86 | 27 |
+| public_safety | 87-107 | 21 |
+| general | 108-160 | 53 |
 
-Queues are derived from 311 complaint types. A simple keyword classifier maps complaint type and descriptor text to the service category/skill group.
+Queues are derived from every observed NYC 311 complaint type in the 2023-2025 extract. The current full warehouse contains 217 queues. Each queue is mapped to a normalized service category with keyword rules. The category is then used for service mix reporting, agent skill assignment, and dashboard filtering.
+
+The January 2025 CSV sample remains as a small development fixture, but it is no longer the main analytical dataset.
 
 ## Reproducibility
 
-The generator uses a fixed default random seed:
+The first CSV generator uses a fixed default random seed:
 
 ```text
 20260511
@@ -111,7 +115,40 @@ The generator uses a fixed default random seed:
 
 Running the generator with the same input file and seed should produce the same synthetic output.
 
-## Latest Sample Summary
+The full SQL warehouse uses deterministic pseudo-random values derived from each source request key. This means the full 10.3M-row synthetic warehouse can be rebuilt from the raw NYC 311 table without relying on a session-level random state.
+
+## Latest Full Warehouse Summary
+
+The current production-scale dataset is generated directly in SQL Server from the 2023-2025 raw table:
+
+```text
+sql/etl/004_load_full_synthetic_warehouse_from_raw.sql
+```
+
+Current full warehouse characteristics:
+
+| Metric | Value |
+| --- | ---: |
+| Source period | 2023-01-01 to 2025-12-31 |
+| Raw source rows | 10,336,480 |
+| Fact calls | 10,336,480 |
+| Dates | 1,096 |
+| Time intervals | 48 |
+| Queues | 217 |
+| Agents | 160 |
+| Answered calls | 9,527,782 |
+| Abandoned calls | 808,698 |
+| Abandonment rate | 7.82% |
+| Average answered handle time | 532.50 sec |
+| SLA rate | 22.57% |
+
+The latest SQL validation summary is stored in:
+
+```text
+docs/sql_validation_summary.md
+```
+
+## Development Fixture Summary
 
 The latest generated summary is stored in:
 

@@ -29,6 +29,7 @@
 - [x] Productization plan documented.
 - [x] Technology choice note documented.
 - [x] Demo script documented.
+- [x] First full explanatory note draft prepared.
 - [x] Presentation outline drafted.
 
 ## Validation
@@ -45,7 +46,7 @@
 - [ ] Review Week 3-6 Word reports manually in Microsoft Word.
 - [ ] Add supervisor feedback if it exists.
 - [ ] Insert selected screenshots into the explanatory note.
-- [ ] Draft final explanatory note chapters.
+- [ ] Polish explanatory note in the official Word template.
 - [ ] Prepare final presentation slides.
 - [ ] Run final dashboard demo rehearsal.
 - [ ] Export final documents to PDF.
@@ -55,6 +56,6 @@
 | Area | Coverage |
 | --- | ---: |
 | Technical product | 86% |
-| Capstone submission package | 85% |
+| Capstone submission package | 90% |
 | Demo readiness | 89% |
-| Final report and presentation | 62% |
+| Final report and presentation | 74% |

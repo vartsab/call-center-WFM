@@ -4,12 +4,6 @@ Last updated: 2026-05-20
 
 ## Repository State
 
-Latest pushed commit:
-
-```text
-264bb71 Add presentation and submission checklist
-```
-
 The tracked repository contains the main source code, SQL scripts, methodology documents, dashboard screenshots, presentation outline, and submission checklist. Raw data, processed CSV outputs, and Word report files are local generated artifacts and are intentionally excluded from version control.
 
 ## Implemented Product Scope
@@ -29,6 +23,7 @@ Completed:
 - dashboard screenshots for report/demo use;
 - demo launch and planning pipeline scripts;
 - Week 1-6 progress report drafts;
+- first full explanatory note draft;
 - final presentation outline;
 - submission checklist.
 
@@ -102,15 +97,16 @@ Dashboard screenshots:
 | Area | Coverage |
 | --- | ---: |
 | Technical product | 86% |
-| Capstone submission package | 85% |
+| Capstone submission package | 90% |
 | Demo readiness | 89% |
-| Final report and presentation | 62% |
+| Final report and presentation | 74% |
 
 ## Recommended Next Steps
 
 1. Manually open and inspect Week 3-6 Word reports in Microsoft Word.
 2. Insert selected screenshots into the explanatory note.
-3. Draft the final explanatory note chapters.
+3. Polish the explanatory note draft into the official Word template.
 4. Prepare presentation slides from `docs/presentation_outline.md`.
 5. Rehearse the dashboard demo using `scripts/run_dashboard.ps1`.
-6. Optionally add MLflow tracking only if time remains after report/presentation polish.
+6. Export final Word and presentation artifacts to PDF.
+7. Optionally add MLflow tracking only if time remains after report/presentation polish.
