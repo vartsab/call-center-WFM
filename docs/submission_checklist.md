@@ -35,6 +35,7 @@
 - [x] Expanded literature, market, and competitor review drafted.
 - [x] Word explanatory note draft generated with dashboard screenshots.
 - [x] Presentation outline drafted.
+- [x] PowerPoint presentation draft generated with dashboard screenshots.
 
 ## Validation
 
@@ -52,7 +53,8 @@
 - [ ] Review the generated explanatory note Word draft manually.
 - [ ] Replace title-page placeholders with official student/supervisor details.
 - [ ] Polish bibliography formatting in Word.
-- [ ] Prepare final presentation slides.
+- [ ] Review generated presentation draft manually in Microsoft PowerPoint.
+- [ ] Add official title-page/student/supervisor details to deck.
 - [ ] Run final dashboard demo rehearsal.
 - [ ] Export final documents to PDF.
 
@@ -61,6 +63,6 @@
 | Area | Coverage |
 | --- | ---: |
 | Technical product | 88% |
-| Capstone submission package | 93% |
-| Demo readiness | 91% |
-| Final report and presentation | 82% |
+| Capstone submission package | 95% |
+| Demo readiness | 92% |
+| Final report and presentation | 88% |

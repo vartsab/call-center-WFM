@@ -28,6 +28,7 @@ Completed:
 - Week 1-6 progress report drafts;
 - first full explanatory note draft;
 - Word explanatory note draft with embedded dashboard screenshots;
+- PowerPoint presentation draft with embedded dashboard screenshots;
 - expanded literature, market, and competitor review;
 - final presentation outline;
 - submission checklist.
@@ -102,6 +103,11 @@ Final report draft:
 - `docs/final/Пояснювальна_записка_чернетка.docx`
 - `docs/explanatory_note_draft.md`
 
+Presentation draft:
+
+- `docs/final/Презентація_чернетка.pptx`
+- `docs/presentation_outline.md`
+
 Dashboard screenshots:
 
 - `docs/screenshots/01_executive_summary.png`
@@ -117,16 +123,16 @@ Dashboard screenshots:
 | Area | Coverage |
 | --- | ---: |
 | Technical product | 88% |
-| Capstone submission package | 93% |
-| Demo readiness | 91% |
-| Final report and presentation | 82% |
+| Capstone submission package | 95% |
+| Demo readiness | 92% |
+| Final report and presentation | 88% |
 
 ## Recommended Next Steps
 
 1. Manually open `docs/final/Пояснювальна_записка_чернетка.docx` in Microsoft Word and inspect spacing, page breaks, image sizing, and table wrapping.
 2. Replace title-page placeholders with official student, supervisor, and submission details.
 3. Polish bibliography formatting according to the program's required citation style.
-4. Prepare presentation slides from `docs/presentation_outline.md`.
+4. Manually open `docs/final/Презентація_чернетка.pptx` in Microsoft PowerPoint and inspect image scaling, line breaks, and speaker flow.
 5. Rehearse the dashboard demo using `scripts/run_dashboard.ps1`.
 6. Export final Word and presentation artifacts to PDF.
 7. Optionally add MLflow tracking only if time remains after report/presentation polish.

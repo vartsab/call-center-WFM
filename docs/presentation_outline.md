@@ -106,7 +106,16 @@ Key result:
 - RMSE 49.7414;
 - MAPE 0.2216.
 
-## Slide 9 - Staffing With Erlang C
+## Slide 9 - Model-Aware Planning
+
+Mention:
+
+- forecasting models are registered rather than hardcoded;
+- supported current models: histogram gradient boosting, random forest, gradient boosting, ridge, Poisson;
+- dashboard can compare holdout predictions and future scenarios;
+- planning pipeline supports `-Model`.
+
+## Slide 10 - Staffing With Erlang C
 
 Use screenshot:
 
@@ -120,7 +129,7 @@ Explain:
 - shrinkage: 30%;
 - max occupancy: 85%.
 
-## Slide 10 - Schedule Optimization
+## Slide 11 - Schedule Optimization
 
 Use screenshot:
 
@@ -140,7 +149,7 @@ Key planning insight:
 - 160-agent pool is legal but insufficient for full 24/7 coverage;
 - estimated full-coverage roster: 462 agents.
 
-## Slide 11 - Validation And Tests
+## Slide 12 - Validation And Tests
 
 Mention:
 
@@ -153,7 +162,15 @@ Suggested screenshot:
 
 - `docs/screenshots/07_methodology_validation.png`
 
-## Slide 12 - Limitations
+## Slide 13 - Engineering Positioning
+
+Mention:
+
+- similar WFM systems exist commercially;
+- the project is still engineering work because it creates a working, inspectable product;
+- novelty is in transparency, reproducibility, open-data foundation, and model-aware planning.
+
+## Slide 14 - Limitations
 
 Mention:
 
@@ -162,7 +179,7 @@ Mention:
 - skill-based routing is not yet enforced in scheduling;
 - SQL Server demo is local rather than cloud-hosted.
 
-## Slide 13 - Future Work
+## Slide 15 - Future Work
 
 Possible improvements:
 
@@ -172,7 +189,7 @@ Possible improvements:
 - add portable DuckDB/SQLite demo export;
 - improve schedule optimizer for multi-skill coverage.
 
-## Slide 14 - Conclusion
+## Slide 16 - Conclusion
 
 Closing message:
 
