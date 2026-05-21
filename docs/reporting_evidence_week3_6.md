@@ -150,9 +150,9 @@ Next-step bridge:
 
 - Use the staffing curve as input for a legal roster optimizer and demonstrate schedule feasibility.
 
-## Week 6 - Scheduling, Productization, And Validation
+## Week 6 - Scheduling, Productization, Deployment, And Validation
 
-Recommended report theme: the project became a demonstrable workforce management product.
+Recommended report theme: the project became a demonstrable and externally available workforce management product.
 
 Completed work:
 
@@ -161,6 +161,10 @@ Completed work:
 - generated a January 2026 future schedule only, not historical schedules;
 - added named synthetic agents while keeping numeric agent IDs;
 - redesigned the Scheduling tab around planning KPIs, coverage gap, daily shift mix, roster table, and timeline;
+- added Postgres dashboard source mode for the compact portfolio deployment;
+- added Docker Compose packaging with Streamlit, PostgreSQL, and Caddy;
+- deployed the dashboard to `https://wfm.vartsab.com:8443` while preserving the existing VPN on port `443`;
+- added a simple password gate for the public demo;
 - added pytest configuration and validated the current test suite.
 
 Evidence:
@@ -168,7 +172,14 @@ Evidence:
 - `src/scheduling/agent_roster_optimizer.py`
 - `src/scheduling/christie_names.py`
 - `app/streamlit/app.py`
+- `Dockerfile`
+- `docker-compose.yml`
+- `deploy/README.md`
+- `deploy/postgres/001_schema.sql`
+- `scripts/build_portfolio_seed.py`
+- `scripts/check_demo_readiness.ps1`
 - `docs/scheduling_methodology.md`
+- `docs/deployment_status.md`
 - `docs/future_scheduling_summary.json`
 - `tests/conftest.py`
 
@@ -191,15 +202,27 @@ Testing evidence:
 
 | Test suite result | Value |
 | --- | ---: |
-| Tests collected | 10 |
-| Tests passed | 10 |
+| Tests collected | 13 |
+| Tests passed | 13 |
+
+Deployment evidence:
+
+| Check | Value |
+| --- | --- |
+| Public endpoint | `https://wfm.vartsab.com:8443` |
+| DNS | `wfm.vartsab.com -> 46.225.121.233` |
+| Runtime stack | Docker Compose: Postgres, Streamlit, Caddy |
+| HTTPS certificate | Issued by Caddy through Let's Encrypt |
+| Dashboard data source | Postgres |
+| Browser smoke test | Password login passed; dashboard loaded; no console errors |
+| Seed row count | `dashboard_volume_30min`: 252,790 rows |
 
 Risks and limitations:
 
 - The approved 160-person pool cannot fully cover the full 24/7 Erlang demand curve.
 - Skill-based routing is not yet enforced in the optimizer.
-- Product packaging still needs a final decision: simple local demo bundle, MLflow-backed model tracking, or Docker-style orchestration.
+- The public deployment uses compact Postgres seed tables, not the full SQL Server warehouse.
 
 Next-step bridge:
 
-- Choose the demonstration packaging approach and prepare final report figures/screenshots.
+- Prepare final report figures/screenshots and GitHub repository handoff.

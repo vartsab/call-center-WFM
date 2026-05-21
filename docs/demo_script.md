@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This script turns the project into a clear capstone product demonstration. The goal is to show one coherent system: SQL Server warehouse, Streamlit dashboard, forecasting, Erlang C staffing, and legal roster optimization.
+This script turns the project into a clear capstone product demonstration. The goal is to show one coherent system: SQL Server warehouse, Streamlit dashboard, forecasting, Erlang C staffing, legal roster optimization, and compact public deployment.
 
 ## Prerequisites
 
@@ -11,6 +11,13 @@ This script turns the project into a clear capstone product demonstration. The g
 - Generated planning artifacts exist under `data/processed/`.
 - Python dependencies from `requirements.txt` are installed.
 - Streamlit can be launched with `python -m streamlit`.
+
+For the public portfolio demo:
+
+- `wfm.vartsab.com` points to the VPS IP.
+- Docker Compose is running Postgres, Streamlit, and Caddy on the VPS.
+- The dashboard is available at `https://wfm.vartsab.com:8443`.
+- The demo password is set in the private `deploy/env.local` file.
 
 ## Launch
 
@@ -24,6 +31,12 @@ Open:
 
 ```text
 http://localhost:8501/
+```
+
+Public demo URL:
+
+```text
+https://wfm.vartsab.com:8443
 ```
 
 If the January 2026 planning artifacts need to be rebuilt:
@@ -105,6 +118,16 @@ Points to mention:
 - model outputs and staffing outputs are documented;
 - assumptions and limitations are explicit.
 
+### 8. Public Deployment
+
+If showing the portfolio version, open `https://wfm.vartsab.com:8443` and log in with the demo password.
+
+Points to mention:
+
+- the public deployment uses compact Postgres seed tables rather than the full SQL Server warehouse;
+- Caddy provides HTTPS on port `8443` because the VPS keeps an existing VPN on port `443`;
+- the deployment is documented in `deploy/README.md` and `docs/deployment_status.md`.
+
 ## Screenshot List
 
 Capture these figures for the report:
@@ -135,11 +158,12 @@ docs/screenshots/
 | Forecasting and evaluation | 85% |
 | Erlang C staffing | 90% |
 | Schedule optimization | 75% |
-| Streamlit product dashboard | 84% |
-| Documentation evidence | 80% |
-| Demo packaging | 85% |
-| Final report and presentation | 55% |
+| Streamlit product dashboard | 96% |
+| Documentation evidence | 94% |
+| Demo packaging | 96% |
+| Portfolio deployment | 96% |
+| Final report and presentation | 88% |
 
-Overall technical product coverage: approximately 86%.
+Overall technical product coverage: approximately 96%.
 
-Overall capstone submission package coverage: approximately 80%.
+Overall capstone submission package coverage: approximately 95%.

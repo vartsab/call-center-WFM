@@ -19,6 +19,23 @@ DOCS_DIR = ROOT / "docs"
 SQL_CACHE_VERSION = "demo_aggregated_20260520"
 
 
+POSTGRES_TABLES = {
+    "volume_30min": "dashboard_volume_30min",
+    "forecasting_input": "dashboard_forecasting_input",
+    "agent_performance": "dashboard_agent_performance",
+    "agent_dimension": "dashboard_agent_dimension",
+    "baseline_forecast": "forecast_baseline",
+    "feature_forecast": "forecast_best_holdout",
+    "model_holdout_predictions": "forecast_model_holdout_predictions",
+    "future_forecast": "future_forecast",
+    "future_model_scenarios": "future_model_scenario_forecasts",
+    "staffing_requirements": "staffing_requirements",
+    "model_staffing_scenarios": "model_staffing_scenarios",
+    "optimized_schedule": "optimized_schedule",
+    "schedule_coverage": "schedule_coverage",
+}
+
+
 SQL_QUERIES = {
     "volume_30min": """
         SELECT
@@ -148,6 +165,41 @@ def sql_connection_string() -> str:
     )
 
 
+def postgres_connection_string() -> str:
+    return os.getenv("DATABASE_URL", "")
+
+
+def dashboard_source_mode() -> str:
+    mode = os.getenv("CALLCENTER_DASHBOARD_SOURCE", "auto").strip().lower()
+    if mode not in {"auto", "sql", "csv", "postgres"}:
+        return "auto"
+    return mode
+
+
+def password_is_configured() -> bool:
+    return bool(os.getenv("WFM_DEMO_PASSWORD", "").strip())
+
+
+def authenticate() -> bool:
+    expected_password = os.getenv("WFM_DEMO_PASSWORD", "").strip()
+    if not expected_password:
+        return True
+    if st.session_state.get("authenticated"):
+        return True
+
+    st.title("Call Center Workforce Management")
+    with st.form("demo_password_form"):
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Enter")
+
+    if submitted:
+        if password == expected_password:
+            st.session_state["authenticated"] = True
+            st.rerun()
+        st.error("Incorrect password.")
+    return False
+
+
 @st.cache_resource(show_spinner=False)
 def get_sql_connection() -> Any | None:
     try:
@@ -157,6 +209,22 @@ def get_sql_connection() -> Any | None:
 
     try:
         return pyodbc.connect(sql_connection_string(), timeout=5)
+    except Exception:
+        return None
+
+
+@st.cache_resource(show_spinner=False)
+def get_postgres_connection() -> Any | None:
+    connection_string = postgres_connection_string()
+    if not connection_string:
+        return None
+    try:
+        import psycopg
+        from psycopg.rows import dict_row
+    except ImportError:
+        return None
+    try:
+        return psycopg.connect(connection_string, row_factory=dict_row)
     except Exception:
         return None
 
@@ -173,6 +241,18 @@ def read_sql_cached(query_key: str, cache_version: str) -> pd.DataFrame:
     return pd.DataFrame.from_records(rows, columns=columns)
 
 
+@st.cache_data(show_spinner=False)
+def read_postgres_cached(table_key: str, cache_version: str) -> pd.DataFrame:
+    table_name = POSTGRES_TABLES[table_key]
+    connection = get_postgres_connection()
+    if connection is None:
+        return pd.DataFrame()
+    with connection.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM {table_name}")
+        rows = cursor.fetchall()
+    return pd.DataFrame.from_records(rows)
+
+
 def read_csv(path: Path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
@@ -181,6 +261,10 @@ def read_csv(path: Path) -> pd.DataFrame:
 
 def read_sql(query_key: str) -> pd.DataFrame:
     return read_sql_cached(query_key, SQL_CACHE_VERSION)
+
+
+def read_postgres(table_key: str) -> pd.DataFrame:
+    return read_postgres_cached(table_key, SQL_CACHE_VERSION)
 
 
 @st.cache_data(show_spinner=False)
@@ -194,6 +278,14 @@ def read_first_csv(paths: list[Path]) -> pd.DataFrame:
         if not data.empty:
             return data
     return pd.DataFrame()
+
+
+def read_postgres_or_first_csv(table_key: str, paths: list[Path]) -> pd.DataFrame:
+    if dashboard_source_mode() == "postgres":
+        data = read_postgres(table_key)
+        if not data.empty:
+            return data
+    return read_first_csv(paths)
 
 
 def model_label(model_name: str) -> str:
@@ -216,6 +308,15 @@ def load_sql_data() -> dict[str, pd.DataFrame]:
         "forecasting_input": read_sql("forecasting_input"),
         "agent_performance": read_sql("agent_performance"),
         "agent_dimension": read_sql("agent_dimension"),
+    }
+
+
+def load_postgres_data() -> dict[str, pd.DataFrame]:
+    return {
+        "volume_30min": read_postgres("volume_30min"),
+        "forecasting_input": read_postgres("forecasting_input"),
+        "agent_performance": read_postgres("agent_performance"),
+        "agent_dimension": read_postgres("agent_dimension"),
     }
 
 
@@ -279,6 +380,10 @@ def normalize_sql_data(data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]
     }
 
 
+def normalize_dashboard_data(data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+    return normalize_sql_data(data)
+
+
 def csv_to_volume(calls: pd.DataFrame) -> pd.DataFrame:
     if calls.empty:
         return pd.DataFrame()
@@ -316,14 +421,22 @@ def csv_to_agent_performance(calls: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_data() -> tuple[str, dict[str, pd.DataFrame]]:
-    sql_data = normalize_sql_data(load_sql_data())
-    if not sql_data["volume_30min"].empty:
-        return "SQL Server", sql_data
+    source_mode = dashboard_source_mode()
+    if source_mode == "postgres":
+        postgres_data = normalize_dashboard_data(load_postgres_data())
+        if not postgres_data["volume_30min"].empty:
+            return "Postgres", postgres_data
+
+    if source_mode != "csv":
+        sql_data = normalize_sql_data(load_sql_data())
+        if not sql_data["volume_30min"].empty:
+            return "SQL Server", sql_data
 
     csv_data = load_csv_data()
     calls = csv_data["calls"]
+    source = "CSV sample" if source_mode == "csv" else "CSV sample (SQL unavailable)"
     return (
-        "CSV sample",
+        source,
         {
             "volume_30min": csv_to_volume(calls),
             "forecasting_input": csv_data["forecasting_input"],
@@ -351,6 +464,20 @@ def format_compact_number(value: float) -> str:
     if absolute >= 1_000:
         return f"{value / 1_000:.1f}K"
     return f"{value:,.0f}"
+
+
+def render_plotly_chart(fig: Any) -> None:
+    try:
+        st.plotly_chart(fig, width="stretch")
+    except TypeError:
+        st.plotly_chart(fig, use_container_width=True)
+
+
+def render_dataframe(data: pd.DataFrame, **kwargs: Any) -> None:
+    try:
+        st.dataframe(data, width="stretch", **kwargs)
+    except TypeError:
+        st.dataframe(data, use_container_width=True, **kwargs)
 
 
 def render_sidebar(source: str, volume: pd.DataFrame) -> tuple[list[str], tuple[Any, Any]]:
@@ -400,6 +527,10 @@ def apply_filters(
 
 
 def render_executive_summary(volume: pd.DataFrame) -> None:
+    if volume.empty:
+        st.info("Historical call volume data is not available.")
+        return
+
     total_calls = volume["offered_calls"].sum() if not volume.empty else 0
     answered_calls = volume["answered_calls"].sum() if not volume.empty else 0
     abandoned_calls = volume["abandoned_calls"].sum() if not volume.empty else 0
@@ -441,16 +572,20 @@ def render_executive_summary(volume: pd.DataFrame) -> None:
     with left:
         fig = px.line(daily, x="calendar_date", y="offered_calls", markers=True)
         fig.update_layout(title="Daily offered calls", yaxis_title="Calls", xaxis_title=None)
-        st.plotly_chart(fig, width="stretch")
+        render_plotly_chart(fig)
     with right:
         fig = px.bar(category, x="offered_calls", y="service_category", orientation="h")
         fig.update_layout(title="Service category mix", xaxis_title="Calls", yaxis_title=None)
-        st.plotly_chart(fig, width="stretch")
+        render_plotly_chart(fig)
 
     st.caption(f"Weighted service level: {service_level:.1%}")
 
 
 def render_historical_trends(volume: pd.DataFrame) -> None:
+    if volume.empty:
+        st.info("Historical trend data is not available.")
+        return
+
     interval = (
         volume.groupby("time_id", as_index=False)
         .agg(
@@ -481,7 +616,7 @@ def render_historical_trends(volume: pd.DataFrame) -> None:
         yaxis2={"title": "SLA rate", "overlaying": "y", "side": "right", "tickformat": ".0%"},
         legend={"orientation": "h"},
     )
-    st.plotly_chart(fig, width="stretch")
+    render_plotly_chart(fig)
 
     heatmap = volume.groupby(["calendar_date", "time_id"], as_index=False).agg(
         offered_calls=("offered_calls", "sum")
@@ -491,7 +626,7 @@ def render_historical_trends(volume: pd.DataFrame) -> None:
     pivot = heatmap.pivot(index="calendar_date", columns="time_label", values="offered_calls").fillna(0)
     fig = px.imshow(pivot, aspect="auto", labels={"color": "Calls"})
     fig.update_layout(title="30-minute call volume heatmap", xaxis_title=None, yaxis_title=None)
-    st.plotly_chart(fig, width="stretch")
+    render_plotly_chart(fig)
 
 
 def render_forecasting(forecasting: pd.DataFrame) -> None:
@@ -523,29 +658,38 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         st.subheader("Model comparison")
         display_rows = model_rows.copy()
         display_rows["model"] = display_rows["model"].map(model_label)
-        st.dataframe(display_rows, width="stretch", hide_index=True)
+        render_dataframe(display_rows, hide_index=True)
 
-    baseline = read_first_csv(
+    baseline = read_postgres_or_first_csv(
+        "baseline_forecast",
         [
             DATA_DIR / "full_baseline_forecast.csv",
             DATA_DIR / "baseline_forecast_sample.csv",
         ]
     )
-    feature_forecast = read_first_csv(
+    feature_forecast = read_postgres_or_first_csv(
+        "feature_forecast",
         [
             DATA_DIR / "full_sklearn_best_forecast.csv",
             DATA_DIR / "sklearn_best_forecast_sample.csv",
         ]
     )
-    future_forecast = read_first_csv([DATA_DIR / "future_sklearn_forecast.csv"])
-    model_predictions = read_first_csv(
+    future_forecast = read_postgres_or_first_csv(
+        "future_forecast",
+        [DATA_DIR / "future_sklearn_forecast.csv"],
+    )
+    model_predictions = read_postgres_or_first_csv(
+        "model_holdout_predictions",
         [
             DATA_DIR / "full_model_holdout_predictions.csv",
             DATA_DIR / "model_holdout_predictions.csv",
             DATA_DIR / "sklearn_model_holdout_predictions_sample.csv",
         ]
     )
-    future_model_scenarios = read_first_csv([DATA_DIR / "future_model_scenario_forecasts.csv"])
+    future_model_scenarios = read_postgres_or_first_csv(
+        "future_model_scenarios",
+        [DATA_DIR / "future_model_scenario_forecasts.csv"],
+    )
     if baseline.empty:
         st.info("Baseline forecast output is not available.")
         return
@@ -618,7 +762,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
             )
         )
     fig.update_layout(title="Forecast holdout period", xaxis_title=None, yaxis_title="Calls")
-    st.plotly_chart(fig, width="stretch")
+    render_plotly_chart(fig)
 
     if not model_rows.empty:
         error_rows = model_rows.melt(
@@ -630,7 +774,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         error_rows["model"] = error_rows["model"].map(model_label)
         fig = px.bar(error_rows, x="model", y="value", color="metric", barmode="group")
         fig.update_layout(title="Holdout error by model", xaxis_title=None, yaxis_title="Error")
-        st.plotly_chart(fig, width="stretch")
+        render_plotly_chart(fig)
 
     if not future_forecast.empty:
         future_forecast["interval_start_datetime"] = pd.to_datetime(
@@ -681,7 +825,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
                 .sort_values("avg_calls", ascending=False)
             )
             summary_by_model["model"] = summary_by_model["model"].map(model_label)
-            st.dataframe(summary_by_model, width="stretch", hide_index=True)
+            render_dataframe(summary_by_model, hide_index=True)
         else:
             fig = px.line(
                 future_forecast,
@@ -689,7 +833,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
                 y="predicted_call_volume",
             )
         fig.update_layout(title="Future 30-minute call forecast", xaxis_title=None, yaxis_title="Calls")
-        st.plotly_chart(fig, width="stretch")
+        render_plotly_chart(fig)
 
     if not forecasting.empty:
         top = (
@@ -699,7 +843,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         )
         fig = px.bar(top, x="service_category", y="call_volume")
         fig.update_layout(title="Forecasting input by category", xaxis_title=None, yaxis_title="Calls")
-        st.plotly_chart(fig, width="stretch")
+        render_plotly_chart(fig)
 
 
 def render_staffing() -> None:
@@ -710,7 +854,8 @@ def render_staffing() -> None:
             DOCS_DIR / "staffing_requirements_summary.json",
         ]
     )
-    staffing = read_first_csv(
+    staffing = read_postgres_or_first_csv(
+        "staffing_requirements",
         [
             DATA_DIR / "future_staffing_requirements.csv",
             DATA_DIR / "full_staffing_requirements.csv",
@@ -768,7 +913,7 @@ def render_staffing() -> None:
         yaxis2={"title": "Calls", "overlaying": "y", "side": "right"},
         legend={"orientation": "h"},
     )
-    st.plotly_chart(fig, width="stretch")
+    render_plotly_chart(fig)
 
     scenario_rows = pd.DataFrame(scenario_summary.get("models", []))
     if not scenario_rows.empty:
@@ -785,7 +930,7 @@ def render_staffing() -> None:
             ]
         ].copy()
         scenario_display["model"] = scenario_display["model"].map(model_label)
-        st.dataframe(scenario_display, width="stretch", hide_index=True)
+        render_dataframe(scenario_display, hide_index=True)
         scenario_plot = scenario_display.melt(
             id_vars="model",
             value_vars=["peak_shrinkage_adjusted_agents", "estimated_full_coverage_agents"],
@@ -794,7 +939,7 @@ def render_staffing() -> None:
         )
         fig = px.bar(scenario_plot, x="model", y="agents", color="metric", barmode="group")
         fig.update_layout(title="Staffing impact by forecast model", xaxis_title=None, yaxis_title="Agents")
-        st.plotly_chart(fig, width="stretch")
+        render_plotly_chart(fig)
 
     display = staffing[
         [
@@ -808,7 +953,7 @@ def render_staffing() -> None:
             "service_level_probability",
         ]
     ].copy()
-    st.dataframe(display, width="stretch", hide_index=True)
+    render_dataframe(display, hide_index=True)
 
 
 def render_scheduling() -> None:
@@ -819,14 +964,16 @@ def render_scheduling() -> None:
             DOCS_DIR / "scheduling_summary.json",
         ]
     )
-    schedule = read_first_csv(
+    schedule = read_postgres_or_first_csv(
+        "optimized_schedule",
         [
             DATA_DIR / "future_optimized_schedule.csv",
             DATA_DIR / "full_optimized_schedule.csv",
             DATA_DIR / "optimized_schedule_sample.csv",
         ]
     )
-    coverage = read_first_csv(
+    coverage = read_postgres_or_first_csv(
+        "schedule_coverage",
         [
             DATA_DIR / "future_schedule_coverage.csv",
             DATA_DIR / "full_schedule_coverage.csv",
@@ -898,7 +1045,7 @@ def render_scheduling() -> None:
     )
     fig.update_layout(title="Required vs scheduled coverage", xaxis_title=None, yaxis_title="Agents")
     fig.update_layout(yaxis2={"title": "Gap", "overlaying": "y", "side": "right"})
-    st.plotly_chart(fig, width="stretch")
+    render_plotly_chart(fig)
 
     dates = sorted(schedule["shift_date"].dropna().unique())
     selected_date = st.selectbox("Schedule date", dates)
@@ -919,7 +1066,7 @@ def render_scheduling() -> None:
     if not shift_mix.empty:
         fig = px.bar(shift_mix, x="shift_window", y="agent_count")
         fig.update_layout(title="Daily shift mix", xaxis_title=None, yaxis_title="Agents")
-        st.plotly_chart(fig, width="stretch")
+        render_plotly_chart(fig)
 
     if not day_coverage.empty:
         fig = go.Figure()
@@ -948,7 +1095,7 @@ def render_scheduling() -> None:
             )
         )
         fig.update_layout(title="Selected-day coverage", xaxis_title=None, yaxis_title="Agents")
-        st.plotly_chart(fig, width="stretch")
+        render_plotly_chart(fig)
 
     shift_options = ["All"] + shift_mix["shift_window"].tolist()
     selected_shift = st.selectbox("Shift window", shift_options)
@@ -969,7 +1116,7 @@ def render_scheduling() -> None:
     ].copy()
     roster_display["break_start_datetime"] = roster_display["break_start_datetime"].dt.strftime("%H:%M")
     roster_display["break_end_datetime"] = roster_display["break_end_datetime"].dt.strftime("%H:%M")
-    st.dataframe(roster_display, width="stretch", hide_index=True)
+    render_dataframe(roster_display, hide_index=True)
 
     with st.expander("Daily timeline"):
         timeline = px.timeline(
@@ -987,7 +1134,7 @@ def render_scheduling() -> None:
             height=min(900, max(360, len(filtered_day_schedule) * 18)),
             showlegend=True,
         )
-        st.plotly_chart(timeline, width="stretch")
+        render_plotly_chart(timeline)
 
 
 def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame) -> None:
@@ -1024,13 +1171,13 @@ def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame
         )
         fig = px.bar(skill_mix, x="skill_group", y="agent_count")
         fig.update_layout(title="Agent pool by skill group", xaxis_title=None, yaxis_title="Agents")
-        st.plotly_chart(fig, width="stretch")
+        render_plotly_chart(fig)
 
     top_agents = grouped.head(20)
     fig = px.bar(top_agents, x="agent_name", y="handled_calls", color="avg_handle_time_sec")
     fig.update_layout(title="Top agents by handled calls", xaxis_title=None, yaxis_title="Calls")
-    st.plotly_chart(fig, width="stretch")
-    st.dataframe(top_agents, width="stretch", hide_index=True)
+    render_plotly_chart(fig)
+    render_dataframe(top_agents, hide_index=True)
 
 
 def render_methodology() -> None:
@@ -1061,6 +1208,9 @@ def render_methodology() -> None:
 
 def main() -> None:
     page_config()
+    if not authenticate():
+        return
+
     source, data = load_data()
     volume = data["volume_30min"]
 

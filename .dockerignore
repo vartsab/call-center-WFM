@@ -1,0 +1,17 @@
+.git
+.venv
+__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+data/raw
+data/external
+data/processed
+logs
+notebooks
+docs/final
+docs/screenshots
+deploy/seed
+*.docx
+*.pptx
+*.log

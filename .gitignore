@@ -23,6 +23,8 @@ sql/raw/*_generated.sql
 
 # Local app/runtime files
 .streamlit/secrets.toml
+deploy/env.local
+deploy_bundle.tgz
 *.log
 python
 

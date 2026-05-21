@@ -192,7 +192,7 @@ Scheduling є окремою задачею operations research. Якщо foreca
 
 Для data layer використано публічний dataset NYC 311 Service Requests. Він містить реальні timestamps, complaint types, borough, statuses та інші поля, які відображають міський сервісний попит. Водночас dataset не містить call-center operational fields, тому такі поля як talk time, hold time, ACW, abandonment, SLA і agent assignment створюються синтетично.
 
-Для database layer обрано Microsoft SQL Server. Попри те, що для безкоштовного web deployment простіше було б використати PostgreSQL або SQLite, SQL Server є доречним для інженерного проєкту, оскільки він часто використовується в корпоративній аналітиці, підтримує надійне індексування, views, batch loading і зрозумілу star schema модель.
+Для database layer обрано Microsoft SQL Server. Попри те, що для безкоштовного web deployment простіше було б використати PostgreSQL або SQLite, SQL Server є доречним для інженерного проєкту, оскільки він часто використовується в корпоративній аналітиці, підтримує надійне індексування, views, batch loading і зрозумілу star schema модель. Для публічної portfolio-демонстрації додано compact PostgreSQL runtime: dashboard читає підготовлені analytical seed tables, а повний SQL Server warehouse залишається canonical data engineering layer.
 
 Для forecasting використано scikit-learn model comparison. Моделі оцінювалися на holdout-періоді за MAE, RMSE і MAPE. Для staffing застосовано Erlang C, оскільки це стандартний математичний підхід для inbound queue planning. Для scheduling застосовано OR-Tools CP-SAT, що дозволяє явно задавати обмеження та objective function.
 
@@ -213,6 +213,7 @@ Scheduling є окремою задачею operations research. Якщо foreca
 - окреме розділення historical evaluation і future workforce planning;
 - explicit reporting of coverage gap для constrained 160-agent scenario;
 - model registry, який дозволяє додавати нові forecasting models і порівнювати їх у dashboard.
+- публічний portfolio deployment через Docker Compose, PostgreSQL, Streamlit і Caddy HTTPS.
 
 Потенційний розвиток продукту:
 
@@ -224,7 +225,7 @@ Scheduling є окремою задачею operations research. Якщо foreca
 - додати agent-centric constraints: preferences, fairness, consecutive working days, shift bidding;
 - додати scenario planning для SLA, shrinkage, roster size і hours of operation;
 - додати MLflow для experiment tracking та model registry;
-- підготувати cloud-friendly deployment на PostgreSQL або managed database;
+- розширити deployment до managed database, monitoring і scheduled backups, якщо продукт виходитиме за межі portfolio demo;
 - додати automated report export для WFM manager.
 
 ## 2.7. Сучасні проблеми розробки
@@ -377,7 +378,7 @@ Streamlit dashboard має вкладки:
 - Agent Performance;
 - Methodology.
 
-Dashboard читає SQL Server views, а для локальної демонстрації може використовувати generated CSV artifacts.
+Dashboard читає SQL Server views, для локальної демонстрації може використовувати generated CSV artifacts, а для VPS portfolio deployment читає compact PostgreSQL seed tables. Публічна версія доступна через Caddy HTTPS із простим password gate.
 
 ## 3.6. Стратегії тестування
 
@@ -389,9 +390,10 @@ Dashboard читає SQL Server views, а для локальної демонс
 - тестування Erlang C calculation;
 - тестування holiday feature generation;
 - тестування schedule optimizer constraints;
-- dashboard screenshot validation для demo package.
+- dashboard screenshot validation для demo package;
+- public deployment smoke test.
 
-Автоматичні тести виконуються через pytest. Поточний результат: 10 tests passed.
+Автоматичні тести виконуються через pytest. Поточний результат: 13 tests passed.
 
 ## 3.7. Виклики у проєктуванні
 
@@ -402,7 +404,8 @@ Dashboard читає SQL Server views, а для локальної демонс
 - коректне пояснення synthetic operational fields;
 - вибір моделі прогнозування на основі повної історії, а не sample;
 - відокремлення forecast evaluation від future schedule planning;
-- побудова schedule, який є legal, але чесно показує coverage gap.
+- побудова schedule, який є legal, але чесно показує coverage gap;
+- публічне розгортання продукту без перенесення повного SQL Server warehouse.
 
 ## Висновки до третього розділу
 
@@ -543,6 +546,8 @@ Dashboard дає 360-degree view of call center performance:
 - agent performance;
 - methodology and validation evidence.
 
+Dashboard також має public portfolio mode: компактна Postgres database на VPS містить seed tables для основних analytical views, а Caddy публікує Streamlit через HTTPS endpoint `https://wfm.vartsab.com:8443`. Це дозволяє демонструвати продукт поза локальним комп'ютером без хостингу повного SQL Server warehouse.
+
 Для фінальної версії документа потрібно вставити screenshots з папки `docs/screenshots`.
 
 ![Рисунок 4.5. Agent performance dashboard](screenshots/06_agent_performance.png)
@@ -561,23 +566,24 @@ Dashboard дає 360-degree view of call center performance:
 | Service level помилково можна сприйняти як agent metric | Метрика винесена на queue/service/staffing level |
 | Historical schedule не має практичного сенсу | Побудовано future January 2026 schedule |
 | 160-agent pool не покриває full demand | Dashboard явно показує coverage gap і full-coverage roster estimate |
+| Full SQL Server warehouse складно дешево розгорнути у cloud | Для portfolio demo створено compact PostgreSQL seed runtime |
 
 Можливі напрями розвитку:
 
 - додати skill-based routing constraints у schedule optimizer;
 - реалізувати MLflow tracking для експериментів;
-- додати PostgreSQL або cloud-friendly deployment mode;
+- додати monitoring, scheduled backups і managed database для довгострокового deployment;
 - покращити synthetic assumptions на основі реальних call-center benchmarks;
 - додати scenario planning для різних SLA, shrinkage і roster sizes;
-- створити фінальну presentation-ready deployment package.
+- створити automated report export для WFM manager.
 
 ## Висновки до четвертого розділу
 
-У четвертому розділі представлено результати реалізації. Проєкт досягнув стану working product: дані завантажені, warehouse побудований, dashboard працює, forecasting model обрана на основі метрик, staffing розраховано, schedule сформовано. Основним незакритим етапом залишається фінальне оформлення пояснювальної записки та презентації.
+У четвертому розділі представлено результати реалізації. Проєкт досягнув стану working product: дані завантажені, warehouse побудований, dashboard працює, forecasting model обрана на основі метрик, staffing розраховано, schedule сформовано, а portfolio deployment доступний зовні через VPS. Основним незакритим етапом залишається фінальне ручне оформлення пояснювальної записки та презентації.
 
 # Розділ 5. Висновки та рекомендації
 
-У межах магістерського інженерного проєкту створено end-to-end систему для call center analytics and workforce optimization. Проєкт пройшов шлях від вибору dataset до локального data product, який підтримує historical reporting, forecasting, staffing calculation і schedule generation.
+У межах магістерського інженерного проєкту створено end-to-end систему для call center analytics and workforce optimization. Проєкт пройшов шлях від вибору dataset до data product, який підтримує historical reporting, forecasting, staffing calculation, schedule generation і public portfolio demonstration.
 
 Основні результати:
 
@@ -592,9 +598,11 @@ Dashboard дає 360-degree view of call center performance:
 - створено January 2026 future forecast;
 - розраховано Erlang C staffing requirements;
 - сформовано legal 160-agent schedule;
+- створено compact PostgreSQL deployment mode;
+- розгорнуто public dashboard через Docker Compose і Caddy HTTPS;
 - підготовлено screenshots, demo script, methodology documents і submission checklist.
 
-Цілі проєкту досягнуто на рівні working MVP / local analytical product. Система демонструє повний predictive-to-prescriptive workflow: від історичного попиту до майбутнього плану покриття. Окремо важливо, що результат не приховує operational gap: approved 160-agent pool є юридично планованим, але не достатнім для повного покриття 24/7 required staffing curve. Це робить dashboard корисним не лише як демонстраційний інструмент, а і як planning decision support system.
+Цілі проєкту досягнуто на рівні working MVP / portfolio analytical product. Система демонструє повний predictive-to-prescriptive workflow: від історичного попиту до майбутнього плану покриття. Окремо важливо, що результат не приховує operational gap: approved 160-agent pool є юридично планованим, але не достатнім для повного покриття 24/7 required staffing curve. Це робить dashboard корисним не лише як демонстраційний інструмент, а і як planning decision support system.
 
 Обмеження проєкту:
 
@@ -602,7 +610,8 @@ Dashboard дає 360-degree view of call center performance:
 - operational metrics є synthetic;
 - handle time and shrinkage assumptions не походять із реального contact center;
 - schedule constraints спрощують трудове законодавство;
-- dashboard працює як local product, а не production cloud deployment.
+- public deployment використовує compact seed tables, а не повний SQL Server warehouse;
+- dashboard має portfolio-grade hardening, але не є production SaaS із SLA, monitoring і backup policy.
 
 Рекомендації:
 
@@ -610,7 +619,8 @@ Dashboard дає 360-degree view of call center performance:
 - у фінальній презентації чітко розділяти real public demand і synthetic operational enrichment;
 - показувати forecasting, staffing і scheduling як послідовний decision pipeline;
 - підкреслити, що service level є queue/staffing metric, а не agent-level metric;
-- розглядати MLflow або інший experiment tracking layer як optional future improvement після завершення основного submission package.
+- розглядати MLflow або інший experiment tracking layer як optional future improvement після завершення основного submission package;
+- перед широким поширенням portfolio link змінити demo password і визначити, чи потрібен uptime monitoring.
 
 ## Бібліографія
 

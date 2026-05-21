@@ -156,7 +156,8 @@ Mention:
 - SQL reconciliation;
 - model metrics;
 - schedule constraint validation;
-- test suite result: 10 passed.
+- public deployment smoke test;
+- test suite result: 13 passed.
 
 Suggested screenshot:
 
@@ -177,7 +178,7 @@ Mention:
 - 311 records are public-service demand records, not guaranteed phone calls;
 - operational metrics are synthetic;
 - skill-based routing is not yet enforced in scheduling;
-- SQL Server demo is local rather than cloud-hosted.
+- public deployment uses compact Postgres seed tables, not the full SQL Server warehouse.
 
 ## Slide 15 - Future Work
 
@@ -186,7 +187,7 @@ Possible improvements:
 - add skill-based scheduling;
 - add scenario controls in Streamlit;
 - add MLflow model tracking;
-- add portable DuckDB/SQLite demo export;
+- add monitoring, backups, and managed database deployment if the demo becomes long-running;
 - improve schedule optimizer for multi-skill coverage.
 
 ## Slide 16 - Conclusion

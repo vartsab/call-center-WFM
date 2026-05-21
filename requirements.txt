@@ -1,13 +1,9 @@
 pandas==2.1.4
 numpy==1.26.4
 scikit-learn==1.4.2
-xgboost
-prophet
 streamlit
 plotly
-sqlalchemy
 pyodbc
+psycopg[binary]
 ortools==9.9.3963
-pyyaml
-python-dotenv
 pytest

@@ -147,9 +147,18 @@ SLIDES = [
             "SQL row counts reconcile from raw table to fact table and dashboard views.",
             "Forecasting models are compared on a 90-day holdout period.",
             "Schedule validation shows zero daily-shift, weekly-limit and rest violations.",
-            "Automated tests: 10 passed.",
+            "Automated tests: 13 passed; public dashboard smoke test passed.",
         ],
         image="07_methodology_validation.png",
+    ),
+    Slide(
+        title="Public portfolio deployment",
+        bullets=[
+            "Public URL: https://wfm.vartsab.com:8443.",
+            "Docker Compose runs PostgreSQL, Streamlit and Caddy on a small VPS.",
+            "Caddy provides HTTPS on port 8443 while the existing VPN keeps port 443.",
+            "The deployed dashboard uses compact Postgres seed tables and a simple password gate.",
+        ],
     ),
     Slide(
         title="Why this is an engineering project",
@@ -166,7 +175,7 @@ SLIDES = [
             "311 records are public-service demand records, not guaranteed calls.",
             "Operational call-center fields are synthetic and must be presented as assumptions.",
             "Skill-based routing is not yet enforced in the schedule optimizer.",
-            "The current SQL Server demo is local rather than cloud-hosted.",
+            "The public VPS demo uses compact seed tables, not the full SQL Server warehouse.",
         ],
     ),
     Slide(
@@ -175,7 +184,7 @@ SLIDES = [
             "Compare Erlang C with Erlang A and discrete-event simulation.",
             "Add intraday re-forecasting and scenario controls.",
             "Extend the optimizer to multi-skill scheduling and agent preferences.",
-            "Optional productization: MLflow tracking and portable/cloud-friendly deployment.",
+            "Optional productization: MLflow tracking, managed database, monitoring and backups.",
         ],
     ),
     Slide(
@@ -183,7 +192,7 @@ SLIDES = [
         bullets=[
             "The project demonstrates a complete path from public demand data to workforce planning decisions.",
             "Implemented layers: SQL warehouse, dashboard, forecasting, staffing and schedule optimization.",
-            "The result is a working local analytical product and a defensible capstone engineering artifact.",
+            "The result is a working analytical product, public portfolio demo and defensible capstone engineering artifact.",
         ],
     ),
 ]

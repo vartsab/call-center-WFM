@@ -16,6 +16,9 @@
 - [x] Legal 160-agent schedule generated.
 - [x] Dashboard screenshots captured.
 - [x] Demo scripts added.
+- [x] Compact Postgres portfolio deployment created.
+- [x] Public VPS dashboard deployed at `https://wfm.vartsab.com:8443`.
+- [x] Dashboard password gate enabled.
 
 ## Documentation
 
@@ -32,6 +35,9 @@
 - [x] Productization plan documented.
 - [x] Technology choice note documented.
 - [x] Demo script documented.
+- [x] Deployment runbook documented.
+- [x] Verified deployment status documented.
+- [x] Repository handoff documented.
 - [x] First full explanatory note draft prepared.
 - [x] Expanded literature, market, and competitor review drafted.
 - [x] Word explanatory note draft generated with dashboard screenshots.
@@ -45,7 +51,8 @@
 - [x] Staffing summary recorded.
 - [x] Scheduling summary recorded.
 - [x] Roster rules validated.
-- [x] Tests passing: 10 passed.
+- [x] Public dashboard smoke-tested.
+- [x] Tests passing: 13 passed.
 
 ## Still Needed Before Final Submission
 
@@ -56,14 +63,17 @@
 - [ ] Polish bibliography formatting in Word.
 - [ ] Review generated presentation draft manually in Microsoft PowerPoint.
 - [ ] Add official title-page/student/supervisor details to deck.
-- [ ] Run final dashboard demo rehearsal.
+- [x] Run final public dashboard smoke test.
+- [ ] Run final narrated dashboard demo rehearsal.
 - [ ] Export final documents to PDF.
+- [ ] Commit and push final repository package after review.
 
 ## Current Coverage Estimate
 
 | Area | Coverage |
 | --- | ---: |
-| Technical product | 91% |
+| Technical product | 96% |
 | Capstone submission package | 95% |
-| Demo readiness | 93% |
+| Portfolio deployment readiness | 96% |
+| Demo readiness | 97% |
 | Final report and presentation | 88% |

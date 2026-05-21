@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-05-20
+Last updated: 2026-05-21
 
 ## Repository State
 
@@ -15,6 +15,11 @@ Completed:
 - full synthetic call-center warehouse load;
 - dimensional tables and analytics views;
 - Streamlit dashboard with SQL Server access and generated-artifact support;
+- Streamlit dashboard with Postgres deployment mode and password protection;
+- compact portfolio seed database for VPS deployment;
+- Docker Compose deployment with Postgres, Streamlit, and Caddy;
+- public HTTPS deployment on `https://wfm.vartsab.com:8443` while preserving the existing VPN on port `443`;
+- deployment runbook and verified deployment status documentation;
 - holiday-aware full-history forecasting feature matrix;
 - model comparison with selected histogram gradient boosting model;
 - interval-level holdout prediction comparison for registered models;
@@ -32,6 +37,7 @@ Completed:
 - PowerPoint presentation draft with embedded dashboard screenshots;
 - expanded literature, market, and competitor review;
 - final presentation outline;
+- repository handoff documentation;
 - submission checklist.
 
 ## Key Validation Results
@@ -95,8 +101,22 @@ Model staffing scenarios:
 Testing:
 
 ```text
-10 tests passed
+13 tests passed
 ```
+
+Portfolio deployment:
+
+| Check | Result |
+| --- | --- |
+| Public dashboard URL | `https://wfm.vartsab.com:8443` |
+| DNS | `wfm.vartsab.com -> 46.225.121.233` |
+| HTTPS certificate | Let's Encrypt certificate issued by Caddy |
+| HTTP redirect | `http://wfm.vartsab.com` redirects to `https://wfm.vartsab.com:8443/` |
+| Runtime stack | Docker Compose: Postgres, Streamlit, Caddy |
+| Dashboard source | Postgres |
+| Password gate | Enabled and browser-tested |
+| Browser console | No errors or warnings in smoke test |
+| Seed row count | `dashboard_volume_30min`: 252,790 rows |
 
 ## Local Generated Artifacts
 
@@ -133,17 +153,16 @@ Dashboard screenshots:
 
 | Area | Coverage |
 | --- | ---: |
-| Technical product | 91% |
+| Technical product | 96% |
 | Capstone submission package | 95% |
-| Demo readiness | 93% |
+| Portfolio deployment readiness | 96% |
+| Demo readiness | 97% |
 | Final report and presentation | 88% |
 
 ## Recommended Next Steps
 
-1. Manually open `docs/final/Пояснювальна_записка_чернетка.docx` in Microsoft Word and inspect spacing, page breaks, image sizing, and table wrapping.
-2. Replace title-page placeholders with official student, supervisor, and submission details.
-3. Polish bibliography formatting according to the program's required citation style.
-4. Manually open `docs/final/Презентація_чернетка.pptx` in Microsoft PowerPoint and inspect image scaling, line breaks, and speaker flow.
-5. Rehearse the dashboard demo using `scripts/run_dashboard.ps1`.
-6. Export final Word and presentation artifacts to PDF.
-7. Optionally add MLflow tracking only if time remains after report/presentation polish.
+1. Rehearse the public dashboard demo at `https://wfm.vartsab.com:8443` using the deployment password.
+2. Rotate `WFM_DEMO_PASSWORD` before sharing the portfolio link broadly.
+3. Add a lightweight uptime check or reminder if the public demo must stay available for a fixed review window.
+4. Add Postgres backups only if the VPS deployment becomes more than a reproducible portfolio demo.
+5. Manually open `docs/final/Пояснювальна_записка_чернетка.docx` and `docs/final/Презентація_чернетка.pptx` only when returning to final submission polish.

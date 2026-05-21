@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-wfm}
+      POSTGRES_USER: ${POSTGRES_USER:-wfm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/env.local}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deploy/postgres:/docker-entrypoint-initdb.d:ro
+      - ./deploy/seed:/seed:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-wfm} -d ${POSTGRES_DB:-wfm}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      CALLCENTER_DASHBOARD_SOURCE: postgres
+      DATABASE_URL: postgresql://${POSTGRES_USER:-wfm}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-wfm}
+      WFM_DEMO_PASSWORD: ${WFM_DEMO_PASSWORD:?Set WFM_DEMO_PASSWORD in deploy/env.local}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      WFM_DOMAIN: ${WFM_DOMAIN:-wfm.vartsab.com}
+    ports:
+      - "80:80"
+      - "8443:8443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:

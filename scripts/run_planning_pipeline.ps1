@@ -9,11 +9,28 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$ProjectRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+$ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+. (Join-Path $PSScriptRoot "_python_env.ps1")
 
 Push-Location $ProjectRoot
 try {
+    $Python = Get-ProjectPython -ProjectRoot $ProjectRoot
+    Show-PythonSummary -Python $Python
+    Assert-PythonModules -Python $Python -Modules @("sklearn", "ortools") -Purpose "planning pipeline"
+
+    if (-not (Test-Path "data\processed\full_forecast_features.csv")) {
+        throw "Missing data\processed\full_forecast_features.csv. Build the full feature matrix before running the planning pipeline."
+    }
+
+    if ($SkipSqlExport -and -not (Test-Path "data\processed\full_operational_forecasting_input.csv")) {
+        throw "Missing data\processed\full_operational_forecasting_input.csv. Run without -SkipSqlExport or export the operational forecasting input first."
+    }
+
     if (-not $SkipSqlExport) {
+        if (-not (Get-Command Invoke-Sqlcmd -ErrorAction SilentlyContinue)) {
+            throw "Invoke-Sqlcmd is not available. Install the SqlServer PowerShell module or rerun with -SkipSqlExport after exporting data\processed\full_operational_forecasting_input.csv."
+        }
+
         Write-Host "Exporting operational forecasting input from SQL Server..."
         Invoke-Sqlcmd `
             -ServerInstance $SqlServer `
@@ -24,7 +41,7 @@ try {
     }
 
     Write-Host "Generating future call-volume forecast..."
-    python src\forecasting\future_feature_forecast.py `
+    & $Python src\forecasting\future_feature_forecast.py `
         --input data\processed\full_forecast_features.csv `
         --forecast-output data\processed\future_sklearn_forecast.csv `
         --feature-output data\processed\future_forecast_features.csv `
@@ -36,14 +53,14 @@ try {
         --model $Model
 
     Write-Host "Calculating Erlang C staffing requirements..."
-    python src\workforce\erlang_c_staffing.py `
+    & $Python src\workforce\erlang_c_staffing.py `
         --forecast data\processed\future_sklearn_forecast.csv `
         --forecasting-input data\processed\full_operational_forecasting_input.csv `
         --output data\processed\future_staffing_requirements.csv `
         --summary-output docs\future_staffing_requirements_summary.json
 
     Write-Host "Calculating model staffing scenarios..."
-    python src\workforce\model_staffing_scenarios.py `
+    & $Python src\workforce\model_staffing_scenarios.py `
         --scenario-forecasts data\processed\future_model_scenario_forecasts.csv `
         --forecasting-input data\processed\full_operational_forecasting_input.csv `
         --output data\processed\future_model_staffing_scenarios.csv `
@@ -51,7 +68,7 @@ try {
         --agent-count $AgentCount
 
     Write-Host "Optimizing legal roster schedule..."
-    python src\scheduling\agent_roster_optimizer.py `
+    & $Python src\scheduling\agent_roster_optimizer.py `
         --requirements data\processed\future_staffing_requirements.csv `
         --schedule-output data\processed\future_optimized_schedule.csv `
         --coverage-output data\processed\future_schedule_coverage.csv `

@@ -35,6 +35,7 @@ The current implementation includes:
 - Erlang C staffing requirement calculator;
 - OR-Tools shift scheduling optimizers;
 - Streamlit dashboard MVP with SQL Server and CSV fallback data access;
+- portfolio deployment path with Streamlit, PostgreSQL, Caddy, Docker Compose, and password protection;
 - project documentation for dataset selection, data generation methodology, architecture, and data dictionary.
 
 ## Repository Structure
@@ -68,6 +69,19 @@ Start the dashboard product demo:
 
 ```powershell
 .\scripts\run_dashboard.ps1
+```
+
+Force the SQL-backed dashboard path when rehearsing SQL live:
+
+```powershell
+.\scripts\run_dashboard.ps1 -DataSource Sql
+```
+
+Check demo readiness without launching the dashboard:
+
+```powershell
+.\scripts\check_demo_readiness.ps1
+.\scripts\check_demo_readiness.ps1 -RequireSql
 ```
 
 Download a small January 2025 sample:
@@ -119,6 +133,27 @@ Run the dashboard:
 
 ```powershell
 streamlit run app\streamlit\app.py
+```
+
+## Portfolio VPS Deployment
+
+The public portfolio deployment uses a compact Postgres seed database instead of the local SQL Server warehouse. The current VPS shape is documented in `deploy/README.md`:
+
+- DNS: `wfm.vartsab.com` points to the VPS public IP.
+- Public URL: `https://wfm.vartsab.com:8443`.
+- Port `443` remains available for the existing VPN.
+- Docker Compose runs Postgres, Streamlit, and Caddy.
+
+Build or refresh the deployment seed:
+
+```powershell
+python scripts\build_portfolio_seed.py
+```
+
+Deploy from the VPS project directory:
+
+```bash
+docker compose --env-file deploy/env.local up -d --build
 ```
 
 View the generated summary:
@@ -176,6 +211,8 @@ Build the January 2026 planning artifacts:
 Demo and reporting notes:
 
 - `docs/demo_script.md`
+- `docs/deployment_status.md`
+- `docs/repository_handoff.md`
 - `docs/technology_choice.md`
 - `docs/reporting_evidence_week3_6.md`
 - `docs/productization_plan.md`
