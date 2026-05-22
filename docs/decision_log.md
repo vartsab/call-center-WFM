@@ -176,15 +176,15 @@ Decision: make zero understaffing a hard constraint in the full-horizon schedule
 
 Reasoning: the schedule is intended for service-level planning, so covering required staffing in every interval is more important than marginally reducing overstaffing.
 
-## 2026-05-15 - Use a legal 160-agent future planning roster
+## 2026-05-15 - Use a simulated 160-agent future planning roster
 
 Status: accepted.
 
-Decision: separate historical model evaluation from future workforce planning. Use the 2025-10-03 to 2025-12-31 holdout for forecast evaluation only, then retrain the selected model on full 2023-2025 history and generate a January 2026 planning forecast, Erlang C staffing curve, and legal 160-agent roster.
+Decision: separate historical model evaluation from future workforce planning. Use the 2025-10-03 to 2025-12-31 holdout for forecast evaluation only, then retrain the selected model on full 2023-2025 history and generate a January 2026 planning forecast, Erlang C staffing curve, and simulated 160-agent roster.
 
-Reasoning: historical schedules are not useful as an operational deliverable. The schedule should represent a future planning period that can be demonstrated as a workforce management product. A legal roster also needs human constraints: one shift per agent per day, maximum weekly shifts, minimum rest, and explicit break placement.
+Reasoning: historical schedules are not useful as an operational deliverable. The schedule should represent a future planning period that can be demonstrated as a workforce management analytical demonstration. A simulated roster also needs human constraints: one shift per agent per day, maximum weekly shifts, minimum rest, and explicit break placement.
 
-Outcome: the January 2026 planning forecast contains 1,488 30-minute intervals. Erlang C estimates an average shrinkage-adjusted requirement of 103.0108 agents and a peak of 189 agents. The legal 160-agent roster schedules 3,427 shifts and validates with zero daily-shift, weekly-limit, or rest violations. The model also estimates that full coverage of the January 2026 24/7 demand curve would require approximately 462 total rostered agents.
+Outcome: the January 2026 planning forecast contains 1,488 30-minute intervals. Erlang C estimates an average shrinkage-adjusted requirement of 103.0108 agents and a peak of 189 agents. The simulated 160-agent roster schedules 3,427 shifts and validates with zero daily-shift, weekly-limit, or rest violations. The model also estimates that full coverage of the January 2026 24/7 demand curve would require approximately 462 total rostered agents.
 
 ## 2026-05-15 - Use synthetic display names for the agent roster
 

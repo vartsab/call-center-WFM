@@ -138,7 +138,7 @@ Use screenshot:
 Explain:
 
 - OR-Tools CP-SAT optimizer;
-- 160-agent legal roster;
+- simulated 160-agent roster;
 - one shift per day;
 - max five shifts per week;
 - 11-hour minimum rest;

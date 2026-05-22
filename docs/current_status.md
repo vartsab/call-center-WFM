@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-05-21
+Last updated: 2026-05-22
 
 ## Repository State
 
@@ -16,6 +16,7 @@ Completed:
 - dimensional tables and analytics views;
 - Streamlit dashboard with SQL Server access and generated-artifact support;
 - Streamlit dashboard with Postgres deployment mode and password protection;
+- portfolio-quality Overview tab with editorial typography, KPI provenance labels, annotated monthly demand chart, and analytical pipeline panel;
 - compact portfolio seed database for VPS deployment;
 - Docker Compose deployment with Postgres, Streamlit, and Caddy;
 - public HTTPS deployment on `https://wfm.vartsab.com:8443` while preserving the existing VPN on port `443`;
@@ -28,8 +29,9 @@ Completed:
 - forecasting model registry documentation;
 - January 2026 future demand forecast;
 - Erlang C staffing calculation;
-- legal 160-agent roster optimizer;
+- simulated 160-agent roster optimizer;
 - dashboard screenshots for report/demo use;
+- refreshed full-dashboard screenshot set captured from the live VPS deployment;
 - demo launch and planning pipeline scripts;
 - Week 1-6 progress report drafts;
 - first full explanatory note draft;
@@ -82,7 +84,7 @@ Staffing and scheduling:
 | Peak predicted calls | 386.1923 |
 | Peak shrinkage-adjusted agents | 189 |
 | Scheduled shifts | 3,427 |
-| Legal roster size | 160 |
+| Simulated roster size | 160 |
 | Estimated full-coverage roster | 462 |
 | Daily shift violations | 0 |
 | Weekly shift-limit violations | 0 |

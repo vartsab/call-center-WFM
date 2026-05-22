@@ -67,7 +67,7 @@ try {
         --summary-output docs\future_model_staffing_scenario_summary.json `
         --agent-count $AgentCount
 
-    Write-Host "Optimizing legal roster schedule..."
+    Write-Host "Building roster simulation..."
     & $Python src\scheduling\agent_roster_optimizer.py `
         --requirements data\processed\future_staffing_requirements.csv `
         --schedule-output data\processed\future_optimized_schedule.csv `

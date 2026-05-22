@@ -7,17 +7,17 @@
 Дата підготовки звіту: 20.05.2026  
 Звітний період: 6-й тиждень активного етапу дипломного проєктування
 
-Фокус тижня: legal scheduling, dashboard productization, deployment readiness, screenshots та validation.
+Фокус тижня: roster simulation, dashboard productization, deployment readiness, screenshots та validation.
 
 ## 1. Виконані завдання, досягнення та зміни у проєкті
 
-На шостому тижні проєкт було доведено до рівня демонстраційного workforce management продукту. Основна увага була на майбутньому schedule planning, legal roster constraints, dashboard polish, screenshots та demo packaging.
+На шостому тижні проєкт було доведено до рівня демонстраційного workforce management продукту. Основна увага була на майбутньому schedule planning, simplified roster constraints, dashboard polish, screenshots та demo packaging.
 
-- створено legal 160-agent roster optimizer на OR-Tools CP-SAT;
+- створено simulated 160-agent roster optimizer на OR-Tools CP-SAT;
 - додано обмеження: один shift per agent per day, максимум 5 shifts per week, 11 hours minimum rest;
 - побудовано January 2026 future schedule замість historical schedule;
 - додано stable synthetic agent display names при збереженні numeric `Agent_ID`; 
-- перероблено Scheduling tab у Streamlit dashboard;
+- перероблено Roster Simulation tab у Streamlit dashboard;
 - додано demo launch scripts і planning pipeline script;
 - додано Postgres deployment mode для dashboard і простий password gate;
 - підготовлено Docker Compose stack для portfolio deployment: Streamlit, PostgreSQL, Caddy;
@@ -27,7 +27,7 @@
 
 ## 2. Scheduling results
 
-Schedule optimizer працює як constrained planning scenario. Він показує, що 160-agent pool є legal roster, але не може повністю покрити 24/7 Erlang demand curve.
+Schedule optimizer працює як constrained planning scenario. Він показує, що 160-agent pool є simulated roster, але не може повністю покрити 24/7 Erlang demand curve.
 
 | Metric | Value |
 | --- | --- |
@@ -61,13 +61,13 @@ MS SQL Server залишено як основний warehouse, оскільки
 
 Підготовлено screenshots для основних сторінок продукту:
 
-- Executive Summary;
-- Historical Trends;
-- Forecasting;
-- Staffing;
-- Scheduling;
-- Agent Performance;
-- Methodology / validation.
+- Overview;
+- Demand Analysis;
+- Demand Forecast;
+- Capacity Planning;
+- Roster Simulation;
+- Service Quality Metrics;
+- Methods & Assumptions / validation.
 
 Dashboard було оптимізовано: замість завантаження granular SQL view rows у Streamlit, застосовано SQL-side aggregation для demo-friendly performance.
 
@@ -127,4 +127,4 @@ Dashboard було оптимізовано: замість завантажен
 
 ## 9. Висновок за тиждень
 
-На шостому тижні проєкт було доведено до portfolio-demo рівня: dashboard працює як продуктова оболонка, scheduling module створює future legal roster, screenshots підготовлені для звітності, тестовий набір успішно проходить, а публічний VPS deployment робить продукт доступним зовні. Наступний фокус — фінальне оформлення звітів, пояснювальної записки, презентації та GitHub repository package.
+На шостому тижні проєкт було доведено до portfolio-demo рівня: dashboard працює як продуктова оболонка, scheduling module створює future roster simulation, screenshots підготовлені для звітності, тестовий набір успішно проходить, а публічний VPS deployment робить продукт доступним зовні. Наступний фокус — фінальне оформлення звітів, пояснювальної записки, презентації та GitHub repository package.

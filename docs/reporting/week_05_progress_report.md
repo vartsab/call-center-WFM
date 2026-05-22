@@ -72,7 +72,7 @@ MAPE використовується обережно, тому що у low-vol
 
 ## 6. План роботи на наступний тиждень
 
-- побудувати legal roster optimizer;
+- побудувати roster simulation optimizer;
 - створити future schedule для January 2026;
 - додати scheduling tab у dashboard;
 - підготувати screenshots і demo script;

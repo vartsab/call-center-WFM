@@ -135,6 +135,254 @@ def page_config() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background: #f8f3ea;
+            color: #182033;
+        }
+        .block-container {
+            padding-top: 1.05rem;
+            max-width: 1180px;
+        }
+        section[data-testid="stSidebar"] {
+            width: 18.5rem !important;
+            min-width: 18.5rem !important;
+            background: #f2eadf;
+        }
+        section[data-testid="stSidebar"] > div {
+            width: 18.5rem !important;
+        }
+        .app-shell-label {
+            color: #6c675d;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            margin: 0 0 0.4rem;
+            text-transform: uppercase;
+        }
+        div[data-testid="stAppViewContainer"] h1 {
+            font-size: 2.05rem;
+            font-weight: 600;
+            letter-spacing: 0;
+            margin-bottom: 0.35rem;
+        }
+        div[data-testid="stMetric"] {
+            padding-bottom: 0.2rem;
+        }
+        div[data-testid="stMetric"] label {
+            color: #4b5563;
+        }
+        div[data-baseweb="tab-list"] {
+            flex-wrap: wrap;
+            row-gap: 0.15rem;
+            border-bottom: 1px solid #d9d0c3;
+        }
+        button[data-baseweb="tab"] {
+            white-space: nowrap;
+            padding-left: 0.32rem;
+            padding-right: 0.32rem;
+        }
+        button[data-baseweb="tab"] p {
+            font-size: 0.74rem;
+            letter-spacing: 0.01em;
+        }
+        .insight-callout {
+            border-left: 4px solid #2f6f9f;
+            background: rgba(255, 255, 255, 0.58);
+            border-radius: 4px;
+            padding: 0.72rem 0.9rem;
+            margin: 0.4rem 0 1rem 0;
+            color: #1d2638;
+            font-size: 0.95rem;
+        }
+        .pipeline-flow {
+            border: 1px solid #dfd6ca;
+            border-radius: 4px;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.62);
+            color: #111827;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .portfolio-overview {
+            padding-top: 1.05rem;
+        }
+        .portfolio-eyebrow,
+        .portfolio-smallcaps,
+        .portfolio-kpi-label,
+        .portfolio-section-label,
+        .portfolio-chip {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .portfolio-eyebrow {
+            color: #6f6a61;
+            margin-bottom: 0.38rem;
+        }
+        .portfolio-title {
+            color: #273041;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2.15rem, 5vw, 4.05rem);
+            font-weight: 400;
+            letter-spacing: 0;
+            line-height: 0.96;
+            margin: 0 0 1.05rem;
+        }
+        .portfolio-dek {
+            color: #414141;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.06rem;
+            font-style: italic;
+            line-height: 1.65;
+            margin: 0 0 1.15rem;
+            max-width: 760px;
+        }
+        .portfolio-meta {
+            border-left: 1px solid #bfb4a6;
+            color: #343b49;
+            margin-top: 1.1rem;
+            padding-left: 1rem;
+            text-align: right;
+        }
+        .portfolio-meta-value {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.05rem;
+            line-height: 1.25;
+        }
+        .portfolio-meta-note {
+            color: #6d675d;
+            font-size: 0.76rem;
+            font-style: italic;
+            margin-top: 0.25rem;
+        }
+        .portfolio-rule {
+            border: 0;
+            border-top: 1px solid #d7cec0;
+            margin: 1.1rem 0 1.35rem;
+        }
+        .portfolio-kpi-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            margin: 0.35rem 0 1.45rem;
+        }
+        .portfolio-kpi {
+            border-top: 1px solid #cfc5b7;
+            padding-top: 0.72rem;
+        }
+        .portfolio-kpi-label {
+            color: #6d675d;
+            line-height: 1.25;
+            min-height: 2.1rem;
+        }
+        .portfolio-kpi-value {
+            color: #293141;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 2.2rem;
+            font-weight: 400;
+            line-height: 1;
+            margin-top: 0.45rem;
+        }
+        .portfolio-kpi-note {
+            color: #6f6a61;
+            font-size: 0.74rem;
+            margin-top: 0.35rem;
+        }
+        .portfolio-section-label {
+            color: #5f5a51;
+            margin: 0.15rem 0 0.35rem;
+        }
+        .portfolio-section-copy {
+            color: #4b4b4b;
+            font-size: 0.92rem;
+            line-height: 1.45;
+            margin: 0 0 0.8rem;
+        }
+        .portfolio-pipeline {
+            margin-top: 0.15rem;
+        }
+        .portfolio-pipeline-step {
+            background: rgba(255, 255, 255, 0.62);
+            border-left: 3px solid #2f6f9f;
+            box-shadow: inset 0 -1px 0 rgba(37, 40, 44, 0.06);
+            margin-bottom: 0.78rem;
+            padding: 0.72rem 0.75rem 0.7rem;
+        }
+        .portfolio-pipeline-step.synthetic {
+            border-left-color: #b66a36;
+        }
+        .portfolio-pipeline-step.forecasted {
+            border-left-color: #2f6f9f;
+        }
+        .portfolio-pipeline-step.simulated {
+            border-left-color: #7b766c;
+        }
+        .portfolio-step-row {
+            align-items: center;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: space-between;
+        }
+        .portfolio-step-title {
+            color: #293141;
+            font-size: 0.87rem;
+            font-weight: 650;
+            line-height: 1.25;
+        }
+        .portfolio-step-note {
+            color: #5f5a51;
+            font-size: 0.74rem;
+            line-height: 1.35;
+            margin-top: 0.18rem;
+        }
+        .portfolio-chip {
+            background: #efe8dc;
+            border-radius: 2px;
+            color: #5a554e;
+            flex: 0 0 auto;
+            letter-spacing: 0.08em;
+            padding: 0.18rem 0.35rem;
+        }
+        .portfolio-chip.real {
+            background: #dbeee6;
+            color: #267451;
+        }
+        .portfolio-chip.synthetic {
+            background: #f2e2d2;
+            color: #9a5a2e;
+        }
+        .portfolio-chip.forecasted {
+            background: #dfeaf5;
+            color: #2f6f9f;
+        }
+        .portfolio-chip.simulated {
+            background: #e9e4dc;
+            color: #625d55;
+        }
+        .portfolio-transparency {
+            border-top: 1px solid #d7cec0;
+            color: #54504a;
+            font-size: 0.82rem;
+            line-height: 1.45;
+            margin-top: 1.2rem;
+            padding-top: 0.85rem;
+        }
+        @media (max-width: 900px) {
+            .portfolio-kpi-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .portfolio-meta {
+                text-align: left;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -466,6 +714,11 @@ def format_compact_number(value: float) -> str:
     return f"{value:,.0f}"
 
 
+def format_month_year(value: Any) -> str:
+    date_value = pd.to_datetime(value)
+    return date_value.strftime("%b %Y")
+
+
 def render_plotly_chart(fig: Any) -> None:
     try:
         st.plotly_chart(fig, width="stretch")
@@ -480,9 +733,56 @@ def render_dataframe(data: pd.DataFrame, **kwargs: Any) -> None:
         st.dataframe(data, use_container_width=True, **kwargs)
 
 
+def add_chart_source(fig: Any, text: str) -> Any:
+    fig.add_annotation(
+        text=text,
+        xref="paper",
+        yref="paper",
+        x=0,
+        y=1.08,
+        showarrow=False,
+        align="left",
+        font={"size": 11, "color": "#6b7280"},
+    )
+    margin = getattr(fig.layout, "margin", None)
+    top_margin = margin.t if margin and margin.t is not None else 60
+    fig.update_layout(margin={"t": max(top_margin, 82)})
+    return fig
+
+
+def render_insight_callout(text: str) -> None:
+    st.markdown(
+        f'<div class="insight-callout"><strong>Insight:</strong> {text}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_kpi_disclaimer() -> None:
+    st.caption("Synthetic operational KPI layer used for analytical simulation.")
+
+
 def render_sidebar(source: str, volume: pd.DataFrame) -> tuple[list[str], tuple[Any, Any]]:
     st.sidebar.title("Call Center WFM")
     st.sidebar.caption(f"Data source: {source}")
+
+    with st.sidebar.expander("Data Transparency", expanded=True):
+        st.markdown(
+            """
+            **REAL:**
+            NYC 311 service request timestamps and volumes.
+
+            **SYNTHETIC:**
+            Operational call center metadata including AHT, abandonment, SLA targets, and agent entities.
+
+            **FORECASTED:**
+            ML model outputs for future demand intervals.
+
+            **SIMULATED:**
+            Roster assignments, staffing plans, and service-level outcomes derived from Erlang C and scheduling logic.
+
+            This dashboard is an academic prototype and not a production WFM system.
+            """
+        )
 
     service_categories = sorted(volume["service_category"].dropna().unique()) if not volume.empty else []
     selected_categories = st.sidebar.multiselect(
@@ -545,40 +845,237 @@ def render_executive_summary(volume: pd.DataFrame) -> None:
         if answered_calls
         else 0
     )
+    period_start = pd.to_datetime(volume["calendar_date"]).min()
+    period_end = pd.to_datetime(volume["calendar_date"]).max()
+    coverage_months = (
+        (period_end.year - period_start.year) * 12 + period_end.month - period_start.month + 1
+        if pd.notna(period_start) and pd.notna(period_end)
+        else 0
+    )
 
-    cols = st.columns(5)
-    cols[0].metric("Offered calls", format_compact_number(total_calls))
-    cols[1].metric("Answered calls", format_compact_number(answered_calls))
-    cols[2].metric("Abandoned", format_compact_number(abandoned_calls))
-    cols[3].metric("Abandonment", f"{abandonment_rate:.1%}")
-    cols[4].metric("Avg AHT", f"{avg_aht:,.0f}s")
-
-    daily = (
-        volume.groupby("calendar_date", as_index=False)
+    monthly = (
+        volume.assign(month=pd.to_datetime(volume["calendar_date"]).dt.to_period("M").dt.to_timestamp())
+        .groupby("month", as_index=False)
         .agg(
             offered_calls=("offered_calls", "sum"),
             answered_calls=("answered_calls", "sum"),
             abandoned_calls=("abandoned_calls", "sum"),
         )
-        .sort_values("calendar_date")
+        .sort_values("month")
     )
     category = (
         volume.groupby("service_category", as_index=False)
         .agg(offered_calls=("offered_calls", "sum"))
         .sort_values("offered_calls", ascending=False)
     )
+    top_category = category.iloc[0]["service_category"] if not category.empty else "selected services"
+    yoy_note = "Demand volume is stable enough for interval-level forecasting."
+    if len(monthly) >= 14:
+        latest_month = monthly.iloc[-1]
+        prior_year_month = latest_month["month"] - pd.DateOffset(years=1)
+        prior = monthly[monthly["month"] == prior_year_month]
+        if not prior.empty and prior.iloc[0]["offered_calls"]:
+            yoy_change = (
+                latest_month["offered_calls"] - prior.iloc[0]["offered_calls"]
+            ) / prior.iloc[0]["offered_calls"]
+            direction = "up" if yoy_change >= 0 else "down"
+            yoy_note = f"Latest comparable month is {direction} {abs(yoy_change):.1%} year over year."
 
-    left, right = st.columns([2, 1])
+    st.markdown('<div class="portfolio-overview">', unsafe_allow_html=True)
+    header_left, header_right = st.columns([3.8, 1.2])
+    with header_left:
+        st.markdown(
+            """
+            <div class="portfolio-eyebrow">Workforce Management - Portfolio Project</div>
+            <div class="portfolio-title">NYC 311 Call Center<br>WFM Analytics Prototype</div>
+            <div class="portfolio-dek">
+            NYC 311 demand follows a predictable weekly and seasonal rhythm, strong enough
+            to support 30-minute interval forecasting across a simulated 160-agent workforce.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with header_right:
+        st.markdown(
+            f"""
+            <div class="portfolio-meta">
+                <div class="portfolio-smallcaps">Data Period</div>
+                <div class="portfolio-meta-value">{format_month_year(period_start)} - {format_month_year(period_end)}</div>
+                <div class="portfolio-meta-note">Source: NYC Open Data - real demand</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown('<hr class="portfolio-rule">', unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class="portfolio-kpi-grid">
+            <div class="portfolio-kpi">
+                <div class="portfolio-kpi-label">Service<br>Requests</div>
+                <div class="portfolio-kpi-value">{format_compact_number(total_calls)}</div>
+                <div class="portfolio-kpi-note">Real - NYC 311</div>
+            </div>
+            <div class="portfolio-kpi">
+                <div class="portfolio-kpi-label">Coverage<br>Period</div>
+                <div class="portfolio-kpi-value">{coverage_months}<span style="font-size:1rem;"> mo</span></div>
+                <div class="portfolio-kpi-note">Historical window</div>
+            </div>
+            <div class="portfolio-kpi">
+                <div class="portfolio-kpi-label">Simulated<br>Agents</div>
+                <div class="portfolio-kpi-value">160</div>
+                <div class="portfolio-kpi-note">Modeled roster</div>
+            </div>
+            <div class="portfolio-kpi">
+                <div class="portfolio-kpi-label">SLA<br>Compliance</div>
+                <div class="portfolio-kpi-value">{service_level:.1%}</div>
+                <div class="portfolio-kpi-note">Synthetic - modeled</div>
+            </div>
+            <div class="portfolio-kpi">
+                <div class="portfolio-kpi-label">Forecast<br>Interval</div>
+                <div class="portfolio-kpi-value">30<span style="font-size:1rem;"> min</span></div>
+                <div class="portfolio-kpi-note">ML model output</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    left, right = st.columns([1.55, 1])
     with left:
-        fig = px.line(daily, x="calendar_date", y="offered_calls", markers=True)
-        fig.update_layout(title="Daily offered calls", yaxis_title="Calls", xaxis_title=None)
+        st.markdown(
+            f"""
+            <div class="portfolio-section-label">Monthly Service Request Volume - NYC 311</div>
+            <div class="portfolio-section-copy">
+            {yoy_note} The largest selected category is {top_category}, giving the
+            prototype a realistic mix of high-volume and long-tail demand.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=monthly["month"],
+                y=monthly["offered_calls"],
+                mode="lines",
+                line={"color": "#24364b", "width": 2.2},
+                fill="tozeroy",
+                fillcolor="rgba(47, 111, 159, 0.14)",
+                hovertemplate="%{x|%b %Y}<br>%{y:,.0f} requests<extra></extra>",
+                name="Service requests",
+            )
+        )
+        if not monthly.empty:
+            peak = monthly.loc[monthly["offered_calls"].idxmax()]
+            latest = monthly.iloc[-1]
+            fig.add_annotation(
+                x=peak["month"],
+                y=peak["offered_calls"],
+                text=f"Peak<br>{format_compact_number(peak['offered_calls'])}",
+                showarrow=True,
+                arrowhead=0,
+                arrowwidth=1,
+                arrowcolor="#7c6f60",
+                ax=38,
+                ay=-44,
+                bgcolor="rgba(248, 243, 234, 0.92)",
+                bordercolor="#cbbfac",
+                borderwidth=1,
+                font={"color": "#2b3444", "size": 11},
+            )
+            fig.add_annotation(
+                x=latest["month"],
+                y=latest["offered_calls"],
+                text=f"Latest<br>{format_compact_number(latest['offered_calls'])}",
+                showarrow=True,
+                arrowhead=0,
+                arrowwidth=1,
+                arrowcolor="#7c6f60",
+                ax=-58,
+                ay=-18,
+                bgcolor="rgba(248, 243, 234, 0.92)",
+                bordercolor="#cbbfac",
+                borderwidth=1,
+                font={"color": "#2b3444", "size": 11},
+            )
+        fig.update_layout(
+            height=390,
+            margin={"l": 8, "r": 8, "t": 18, "b": 28},
+            paper_bgcolor="#f8f3ea",
+            plot_bgcolor="#f8f3ea",
+            font={"family": "Arial, sans-serif", "color": "#2d3340"},
+            xaxis={
+                "showgrid": False,
+                "showline": True,
+                "linecolor": "#cfc5b7",
+                "tickfont": {"size": 11, "color": "#5e5a52"},
+            },
+            yaxis={
+                "title": None,
+                "gridcolor": "#e2d8ca",
+                "zeroline": False,
+                "tickformat": "~s",
+                "tickfont": {"size": 11, "color": "#5e5a52"},
+            },
+            showlegend=False,
+        )
         render_plotly_chart(fig)
+        st.caption(
+            "Source: NYC 311 Service Requests, NYC Open Data. Values shown as monthly request totals. Real data."
+        )
     with right:
-        fig = px.bar(category, x="offered_calls", y="service_category", orientation="h")
-        fig.update_layout(title="Service category mix", xaxis_title="Calls", yaxis_title=None)
-        render_plotly_chart(fig)
+        st.markdown(
+            """
+            <div class="portfolio-section-label">Analytical Pipeline</div>
+            <div class="portfolio-pipeline">
+                <div class="portfolio-pipeline-step">
+                    <div class="portfolio-step-row">
+                        <div>
+                            <div class="portfolio-step-title">NYC 311 open data</div>
+                            <div class="portfolio-step-note">Service requests and timestamps</div>
+                        </div>
+                        <span class="portfolio-chip real">Real</span>
+                    </div>
+                </div>
+                <div class="portfolio-pipeline-step synthetic">
+                    <div class="portfolio-step-row">
+                        <div>
+                            <div class="portfolio-step-title">Synthetic metadata overlay</div>
+                            <div class="portfolio-step-note">AHT, hold time, SLA, agent IDs</div>
+                        </div>
+                        <span class="portfolio-chip synthetic">Synthetic</span>
+                    </div>
+                </div>
+                <div class="portfolio-pipeline-step forecasted">
+                    <div class="portfolio-step-row">
+                        <div>
+                            <div class="portfolio-step-title">ML demand forecast</div>
+                            <div class="portfolio-step-note">30-minute interval predictions</div>
+                        </div>
+                        <span class="portfolio-chip forecasted">Forecasted</span>
+                    </div>
+                </div>
+                <div class="portfolio-pipeline-step simulated">
+                    <div class="portfolio-step-row">
+                        <div>
+                            <div class="portfolio-step-title">Erlang C and roster simulation</div>
+                            <div class="portfolio-step-note">Staffing need and shift scheduling</div>
+                        </div>
+                        <span class="portfolio-chip simulated">Simulated</span>
+                    </div>
+                </div>
+            </div>
+            <div class="portfolio-transparency">
+                <div class="portfolio-section-label">Data Transparency</div>
+                Demand data is real and public. Operational metadata, agent IDs, and roster
+                assignments are synthetically generated to demonstrate the WFM analytical pipeline.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    st.caption(f"Weighted service level: {service_level:.1%}")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def render_historical_trends(volume: pd.DataFrame) -> None:
@@ -586,47 +1083,41 @@ def render_historical_trends(volume: pd.DataFrame) -> None:
         st.info("Historical trend data is not available.")
         return
 
-    interval = (
-        volume.groupby("time_id", as_index=False)
-        .agg(
-            offered_calls=("offered_calls", "sum"),
-            avg_handle_time_sec=("avg_handle_time_sec", "mean"),
-            service_level_rate=("service_level_rate", "mean"),
-        )
-        .sort_values("time_id")
-    )
-    interval["time_label"] = interval["time_id"].astype(str).str.zfill(4)
-    interval["time_label"] = interval["time_label"].str[:2] + ":" + interval["time_label"].str[2:]
+    render_insight_callout("Intraday demand concentration supports 30-minute interval forecasting.")
 
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=interval["time_label"], y=interval["offered_calls"], name="Calls"))
-    fig.add_trace(
-        go.Scatter(
-            x=interval["time_label"],
-            y=interval["service_level_rate"],
-            name="SLA rate",
-            yaxis="y2",
-            mode="lines",
-        )
+    day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    heatmap = volume.copy()
+    heatmap["calendar_date_dt"] = pd.to_datetime(heatmap["calendar_date"])
+    heatmap["day_name"] = heatmap["calendar_date_dt"].dt.day_name()
+    heatmap["hour"] = heatmap["time_id"].astype(str).str.zfill(4).str[:2].astype(int)
+    heatmap["hour_label"] = heatmap["hour"].map(lambda value: f"{value:02d}:00")
+    date_hour = (
+        heatmap.groupby(["calendar_date", "day_name", "hour_label"], as_index=False)
+        .agg(offered_calls=("offered_calls", "sum"))
+    )
+    day_hour = (
+        date_hour.groupby(["day_name", "hour_label"], as_index=False)
+        .agg(avg_calls=("offered_calls", "mean"))
+    )
+    day_hour["day_name"] = pd.Categorical(day_hour["day_name"], categories=day_order, ordered=True)
+    day_hour = day_hour.sort_values(["day_name", "hour_label"])
+    pivot = day_hour.pivot(index="day_name", columns="hour_label", values="avg_calls").fillna(0)
+
+    fig = px.imshow(
+        pivot,
+        aspect="auto",
+        color_continuous_scale="Blues",
+        labels={"color": "Avg calls"},
     )
     fig.update_layout(
-        title="Intraday demand and service level",
+        title="Average demand by day and hour",
         xaxis_title=None,
-        yaxis_title="Calls",
-        yaxis2={"title": "SLA rate", "overlaying": "y", "side": "right", "tickformat": ".0%"},
-        legend={"orientation": "h"},
+        yaxis_title=None,
+        coloraxis_colorbar={"title": "Avg calls"},
     )
+    add_chart_source(fig, "Source: REAL NYC 311 demand")
     render_plotly_chart(fig)
-
-    heatmap = volume.groupby(["calendar_date", "time_id"], as_index=False).agg(
-        offered_calls=("offered_calls", "sum")
-    )
-    heatmap["time_label"] = heatmap["time_id"].astype(str).str.zfill(4)
-    heatmap["time_label"] = heatmap["time_label"].str[:2] + ":" + heatmap["time_label"].str[2:]
-    pivot = heatmap.pivot(index="calendar_date", columns="time_label", values="offered_calls").fillna(0)
-    fig = px.imshow(pivot, aspect="auto", labels={"color": "Calls"})
-    fig.update_layout(title="30-minute call volume heatmap", xaxis_title=None, yaxis_title=None)
-    render_plotly_chart(fig)
+    st.caption("Values show average offered calls per hour across the selected date range and service categories.")
 
 
 def render_forecasting(forecasting: pd.DataFrame) -> None:
@@ -643,6 +1134,8 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         ]
     )
     future_summary = load_first_json([DOCS_DIR / "future_forecast_summary.json"])
+
+    render_insight_callout("Histogram Gradient Boosting achieved the lowest validation RMSE among the tested feature models.")
 
     metric_cols = st.columns(4)
     metric_cols[0].metric("Test intervals", summary.get("test_intervals", 0))
@@ -762,6 +1255,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
             )
         )
     fig.update_layout(title="Forecast holdout period", xaxis_title=None, yaxis_title="Calls")
+    add_chart_source(fig, "REAL historical demand + FORECASTED model output")
     render_plotly_chart(fig)
 
     if not model_rows.empty:
@@ -774,6 +1268,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         error_rows["model"] = error_rows["model"].map(model_label)
         fig = px.bar(error_rows, x="model", y="value", color="metric", barmode="group")
         fig.update_layout(title="Holdout error by model", xaxis_title=None, yaxis_title="Error")
+        add_chart_source(fig, "FORECASTED validation output")
         render_plotly_chart(fig)
 
     if not future_forecast.empty:
@@ -833,6 +1328,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
                 y="predicted_call_volume",
             )
         fig.update_layout(title="Future 30-minute call forecast", xaxis_title=None, yaxis_title="Calls")
+        add_chart_source(fig, "FORECASTED model output")
         render_plotly_chart(fig)
 
     if not forecasting.empty:
@@ -843,6 +1339,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         )
         fig = px.bar(top, x="service_category", y="call_volume")
         fig.update_layout(title="Forecasting input by category", xaxis_title=None, yaxis_title="Calls")
+        add_chart_source(fig, "Source: REAL NYC 311 demand")
         render_plotly_chart(fig)
 
 
@@ -866,6 +1363,8 @@ def render_staffing() -> None:
         st.info("Staffing requirements output is not available.")
         return
     scenario_summary = load_json(DOCS_DIR / "future_model_staffing_scenario_summary.json")
+
+    render_insight_callout("Erlang C transforms interval demand forecasts into modeled staffing requirements.")
 
     staffing["interval_start_datetime"] = pd.to_datetime(staffing["interval_start_datetime"])
     staffing["predicted_call_volume"] = pd.to_numeric(staffing["predicted_call_volume"])
@@ -913,6 +1412,7 @@ def render_staffing() -> None:
         yaxis2={"title": "Calls", "overlaying": "y", "side": "right"},
         legend={"orientation": "h"},
     )
+    add_chart_source(fig, "FORECASTED demand + SIMULATED Erlang C staffing")
     render_plotly_chart(fig)
 
     scenario_rows = pd.DataFrame(scenario_summary.get("models", []))
@@ -939,6 +1439,7 @@ def render_staffing() -> None:
         )
         fig = px.bar(scenario_plot, x="model", y="agents", color="metric", barmode="group")
         fig.update_layout(title="Staffing impact by forecast model", xaxis_title=None, yaxis_title="Agents")
+        add_chart_source(fig, "SIMULATED staffing scenario output")
         render_plotly_chart(fig)
 
     display = staffing[
@@ -981,8 +1482,10 @@ def render_scheduling() -> None:
         ]
     )
     if schedule.empty or coverage.empty:
-        st.info("Optimized schedule output is not available.")
+        st.info("Roster simulation output is not available.")
         return
+
+    render_insight_callout("Available agent supply does not fully satisfy modeled peak demand intervals.")
 
     schedule["shift_start_datetime"] = pd.to_datetime(schedule["shift_start_datetime"])
     schedule["shift_end_datetime"] = pd.to_datetime(schedule["shift_end_datetime"])
@@ -1006,7 +1509,7 @@ def render_scheduling() -> None:
     metric_cols = st.columns(7)
     metric_cols[0].metric("Shifts", summary.get("scheduled_shifts", len(schedule)))
     metric_cols[1].metric("Agents", summary.get("agent_pool_size", summary.get("agents_scheduled", 0)))
-    metric_cols[2].metric("Full roster", summary.get("estimated_full_coverage_agents", 0))
+    metric_cols[2].metric("Full coverage est.", summary.get("estimated_full_coverage_agents", 0))
     metric_cols[3].metric("Peak need", summary.get("peak_required_agents", 0))
     metric_cols[4].metric("Peak plan", summary.get("peak_scheduled_agents", 0))
     metric_cols[5].metric("Coverage", f"{coverage_achieved:.1%}")
@@ -1045,6 +1548,7 @@ def render_scheduling() -> None:
     )
     fig.update_layout(title="Required vs scheduled coverage", xaxis_title=None, yaxis_title="Agents")
     fig.update_layout(yaxis2={"title": "Gap", "overlaying": "y", "side": "right"})
+    add_chart_source(fig, "SIMULATED roster allocation")
     render_plotly_chart(fig)
 
     dates = sorted(schedule["shift_date"].dropna().unique())
@@ -1066,6 +1570,7 @@ def render_scheduling() -> None:
     if not shift_mix.empty:
         fig = px.bar(shift_mix, x="shift_window", y="agent_count")
         fig.update_layout(title="Daily shift mix", xaxis_title=None, yaxis_title="Agents")
+        add_chart_source(fig, "SIMULATED roster allocation")
         render_plotly_chart(fig)
 
     if not day_coverage.empty:
@@ -1095,6 +1600,7 @@ def render_scheduling() -> None:
             )
         )
         fig.update_layout(title="Selected-day coverage", xaxis_title=None, yaxis_title="Agents")
+        add_chart_source(fig, "SIMULATED roster allocation")
         render_plotly_chart(fig)
 
     shift_options = ["All"] + shift_mix["shift_window"].tolist()
@@ -1134,13 +1640,15 @@ def render_scheduling() -> None:
             height=min(900, max(360, len(filtered_day_schedule) * 18)),
             showlegend=True,
         )
+        add_chart_source(timeline, "SIMULATED roster allocation")
         render_plotly_chart(timeline)
 
 
 def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame) -> None:
     if agents.empty:
-        st.info("Agent performance data is not available.")
+        st.info("Service quality metrics data is not available.")
         return
+    render_insight_callout("Simulated service-quality indicators demonstrate modeled operational outcomes rather than real employee performance.")
     display = agents.copy()
     if "agent_name" not in display.columns:
         display["agent_name"] = "Agent " + display["agent_id"].astype(str)
@@ -1171,11 +1679,13 @@ def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame
         )
         fig = px.bar(skill_mix, x="skill_group", y="agent_count")
         fig.update_layout(title="Agent pool by skill group", xaxis_title=None, yaxis_title="Agents")
+        add_chart_source(fig, "SYNTHETIC agent entities")
         render_plotly_chart(fig)
 
     top_agents = grouped.head(20)
     fig = px.bar(top_agents, x="agent_name", y="handled_calls", color="avg_handle_time_sec")
     fig.update_layout(title="Top agents by handled calls", xaxis_title=None, yaxis_title="Calls")
+    add_chart_source(fig, "SYNTHETIC agent performance metadata")
     render_plotly_chart(fig)
     render_dataframe(top_agents, hide_index=True)
 
@@ -1197,13 +1707,73 @@ def render_methodology() -> None:
         "vw_Agent_Performance": "175,359",
     }
 
-    left, right = st.columns(2)
-    with left:
-        st.subheader("Dataset summaries")
-        st.json({"full_nyc_311_extract": full_dataset, "synthetic_sample": sample})
-    with right:
-        st.subheader("SQL validation")
-        st.table(pd.DataFrame(validation.items(), columns=["Object", "Value"]))
+    render_insight_callout("Operational metadata is synthetic and documented for academic transparency.")
+
+    st.subheader("Pipeline flow")
+    st.markdown(
+        """
+        <div class="pipeline-flow">
+        NYC 311 -> Cleaning -> Synthetic Metadata -> Forecasting -> Erlang C -> Roster Simulation -> Dashboard
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.subheader("Real vs Synthetic")
+    transparency_rows = [
+        {
+            "Layer": "REAL",
+            "Included data": "NYC 311 service request timestamps and demand volumes",
+            "Use in dashboard": "Historical demand, interval volume, service category trends",
+        },
+        {
+            "Layer": "SYNTHETIC",
+            "Included data": "AHT, hold time, abandonment, SLA flags, agent entities",
+            "Use in dashboard": "Service quality metrics and simulated operational KPIs",
+        },
+        {
+            "Layer": "FORECASTED",
+            "Included data": "Model predictions for future 30-minute demand intervals",
+            "Use in dashboard": "Demand forecast and model comparison",
+        },
+        {
+            "Layer": "SIMULATED",
+            "Included data": "Staffing plans, roster assignments, and coverage outcomes",
+            "Use in dashboard": "Capacity planning and roster simulation",
+        },
+    ]
+    render_dataframe(pd.DataFrame(transparency_rows), hide_index=True)
+
+    assumptions_col, limitations_col = st.columns(2)
+    with assumptions_col:
+        st.subheader("Assumptions")
+        st.markdown(
+            """
+            - Synthetic AHT is generated from documented service-category assumptions.
+            - Synthetic SLA outcomes are derived from modeled wait-time behavior.
+            - Simulated agents are generated entities, not real employees.
+            - Erlang C assumes stationary interval demand, pooled agents, and simplified queue behavior.
+            """
+        )
+    with limitations_col:
+        st.subheader("Limitations")
+        st.markdown(
+            """
+            - No real call center operations are included.
+            - No real employee data is included.
+            - Staffing assumptions are simplified for an academic prototype.
+            - The dashboard is an academic prototype only.
+            """
+        )
+
+    with st.expander("Validation evidence", expanded=False):
+        left, right = st.columns(2)
+        with left:
+            st.subheader("Dataset summaries")
+            st.json({"full_nyc_311_extract": full_dataset, "synthetic_sample": sample})
+        with right:
+            st.subheader("SQL validation")
+            st.table(pd.DataFrame(validation.items(), columns=["Object", "Value"]))
 
 
 def main() -> None:
@@ -1217,17 +1787,20 @@ def main() -> None:
     categories, date_range = render_sidebar(source, volume)
     filtered_volume = apply_filters(volume, categories, date_range)
 
-    st.title("Call Center Workforce Management")
+    st.markdown(
+        '<div class="app-shell-label">Call Center Workforce Management</div>',
+        unsafe_allow_html=True,
+    )
 
     tabs = st.tabs(
         [
-            "Executive Summary",
-            "Historical Trends",
-            "Forecasting",
-            "Staffing",
-            "Scheduling",
-            "Agent Performance",
-            "Methodology",
+            "Overview",
+            "Demand Analysis",
+            "Demand Forecast",
+            "Capacity Planning",
+            "Roster Simulation",
+            "Service Quality Metrics",
+            "Methods & Assumptions",
         ]
     )
 

@@ -148,7 +148,7 @@ Risks and limitations:
 
 Next-step bridge:
 
-- Use the staffing curve as input for a legal roster optimizer and demonstrate schedule feasibility.
+- Use the staffing curve as input for a roster simulation and demonstrate schedule feasibility.
 
 ## Week 6 - Scheduling, Productization, Deployment, And Validation
 
@@ -156,11 +156,11 @@ Recommended report theme: the project became a demonstrable and externally avail
 
 Completed work:
 
-- built a legal 160-agent roster optimizer with OR-Tools CP-SAT;
+- built a simulated 160-agent roster optimizer with OR-Tools CP-SAT;
 - enforced one shift per agent per day, a maximum of five shifts per week, and 11 hours minimum rest;
 - generated a January 2026 future schedule only, not historical schedules;
 - added named synthetic agents while keeping numeric agent IDs;
-- redesigned the Scheduling tab around planning KPIs, coverage gap, daily shift mix, roster table, and timeline;
+- redesigned the Roster Simulation tab around planning KPIs, coverage gap, daily shift mix, roster table, and timeline;
 - added Postgres dashboard source mode for the compact portfolio deployment;
 - added Docker Compose packaging with Streamlit, PostgreSQL, and Caddy;
 - deployed the dashboard to `https://wfm.vartsab.com:8443` while preserving the existing VPN on port `443`;

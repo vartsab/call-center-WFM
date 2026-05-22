@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This script turns the project into a clear capstone product demonstration. The goal is to show one coherent system: SQL Server warehouse, Streamlit dashboard, forecasting, Erlang C staffing, legal roster optimization, and compact public deployment.
+This script turns the project into a clear capstone product demonstration. The goal is to show one coherent system: SQL Server warehouse, Streamlit dashboard, forecasting, Erlang C staffing, roster simulation, and compact public deployment.
 
 ## Prerequisites
 
@@ -47,7 +47,7 @@ If the January 2026 planning artifacts need to be rebuilt:
 
 ## Demo Flow
 
-### 1. Executive Summary
+### 1. Overview
 
 Show that the dashboard reads the full SQL-backed synthetic warehouse.
 
@@ -57,7 +57,7 @@ Points to mention:
 - fact table contains 10,336,480 simulated calls;
 - KPIs include offered calls, answered calls, abandonment, and AHT.
 
-### 2. Historical Trends
+### 2. Demand Analysis
 
 Show the historical workload patterns and service category mix.
 
@@ -67,7 +67,7 @@ Points to mention:
 - operational call-center fields are synthetic and documented;
 - the dashboard supports filtering by date and service category.
 
-### 3. Forecasting
+### 3. Demand Forecast
 
 Show the model evaluation and future forecast.
 
@@ -78,7 +78,7 @@ Points to mention:
 - the January 2026 planning forecast is generated after training on the full 2023-2025 history;
 - US federal holiday features are included.
 
-### 4. Staffing
+### 4. Capacity Planning
 
 Show the Erlang C staffing curve.
 
@@ -88,7 +88,7 @@ Points to mention:
 - the target is 80% of calls answered within 20 seconds;
 - shrinkage and occupancy constraints are included.
 
-### 5. Scheduling
+### 5. Roster Simulation
 
 Show the future January 2026 roster.
 
@@ -96,10 +96,10 @@ Points to mention:
 
 - the schedule is future-facing, not historical;
 - the roster has 160 named synthetic agents;
-- legal constraints include one shift per day, max five shifts per week, and 11 hours minimum rest;
+- simplified roster constraints include one shift per day, max five shifts per week, and 11 hours minimum rest;
 - the dashboard shows the difference between the approved 160-agent scenario and the estimated full-coverage roster.
 
-### 6. Agent Performance
+### 6. Service Quality Metrics
 
 Show the agent-level operational view.
 
@@ -108,9 +108,9 @@ Points to mention:
 - agent metrics include handled calls and handle-time components;
 - service level is intentionally not treated as an agent-level metric because queue wait occurs before an agent receives the call.
 
-### 7. Methodology
+### 7. Methods & Assumptions
 
-Show the validation and methodology tab.
+Show the validation and Methods & Assumptions tab.
 
 Points to mention:
 
@@ -132,15 +132,15 @@ Points to mention:
 
 Capture these figures for the report:
 
-1. Executive Summary KPI view.
-2. Historical Trends volume chart.
-3. Forecasting model comparison table.
+1. Overview KPI view.
+2. Demand Analysis volume chart.
+3. Demand Forecast model comparison table.
 4. January 2026 future forecast chart.
-5. Staffing requirement curve.
-6. Scheduling coverage and shift mix view.
+5. Capacity Planning requirement curve.
+6. Roster Simulation coverage and shift mix view.
 7. Daily roster table.
-8. Agent Performance view.
-9. Methodology / validation view.
+8. Service Quality Metrics view.
+9. Methods & Assumptions / validation view.
 
 Suggested destination:
 

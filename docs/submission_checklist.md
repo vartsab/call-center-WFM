@@ -13,7 +13,7 @@
 - [x] Staffing impact comparison by forecast model added.
 - [x] Future January 2026 forecast generated.
 - [x] Erlang C staffing requirements calculated.
-- [x] Legal 160-agent schedule generated.
+- [x] Simulated 160-agent schedule generated.
 - [x] Dashboard screenshots captured.
 - [x] Demo scripts added.
 - [x] Compact Postgres portfolio deployment created.

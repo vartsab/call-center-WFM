@@ -81,7 +81,7 @@ SLIDES = [
             "Raw table -> synthetic call-center warehouse.",
             "Warehouse -> SQL views -> Streamlit dashboard.",
             "Forecasting -> Erlang C staffing -> OR-Tools schedule optimizer.",
-            "The product mirrors enterprise WFM flow, but keeps every step inspectable.",
+            "The academic prototype mirrors an enterprise-inspired WFM flow, but keeps every step inspectable.",
         ],
     ),
     Slide(
@@ -164,7 +164,7 @@ SLIDES = [
         title="Why this is an engineering project",
         bullets=[
             "The project does not claim to invent WFM as a new market category.",
-            "Its novelty is the transparent, reproducible, open-data implementation of an enterprise WFM workflow.",
+            "Its novelty is the transparent, reproducible, open-data implementation of an enterprise-inspired WFM workflow.",
             "Academic value: every layer can be inspected, changed, evaluated and extended.",
             "Market relevance: commercial WFM suites solve the same real operational problem.",
         ],

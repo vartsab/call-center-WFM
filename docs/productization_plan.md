@@ -9,7 +9,7 @@ The final demonstration should feel like one coherent product rather than a coll
 - Streamlit as the user-facing dashboard;
 - forecast evaluation and future planning forecast;
 - Erlang C staffing requirements;
-- legal roster optimization;
+- roster simulation;
 - documented model, schedule, and deployment outputs.
 
 ## Current Product Shape
@@ -122,7 +122,7 @@ Tradeoffs:
 
 - public URL uses nonstandard HTTPS port `8443`;
 - compact seed tables are analytical extracts, not the complete raw warehouse;
-- production hardening such as backups and monitoring remains optional.
+- operational hardening such as backups and monitoring remains optional.
 
 ## Recommended Path
 
@@ -136,17 +136,17 @@ Implemented sequence:
 ## Proposed Final Demo Flow
 
 1. Open Streamlit dashboard.
-2. Show SQL-backed historical executive summary.
+2. Show SQL-backed historical overview.
 3. Show full-history forecast model comparison.
 4. Show January 2026 forecast.
 5. Show Erlang C staffing requirement curve.
-6. Show Scheduling tab with:
-   - 160-agent legal roster;
+6. Show Roster Simulation tab with:
+   - simulated 160-agent roster;
    - full-coverage roster estimate;
    - daily shift mix;
    - selected-day coverage gap;
    - roster table with named agents.
-7. Show Methodology tab and validation metrics.
+7. Show Methods & Assumptions tab and validation metrics.
 8. Mention public deployment: `https://wfm.vartsab.com:8443`.
 9. If MLflow is added later, open MLflow UI and show model comparison runs.
 

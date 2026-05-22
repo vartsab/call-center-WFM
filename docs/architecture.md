@@ -13,7 +13,7 @@ Public 311 data
     -> historical forecasting evaluation
     -> future planning forecast
     -> Erlang C staffing calculator
-    -> legal roster optimizer
+    -> roster simulation
     -> schedule visualization
 ```
 
@@ -126,7 +126,7 @@ Objective:
 - minimize overcoverage;
 - minimize total scheduled shifts.
 
-The approved 160-agent scenario is intentionally shown as a constrained planning case. The January 2026 staffing curve implies a much larger full-coverage roster estimate, so the dashboard reports both the legal 160-agent roster and the remaining coverage gap.
+The approved 160-agent scenario is intentionally shown as a constrained planning case. The January 2026 staffing curve implies a much larger full-coverage roster estimate, so the dashboard reports both the simulated 160-agent roster and the remaining coverage gap.
 
 ### Productization Layer
 
@@ -142,13 +142,13 @@ An optional MLOps layer can be added with MLflow for experiment tracking and mod
 
 Tabs:
 
-- Executive Summary;
-- Historical Trends;
-- Forecasting;
-- Staffing;
-- Scheduling;
-- Agent Performance;
-- Methodology.
+- Overview;
+- Demand Analysis;
+- Demand Forecast;
+- Capacity Planning;
+- Roster Simulation;
+- Service Quality Metrics;
+- Methods & Assumptions.
 
 The current dashboard reads from SQL Server views when available and uses generated CSV files as a fallback for local demos.
 

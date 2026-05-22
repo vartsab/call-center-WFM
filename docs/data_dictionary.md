@@ -143,7 +143,7 @@ The project keeps raw and processed CSV outputs local. The code and committed su
 | `docs/future_forecast_summary.json` | January 2026 future forecast summary. |
 | `data/processed/future_staffing_requirements.csv` | January 2026 Erlang C staffing requirements. |
 | `docs/future_staffing_requirements_summary.json` | January 2026 staffing summary. |
-| `data/processed/future_optimized_schedule.csv` | January 2026 legal roster schedule for the 160-agent planning scenario. |
+| `data/processed/future_optimized_schedule.csv` | January 2026 simulated roster schedule for the 160-agent planning scenario. |
 | `data/processed/future_schedule_coverage.csv` | January 2026 scheduled coverage versus required staffing. |
 | `docs/future_scheduling_summary.json` | January 2026 scheduling summary. |
 
