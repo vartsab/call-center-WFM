@@ -130,7 +130,7 @@ SQL_QUERIES = {
 
 
 PAPER_BG = "#f8f3ea"
-PANEL_BG = "#fffaf2"
+PANEL_BG = PAPER_BG
 INK = "#182033"
 MUTED = "#6d675d"
 RULE = "#d7cec0"
@@ -468,7 +468,8 @@ def page_config() -> None:
             font-size: 0.73rem;
             margin-top: 0.35rem;
         }
-        .editorial-section {
+        .editorial-section,
+        .chart-label {
             color: #5f5a51;
             font-size: 0.68rem;
             font-weight: 700;
@@ -476,7 +477,8 @@ def page_config() -> None:
             margin: 1.25rem 0 0.4rem;
             text-transform: uppercase;
         }
-        .editorial-note {
+        .editorial-note,
+        .chart-note {
             color: #4b4b4b;
             font-size: 0.9rem;
             line-height: 1.45;
@@ -525,6 +527,10 @@ def page_config() -> None:
         div[data-testid="stDataFrame"] {
             border: 1px solid #dfd6ca;
             border-radius: 4px;
+        }
+        div[data-testid="stPlotlyChart"],
+        div[data-testid="stPlotlyChart"] > div {
+            background: #f8f3ea !important;
         }
         @media (max-width: 900px) {
             .portfolio-kpi-grid {
@@ -930,13 +936,25 @@ def render_section_header(label: str, note: str = "") -> None:
     )
 
 
+def render_chart_header(label: str, note: str = "") -> None:
+    note_html = f'<div class="chart-note">{escape(note)}</div>' if note else ""
+    st.markdown(
+        f"""
+        <div class="chart-label">{escape(label)}</div>
+        {note_html}
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def style_editorial_figure(fig: Any, height: int | None = None) -> Any:
     layout_updates: dict[str, Any] = {
         "paper_bgcolor": PANEL_BG,
         "plot_bgcolor": PANEL_BG,
         "colorway": EDITORIAL_COLORS,
         "font": {"family": "Arial, sans-serif", "color": INK},
-        "title_font": {"family": 'Georgia, "Times New Roman", serif', "size": 20, "color": INK},
+        "title_text": "",
+        "title_font": {"family": "Arial, sans-serif", "size": 12, "color": MUTED},
         "legend": {
             "orientation": "h",
             "yanchor": "bottom",
@@ -970,6 +988,7 @@ def style_editorial_figure(fig: Any, height: int | None = None) -> Any:
 
 def add_chart_source(fig: Any, text: str) -> Any:
     style_editorial_figure(fig)
+    fig.update_layout(title_text="")
     fig.add_annotation(
         text=text,
         xref="paper",
@@ -995,6 +1014,15 @@ def render_insight_callout(text: str) -> None:
 
 def render_kpi_disclaimer() -> None:
     st.caption("Synthetic operational KPI layer used for analytical simulation.")
+
+
+def apply_agent_name_lookup(frame: pd.DataFrame, lookup: dict[int, str]) -> pd.DataFrame:
+    if frame.empty or "agent_id" not in frame.columns or not lookup:
+        return frame
+    updated = frame.copy()
+    updated["agent_id"] = pd.to_numeric(updated["agent_id"])
+    updated["agent_name"] = updated["agent_id"].map(lookup).fillna(updated.get("agent_name", ""))
+    return updated
 
 
 def render_sidebar(source: str, volume: pd.DataFrame) -> tuple[list[str], tuple[Any, Any]]:
@@ -1358,7 +1386,7 @@ def render_historical_trends(volume: pd.DataFrame) -> None:
             ("Peak avg calls", format_number(peak_hour["avg_calls"], 1), "per selected hour"),
         ]
     )
-    render_section_header(
+    render_chart_header(
         "Intraday Demand Heatmap",
         "Darker cells show where demand repeatedly concentrates, making the forecasting problem operational rather than abstract.",
     )
@@ -1508,7 +1536,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
     else:
         selected_models = []
 
-    render_section_header(
+    render_chart_header(
         "Holdout Forecast Evidence",
         "Actual demand and candidate model outputs are shown on the same historical interval window.",
     )
@@ -1565,6 +1593,10 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
             value_name="value",
         )
         error_rows["model"] = error_rows["model"].map(model_label)
+        render_chart_header(
+            "Validation Error By Model",
+            "Error bars make the model trade-offs legible before the forecast is used downstream.",
+        )
         fig = px.bar(
             error_rows,
             x="model",
@@ -1852,8 +1884,8 @@ def render_scheduling() -> None:
         "Chapter 05 - Roster Simulation",
         "The modeled roster exposes the capacity gap.",
         (
-            "This is not a labor-law optimizer; it is a roster simulation that shows whether the "
-            "available agent pool can satisfy modeled peak demand intervals."
+            "This is a roster simulation: a way to see whether the available agent pool can cover "
+            "the pressure created by modeled peak demand."
         ),
         "SIMULATED roster allocation",
     )
@@ -2027,6 +2059,10 @@ def render_scheduling() -> None:
     ].copy()
     roster_display["break_start_datetime"] = roster_display["break_start_datetime"].dt.strftime("%H:%M")
     roster_display["break_end_datetime"] = roster_display["break_end_datetime"].dt.strftime("%H:%M")
+    render_section_header(
+        "Roster Detail",
+        "Agent names are fictional Agatha Christie characters, used only for the simulation.",
+    )
     render_dataframe(roster_display, hide_index=True)
 
     with st.expander("Daily timeline"):
@@ -2056,17 +2092,36 @@ def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame
         return
     render_chapter_header(
         "Chapter 06 - Service Quality Metrics",
-        "Quality indicators are simulated, not employee evidence.",
+        "Service quality is modeled, not observed.",
         (
-            "The service-quality layer demonstrates how operational metadata could be analyzed while "
-            "keeping synthetic agent entities clearly separated from real NYC 311 demand."
+            "The service-quality layer shows how a WFM team might read handle time, workload, "
+            "and skill mix once the synthetic operating layer is placed over real demand."
         ),
         "SYNTHETIC operational metadata",
     )
-    render_insight_callout("Simulated service-quality indicators demonstrate modeled operational outcomes rather than real employee performance.")
+    render_insight_callout("Simulated service-quality indicators show the shape of the modeled operation.")
     display = agents.copy()
+    schedule_names = read_postgres_or_first_csv(
+        "optimized_schedule",
+        [
+            DATA_DIR / "future_optimized_schedule.csv",
+            DATA_DIR / "full_optimized_schedule.csv",
+            DATA_DIR / "optimized_schedule_sample.csv",
+        ],
+    )
+    name_lookup: dict[int, str] = {}
+    if not schedule_names.empty and {"agent_id", "agent_name"}.issubset(schedule_names.columns):
+        schedule_names["agent_id"] = pd.to_numeric(schedule_names["agent_id"])
+        name_lookup = (
+            schedule_names.dropna(subset=["agent_id", "agent_name"])
+            .drop_duplicates("agent_id")
+            .set_index("agent_id")["agent_name"]
+            .to_dict()
+        )
     if "agent_name" not in display.columns:
         display["agent_name"] = "Agent " + display["agent_id"].astype(str)
+    display = apply_agent_name_lookup(display, name_lookup)
+    agent_dimension = apply_agent_name_lookup(agent_dimension, name_lookup)
     total_agents = len(agent_dimension) if not agent_dimension.empty else display["agent_id"].nunique()
     agents_with_calls = display["agent_id"].nunique()
     grouped = (
@@ -2083,16 +2138,16 @@ def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame
     render_metric_strip(
         [
             ("Total agents", format_number(total_agents), "simulated entities"),
-            ("Agents with calls", format_number(agents_with_calls), "observed in metadata"),
+            ("Agents with calls", format_number(agents_with_calls), "active in the sample"),
             ("Handled calls", format_number(grouped["handled_calls"].sum()), "synthetic KPI layer"),
             ("Avg AHT", f"{grouped['avg_handle_time_sec'].mean():,.0f}s", "modeled handle time"),
         ]
     )
 
     if not agent_dimension.empty:
-        render_section_header(
+        render_chart_header(
             "Synthetic Agent Pool",
-            "Skill groups provide a realistic operating structure without representing real employees.",
+            "Skill groups give the synthetic operation structure; agent names are fictional Agatha Christie characters.",
         )
         skill_mix = (
             agent_dimension.groupby("skill_group", as_index=False)
@@ -2104,9 +2159,9 @@ def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame
         add_chart_source(fig, "SYNTHETIC agent entities")
         render_plotly_chart(fig)
 
-    render_section_header(
+    render_chart_header(
         "Modeled Service Workload",
-        "The chart ranks generated agent entities by handled calls and colors them by average handle time.",
+        "The chart ranks fictional agent names by handled calls and colors them by modeled handle time.",
     )
     top_agents = grouped.head(20)
     fig = px.bar(
@@ -2119,7 +2174,10 @@ def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame
     fig.update_layout(title="Top agents by handled calls", xaxis_title=None, yaxis_title="Calls")
     add_chart_source(fig, "SYNTHETIC agent performance metadata")
     render_plotly_chart(fig)
-    render_section_header("Synthetic Detail Table", "Detailed rows remain available for transparent inspection.")
+    render_section_header(
+        "Synthetic Detail Table",
+        "Agent names are fictional Agatha Christie characters; the rows are generated service-quality metadata.",
+    )
     render_dataframe(top_agents, hide_index=True)
 
 
@@ -2226,7 +2284,7 @@ def render_methodology() -> None:
             """
             - Synthetic AHT is generated from documented service-category assumptions.
             - Synthetic SLA outcomes are derived from modeled wait-time behavior.
-            - Simulated agents are generated entities, not real employees.
+            - Simulated agents use fictional Agatha Christie character names for display.
             - Erlang C assumes stationary interval demand, pooled agents, and simplified queue behavior.
             """
         )
@@ -2235,7 +2293,7 @@ def render_methodology() -> None:
         st.markdown(
             """
             - No real call center operations are included.
-            - No real employee data is included.
+            - No employee records are included.
             - Staffing assumptions are simplified for an academic prototype.
             - The dashboard is an academic prototype only.
             """

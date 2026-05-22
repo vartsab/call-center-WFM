@@ -4,13 +4,17 @@ from __future__ import annotations
 
 import csv
 import shutil
+import sys
 from collections import defaultdict
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 DATA_DIR = ROOT / "data" / "processed"
 SEED_DIR = ROOT / "deploy" / "seed"
+
+from src.scheduling.christie_names import christie_agent_name
 
 
 CATEGORY_SERVICE_LEVEL = {
@@ -159,6 +163,27 @@ def build_dashboard_volume() -> None:
     )
 
 
+def build_agent_dimension() -> None:
+    rows = read_rows(DATA_DIR / "dim_agents_sample.csv")
+    output_rows: list[dict[str, object]] = []
+    for row in rows:
+        agent_id = int(row["agent_id"])
+        output_rows.append(
+            {
+                "agent_id": agent_id,
+                "agent_name": christie_agent_name(agent_id),
+                "skill_group": row["skill_group"],
+                "employment_type": row["employment_type"],
+                "active_flag": row["active_flag"],
+            }
+        )
+    write_rows(
+        SEED_DIR / "dashboard_agent_dimension.csv",
+        output_rows,
+        ["agent_id", "agent_name", "skill_group", "employment_type", "active_flag"],
+    )
+
+
 def build_agent_performance() -> None:
     calls = read_rows(DATA_DIR / "synthetic_calls_sample.csv")
     agents = {
@@ -191,7 +216,7 @@ def build_agent_performance() -> None:
         output_rows.append(
             {
                 "agent_id": agent_id,
-                "agent_name": agent.get("agent_name", f"Agent {agent_id}"),
+                "agent_name": christie_agent_name(int(agent_id)),
                 "skill_group": agent.get("skill_group", ""),
                 "calendar_date": calendar_date,
                 "handled_calls": int(handled),
@@ -226,6 +251,7 @@ def copy_artifacts() -> None:
 def main() -> None:
     copy_artifacts()
     build_dashboard_volume()
+    build_agent_dimension()
     build_agent_performance()
     print(f"Portfolio seed files written to {SEED_DIR}")
 
