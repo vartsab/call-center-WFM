@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -126,6 +127,26 @@ SQL_QUERIES = {
         FROM dbo.Dim_Agent
     """,
 }
+
+
+PAPER_BG = "#f8f3ea"
+PANEL_BG = "#fffaf2"
+INK = "#182033"
+MUTED = "#6d675d"
+RULE = "#d7cec0"
+GRID = "#e5dbcd"
+ACCENT = "#2f6f9f"
+ACCENT_DARK = "#24364b"
+ACCENT_WARM = "#b66a36"
+ACCENT_SOFT = "#7aaed6"
+EDITORIAL_COLORS = [
+    ACCENT_DARK,
+    ACCENT,
+    ACCENT_WARM,
+    "#7b766c",
+    ACCENT_SOFT,
+    "#7c4f3a",
+]
 
 
 def page_config() -> None:
@@ -370,6 +391,140 @@ def page_config() -> None:
             line-height: 1.45;
             margin-top: 1.2rem;
             padding-top: 0.85rem;
+        }
+        .chapter-header {
+            border-bottom: 1px solid #d7cec0;
+            margin: 1.2rem 0 1.35rem;
+            padding-bottom: 1.05rem;
+        }
+        .chapter-kicker {
+            color: #6f6a61;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+        }
+        .chapter-title {
+            color: #273041;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(1.85rem, 3.2vw, 3.05rem);
+            font-weight: 400;
+            letter-spacing: 0;
+            line-height: 1.02;
+            margin: 0;
+        }
+        .chapter-dek {
+            color: #414141;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1rem;
+            font-style: italic;
+            line-height: 1.55;
+            margin: 0.65rem 0 0;
+            max-width: 820px;
+        }
+        .chapter-tag {
+            background: #efe8dc;
+            color: #5a554e;
+            display: inline-block;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            margin-top: 0.85rem;
+            padding: 0.22rem 0.42rem;
+            text-transform: uppercase;
+        }
+        .editorial-metric-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+            margin: 0.35rem 0 1.35rem;
+        }
+        .editorial-metric {
+            border-top: 1px solid #cfc5b7;
+            min-width: 0;
+            padding-top: 0.65rem;
+        }
+        .editorial-metric-label {
+            color: #6d675d;
+            font-size: 0.67rem;
+            font-weight: 700;
+            letter-spacing: 0.11em;
+            line-height: 1.22;
+            min-height: 1.65rem;
+            text-transform: uppercase;
+        }
+        .editorial-metric-value {
+            color: #1d2638;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 2rem;
+            font-weight: 400;
+            line-height: 1;
+            margin-top: 0.45rem;
+            overflow-wrap: anywhere;
+        }
+        .editorial-metric-note {
+            color: #6f6a61;
+            font-size: 0.73rem;
+            margin-top: 0.35rem;
+        }
+        .editorial-section {
+            color: #5f5a51;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            margin: 1.25rem 0 0.4rem;
+            text-transform: uppercase;
+        }
+        .editorial-note {
+            color: #4b4b4b;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            margin-bottom: 0.75rem;
+            max-width: 820px;
+        }
+        .insight-callout .callout-label {
+            color: #5f5a51;
+            display: block;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.2rem;
+            text-transform: uppercase;
+        }
+        .method-flow {
+            display: grid;
+            gap: 0.7rem;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            margin: 0.5rem 0 1.3rem;
+        }
+        .method-card {
+            background: rgba(255, 255, 255, 0.62);
+            border-left: 3px solid #2f6f9f;
+            color: #293141;
+            min-height: 5.2rem;
+            padding: 0.8rem 0.8rem 0.7rem;
+        }
+        .method-card.synthetic {
+            border-left-color: #b66a36;
+        }
+        .method-card.simulated {
+            border-left-color: #7b766c;
+        }
+        .method-card-title {
+            font-size: 0.86rem;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+        .method-card-note {
+            color: #5f5a51;
+            font-size: 0.74rem;
+            line-height: 1.35;
+            margin-top: 0.25rem;
+        }
+        div[data-testid="stDataFrame"] {
+            border: 1px solid #dfd6ca;
+            border-radius: 4px;
         }
         @media (max-width: 900px) {
             .portfolio-kpi-grid {
@@ -733,7 +888,88 @@ def render_dataframe(data: pd.DataFrame, **kwargs: Any) -> None:
         st.dataframe(data, use_container_width=True, **kwargs)
 
 
+def render_chapter_header(kicker: str, title: str, deck: str, tag: str = "") -> None:
+    tag_html = f'<div class="chapter-tag">{escape(tag)}</div>' if tag else ""
+    st.markdown(
+        f"""
+        <div class="chapter-header">
+            <div class="chapter-kicker">{escape(kicker)}</div>
+            <div class="chapter-title">{escape(title)}</div>
+            <div class="chapter-dek">{escape(deck)}</div>
+            {tag_html}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_metric_strip(metrics: list[tuple[str, str, str]]) -> None:
+    cards = []
+    for label, value, note in metrics:
+        cards.append(
+            '<div class="editorial-metric">'
+            f'<div class="editorial-metric-label">{escape(label)}</div>'
+            f'<div class="editorial-metric-value">{escape(str(value))}</div>'
+            f'<div class="editorial-metric-note">{escape(note)}</div>'
+            "</div>"
+        )
+    st.markdown(
+        f'<div class="editorial-metric-grid">{"".join(cards)}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_section_header(label: str, note: str = "") -> None:
+    note_html = f'<div class="editorial-note">{escape(note)}</div>' if note else ""
+    st.markdown(
+        f"""
+        <div class="editorial-section">{escape(label)}</div>
+        {note_html}
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def style_editorial_figure(fig: Any, height: int | None = None) -> Any:
+    layout_updates: dict[str, Any] = {
+        "paper_bgcolor": PANEL_BG,
+        "plot_bgcolor": PANEL_BG,
+        "colorway": EDITORIAL_COLORS,
+        "font": {"family": "Arial, sans-serif", "color": INK},
+        "title_font": {"family": 'Georgia, "Times New Roman", serif', "size": 20, "color": INK},
+        "legend": {
+            "orientation": "h",
+            "yanchor": "bottom",
+            "y": -0.22,
+            "xanchor": "left",
+            "x": 0,
+            "font": {"size": 11, "color": MUTED},
+        },
+        "margin": {"l": 32, "r": 24, "t": 82, "b": 48},
+    }
+    if height:
+        layout_updates["height"] = height
+    fig.update_layout(**layout_updates)
+    fig.update_xaxes(
+        showgrid=False,
+        showline=True,
+        linecolor=RULE,
+        zeroline=False,
+        tickfont={"size": 11, "color": MUTED},
+        title_font={"size": 12, "color": MUTED},
+    )
+    fig.update_yaxes(
+        gridcolor=GRID,
+        showline=False,
+        zeroline=False,
+        tickfont={"size": 11, "color": MUTED},
+        title_font={"size": 12, "color": MUTED},
+    )
+    return fig
+
+
 def add_chart_source(fig: Any, text: str) -> Any:
+    style_editorial_figure(fig)
     fig.add_annotation(
         text=text,
         xref="paper",
@@ -752,7 +988,7 @@ def add_chart_source(fig: Any, text: str) -> Any:
 
 def render_insight_callout(text: str) -> None:
     st.markdown(
-        f'<div class="insight-callout"><strong>Insight:</strong> {text}</div>',
+        f'<div class="insight-callout"><span class="callout-label">Interpretation</span>{escape(text)}</div>',
         unsafe_allow_html=True,
     )
 
@@ -1083,6 +1319,15 @@ def render_historical_trends(volume: pd.DataFrame) -> None:
         st.info("Historical trend data is not available.")
         return
 
+    render_chapter_header(
+        "Chapter 02 - Real Demand Anatomy",
+        "Demand has a clock.",
+        (
+            "The raw service request stream becomes operationally useful once it is reshaped "
+            "into recurring hour-of-day and day-of-week patterns."
+        ),
+        "REAL NYC 311 demand",
+    )
     render_insight_callout("Intraday demand concentration supports 30-minute interval forecasting.")
 
     day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -1102,11 +1347,26 @@ def render_historical_trends(volume: pd.DataFrame) -> None:
     day_hour["day_name"] = pd.Categorical(day_hour["day_name"], categories=day_order, ordered=True)
     day_hour = day_hour.sort_values(["day_name", "hour_label"])
     pivot = day_hour.pivot(index="day_name", columns="hour_label", values="avg_calls").fillna(0)
+    peak_hour = day_hour.loc[day_hour["avg_calls"].idxmax()]
+    rendered_days = volume["calendar_date"].nunique()
+
+    render_metric_strip(
+        [
+            ("Observed days", format_number(rendered_days), "selected filter window"),
+            ("Peak day", str(peak_hour["day_name"]), "highest average hour"),
+            ("Peak hour", str(peak_hour["hour_label"]), "local demand concentration"),
+            ("Peak avg calls", format_number(peak_hour["avg_calls"], 1), "per selected hour"),
+        ]
+    )
+    render_section_header(
+        "Intraday Demand Heatmap",
+        "Darker cells show where demand repeatedly concentrates, making the forecasting problem operational rather than abstract.",
+    )
 
     fig = px.imshow(
         pivot,
         aspect="auto",
-        color_continuous_scale="Blues",
+        color_continuous_scale=["#f8f3ea", "#d7e6ed", "#6da3c8", "#2f6f9f", "#16324a"],
         labels={"color": "Avg calls"},
     )
     fig.update_layout(
@@ -1114,6 +1374,22 @@ def render_historical_trends(volume: pd.DataFrame) -> None:
         xaxis_title=None,
         yaxis_title=None,
         coloraxis_colorbar={"title": "Avg calls"},
+        height=460,
+    )
+    fig.add_annotation(
+        x=str(peak_hour["hour_label"]),
+        y=str(peak_hour["day_name"]),
+        text=f"Peak<br>{format_number(peak_hour['avg_calls'], 1)}",
+        showarrow=True,
+        arrowhead=0,
+        arrowwidth=1,
+        arrowcolor="#7c6f60",
+        ax=36,
+        ay=-30,
+        bgcolor="rgba(248, 243, 234, 0.92)",
+        bordercolor="#cbbfac",
+        borderwidth=1,
+        font={"color": INK, "size": 11},
     )
     add_chart_source(fig, "Source: REAL NYC 311 demand")
     render_plotly_chart(fig)
@@ -1135,20 +1411,35 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
     )
     future_summary = load_first_json([DOCS_DIR / "future_forecast_summary.json"])
 
+    render_chapter_header(
+        "Chapter 03 - Forecast Evidence",
+        "The model earns trust by being compared.",
+        (
+            "Forecasting is presented as measured evidence: holdout accuracy, model comparison, "
+            "and future interval predictions remain visibly separated from historical demand."
+        ),
+        "FORECASTED model output",
+    )
     render_insight_callout("Histogram Gradient Boosting achieved the lowest validation RMSE among the tested feature models.")
 
-    metric_cols = st.columns(4)
-    metric_cols[0].metric("Test intervals", summary.get("test_intervals", 0))
-    metric_cols[1].metric("MAE", summary.get("mae", 0))
-    metric_cols[2].metric("RMSE", summary.get("rmse", 0))
-    metric_cols[3].metric("MAPE", f"{summary.get('mape', 0):.1%}")
+    render_metric_strip(
+        [
+            ("Test intervals", format_number(summary.get("test_intervals", 0)), "holdout sample"),
+            ("MAE", format_number(summary.get("mae", 0), 2), "average absolute error"),
+            ("RMSE", format_number(summary.get("rmse", 0), 2), "penalizes peak misses"),
+            ("MAPE", f"{summary.get('mape', 0):.1%}", "relative forecast error"),
+        ]
+    )
 
     model_rows = pd.DataFrame(model_summary.get("models", [])) if model_summary else pd.DataFrame()
     model_names = model_rows["model"].tolist() if not model_rows.empty else []
     selected_model = model_summary.get("selected_model", "") if model_summary else ""
 
     if not model_rows.empty:
-        st.subheader("Model comparison")
+        render_section_header(
+            "Model Comparison",
+            "The table keeps model selection auditable instead of presenting the chosen model as a black box.",
+        )
         display_rows = model_rows.copy()
         display_rows["model"] = display_rows["model"].map(model_label)
         render_dataframe(display_rows, hide_index=True)
@@ -1217,6 +1508,10 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
     else:
         selected_models = []
 
+    render_section_header(
+        "Holdout Forecast Evidence",
+        "Actual demand and candidate model outputs are shown on the same historical interval window.",
+    )
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -1224,6 +1519,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
             y=baseline["actual_call_volume"],
             mode="lines",
             name="Actual",
+            line={"color": ACCENT_DARK, "width": 2.2},
         )
     )
     fig.add_trace(
@@ -1232,10 +1528,11 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
             y=baseline["predicted_call_volume"],
             mode="lines",
             name="Baseline",
+            line={"color": "#8c867c", "width": 1.5, "dash": "dot"},
         )
     )
     if selected_models and not model_predictions.empty:
-        for model in selected_models:
+        for index, model in enumerate(selected_models):
             model_slice = model_predictions[model_predictions["model"] == model]
             fig.add_trace(
                 go.Scatter(
@@ -1243,6 +1540,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
                     y=model_slice["predicted_call_volume"],
                     mode="lines",
                     name=model_label(model),
+                    line={"color": EDITORIAL_COLORS[(index + 1) % len(EDITORIAL_COLORS)], "width": 1.7},
                 )
             )
     elif not feature_forecast.empty:
@@ -1252,6 +1550,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
                 y=feature_forecast["predicted_call_volume"],
                 mode="lines",
                 name=f"Best feature model ({model_label(selected_model or 'selected')})",
+                line={"color": ACCENT, "width": 1.8},
             )
         )
     fig.update_layout(title="Forecast holdout period", xaxis_title=None, yaxis_title="Calls")
@@ -1266,7 +1565,14 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
             value_name="value",
         )
         error_rows["model"] = error_rows["model"].map(model_label)
-        fig = px.bar(error_rows, x="model", y="value", color="metric", barmode="group")
+        fig = px.bar(
+            error_rows,
+            x="model",
+            y="value",
+            color="metric",
+            barmode="group",
+            color_discrete_sequence=[ACCENT_DARK, ACCENT, ACCENT_WARM],
+        )
         fig.update_layout(title="Holdout error by model", xaxis_title=None, yaxis_title="Error")
         add_chart_source(fig, "FORECASTED validation output")
         render_plotly_chart(fig)
@@ -1278,12 +1584,18 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         future_forecast["predicted_call_volume"] = pd.to_numeric(
             future_forecast["predicted_call_volume"]
         )
-        st.subheader("Future planning forecast")
-        future_cols = st.columns(4)
-        future_cols[0].metric("Forecast intervals", future_summary.get("forecast_intervals", len(future_forecast)))
-        future_cols[1].metric("Forecast start", future_summary.get("forecast_start", ""))
-        future_cols[2].metric("Avg calls", f"{future_summary.get('avg_predicted_calls', 0):,.1f}")
-        future_cols[3].metric("Peak calls", f"{future_summary.get('peak_predicted_calls', 0):,.1f}")
+        render_section_header(
+            "Future Planning Forecast",
+            "The future horizon is a model output, used downstream for staffing and roster simulation.",
+        )
+        render_metric_strip(
+            [
+                ("Forecast intervals", format_number(future_summary.get("forecast_intervals", len(future_forecast))), "30-minute periods"),
+                ("Forecast start", str(future_summary.get("forecast_start", "")), "planning horizon"),
+                ("Avg calls", format_number(future_summary.get("avg_predicted_calls", 0), 1), "modeled interval demand"),
+                ("Peak calls", format_number(future_summary.get("peak_predicted_calls", 0), 1), "modeled interval peak"),
+            ]
+        )
         if not future_model_scenarios.empty:
             future_model_scenarios["interval_start_datetime"] = pd.to_datetime(
                 future_model_scenarios["interval_start_datetime"]
@@ -1310,6 +1622,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
                 x="interval_start_datetime",
                 y="predicted_call_volume",
                 color="model",
+                color_discrete_sequence=EDITORIAL_COLORS,
             )
             summary_by_model = (
                 future_model_scenarios.groupby("model", as_index=False)
@@ -1332,12 +1645,16 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         render_plotly_chart(fig)
 
     if not forecasting.empty:
+        render_section_header(
+            "Forecasting Input Mix",
+            "The historical demand mix keeps the model grounded in the real service request composition.",
+        )
         top = (
             forecasting.groupby("service_category", as_index=False)
             .agg(call_volume=("call_volume", "sum"))
             .sort_values("call_volume", ascending=False)
         )
-        fig = px.bar(top, x="service_category", y="call_volume")
+        fig = px.bar(top, x="service_category", y="call_volume", color_discrete_sequence=[ACCENT])
         fig.update_layout(title="Forecasting input by category", xaxis_title=None, yaxis_title="Calls")
         add_chart_source(fig, "Source: REAL NYC 311 demand")
         render_plotly_chart(fig)
@@ -1364,6 +1681,15 @@ def render_staffing() -> None:
         return
     scenario_summary = load_json(DOCS_DIR / "future_model_staffing_scenario_summary.json")
 
+    render_chapter_header(
+        "Chapter 04 - Capacity Translation",
+        "Forecasted demand becomes staffing pressure.",
+        (
+            "This chapter shows the operational bridge between predicted call volume and modeled agent "
+            "requirements using Erlang C assumptions."
+        ),
+        "FORECASTED + SIMULATED",
+    )
     render_insight_callout("Erlang C transforms interval demand forecasts into modeled staffing requirements.")
 
     staffing["interval_start_datetime"] = pd.to_datetime(staffing["interval_start_datetime"])
@@ -1373,12 +1699,19 @@ def render_staffing() -> None:
     staffing["expected_occupancy"] = pd.to_numeric(staffing["expected_occupancy"])
     staffing["service_level_probability"] = pd.to_numeric(staffing["service_level_probability"])
 
-    metric_cols = st.columns(4)
-    metric_cols[0].metric("Intervals", summary.get("interval_count", len(staffing)))
-    metric_cols[1].metric("Peak base FTE", summary.get("peak_base_required_agents", 0))
-    metric_cols[2].metric("Peak shrinkage FTE", summary.get("peak_shrinkage_adjusted_agents", 0))
-    metric_cols[3].metric("Avg service level", f"{summary.get('avg_service_level_probability', 0):.1%}")
+    render_metric_strip(
+        [
+            ("Intervals", format_number(summary.get("interval_count", len(staffing))), "planning horizon"),
+            ("Peak base FTE", format_number(summary.get("peak_base_required_agents", 0)), "before shrinkage"),
+            ("Peak shrinkage FTE", format_number(summary.get("peak_shrinkage_adjusted_agents", 0)), "modeled peak"),
+            ("Avg service level", f"{summary.get('avg_service_level_probability', 0):.1%}", "Erlang C output"),
+        ]
+    )
 
+    render_section_header(
+        "Staffing Requirement Curve",
+        "The pink demand field gives context; the blue staffing lines show how capacity needs rise and fall against it.",
+    )
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -1386,6 +1719,7 @@ def render_staffing() -> None:
             y=staffing["base_required_agents"],
             mode="lines",
             name="Base required agents",
+            line={"color": ACCENT_DARK, "width": 1.9},
         )
     )
     fig.add_trace(
@@ -1394,6 +1728,7 @@ def render_staffing() -> None:
             y=staffing["shrinkage_adjusted_agents"],
             mode="lines",
             name="Shrinkage-adjusted agents",
+            line={"color": ACCENT, "width": 2.1},
         )
     )
     fig.add_trace(
@@ -1402,8 +1737,25 @@ def render_staffing() -> None:
             y=staffing["predicted_call_volume"],
             name="Predicted calls",
             yaxis="y2",
-            opacity=0.35,
+            opacity=0.28,
+            marker={"color": "#d9766a"},
         )
+    )
+    peak_staffing = staffing.loc[staffing["shrinkage_adjusted_agents"].idxmax()]
+    fig.add_annotation(
+        x=peak_staffing["interval_start_datetime"],
+        y=peak_staffing["shrinkage_adjusted_agents"],
+        text=f"Peak need<br>{format_number(peak_staffing['shrinkage_adjusted_agents'])}",
+        showarrow=True,
+        arrowhead=0,
+        arrowwidth=1,
+        arrowcolor="#7c6f60",
+        ax=44,
+        ay=-38,
+        bgcolor="rgba(248, 243, 234, 0.92)",
+        bordercolor="#cbbfac",
+        borderwidth=1,
+        font={"color": INK, "size": 11},
     )
     fig.update_layout(
         title="Forecasted calls and required staffing",
@@ -1417,7 +1769,10 @@ def render_staffing() -> None:
 
     scenario_rows = pd.DataFrame(scenario_summary.get("models", []))
     if not scenario_rows.empty:
-        st.subheader("Model impact on staffing")
+        render_section_header(
+            "Model Impact On Staffing",
+            "Different forecast models create visibly different staffing peaks and full-coverage estimates.",
+        )
         scenario_display = scenario_rows[
             [
                 "model",
@@ -1437,11 +1792,19 @@ def render_staffing() -> None:
             var_name="metric",
             value_name="agents",
         )
-        fig = px.bar(scenario_plot, x="model", y="agents", color="metric", barmode="group")
+        fig = px.bar(
+            scenario_plot,
+            x="model",
+            y="agents",
+            color="metric",
+            barmode="group",
+            color_discrete_sequence=[ACCENT_DARK, ACCENT_SOFT],
+        )
         fig.update_layout(title="Staffing impact by forecast model", xaxis_title=None, yaxis_title="Agents")
         add_chart_source(fig, "SIMULATED staffing scenario output")
         render_plotly_chart(fig)
 
+    render_section_header("Interval Detail Table", "Detailed interval calculations remain available for technical review.")
     display = staffing[
         [
             "interval_start_datetime",
@@ -1485,6 +1848,15 @@ def render_scheduling() -> None:
         st.info("Roster simulation output is not available.")
         return
 
+    render_chapter_header(
+        "Chapter 05 - Roster Simulation",
+        "The modeled roster exposes the capacity gap.",
+        (
+            "This is not a labor-law optimizer; it is a roster simulation that shows whether the "
+            "available agent pool can satisfy modeled peak demand intervals."
+        ),
+        "SIMULATED roster allocation",
+    )
     render_insight_callout("Available agent supply does not fully satisfy modeled peak demand intervals.")
 
     schedule["shift_start_datetime"] = pd.to_datetime(schedule["shift_start_datetime"])
@@ -1506,20 +1878,27 @@ def render_scheduling() -> None:
             else 0
         )
 
-    metric_cols = st.columns(7)
-    metric_cols[0].metric("Shifts", summary.get("scheduled_shifts", len(schedule)))
-    metric_cols[1].metric("Agents", summary.get("agent_pool_size", summary.get("agents_scheduled", 0)))
-    metric_cols[2].metric("Full coverage est.", summary.get("estimated_full_coverage_agents", 0))
-    metric_cols[3].metric("Peak need", summary.get("peak_required_agents", 0))
-    metric_cols[4].metric("Peak plan", summary.get("peak_scheduled_agents", 0))
-    metric_cols[5].metric("Coverage", f"{coverage_achieved:.1%}")
-    metric_cols[6].metric("Gap intervals", summary.get("intervals_with_understaffing", 0))
+    render_metric_strip(
+        [
+            ("Shifts", format_number(summary.get("scheduled_shifts", len(schedule))), "simulated assignments"),
+            ("Agents", format_number(summary.get("agent_pool_size", summary.get("agents_scheduled", 0))), "modeled roster"),
+            ("Full coverage est.", format_number(summary.get("estimated_full_coverage_agents", 0)), "staffing benchmark"),
+            ("Peak need", format_number(summary.get("peak_required_agents", 0)), "required agents"),
+            ("Peak plan", format_number(summary.get("peak_scheduled_agents", 0)), "scheduled agents"),
+            ("Coverage", f"{coverage_achieved:.1%}", "modeled fulfillment"),
+            ("Gap intervals", format_number(summary.get("intervals_with_understaffing", 0)), "understaffed periods"),
+        ]
+    )
     st.caption(
         "Roster rules: one shift per agent per day, "
         f"max {summary.get('max_shifts_per_agent_per_week', 5)} shifts per week, "
         f"{summary.get('min_rest_hours', 11)}h minimum rest."
     )
 
+    render_section_header(
+        "Coverage Gap Over Time",
+        "Required and scheduled lines show the central simulation question: how often modeled supply falls short of demand.",
+    )
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -1527,6 +1906,7 @@ def render_scheduling() -> None:
             y=coverage["required_agents"],
             mode="lines",
             name="Required",
+            line={"color": ACCENT_DARK, "width": 2},
         )
     )
     fig.add_trace(
@@ -1535,6 +1915,7 @@ def render_scheduling() -> None:
             y=coverage["scheduled_agents"],
             mode="lines",
             name="Scheduled",
+            line={"color": ACCENT, "width": 2},
         )
     )
     fig.add_trace(
@@ -1544,7 +1925,24 @@ def render_scheduling() -> None:
             name="Understaffed",
             opacity=0.35,
             yaxis="y2",
+            marker={"color": ACCENT_WARM},
         )
+    )
+    worst_gap = coverage.loc[coverage["understaffed_agents"].idxmax()]
+    fig.add_annotation(
+        x=worst_gap["interval_start_datetime"],
+        y=worst_gap["required_agents"],
+        text=f"Largest gap<br>{format_number(worst_gap['understaffed_agents'])}",
+        showarrow=True,
+        arrowhead=0,
+        arrowwidth=1,
+        arrowcolor="#7c6f60",
+        ax=46,
+        ay=-35,
+        bgcolor="rgba(248, 243, 234, 0.92)",
+        bordercolor="#cbbfac",
+        borderwidth=1,
+        font={"color": INK, "size": 11},
     )
     fig.update_layout(title="Required vs scheduled coverage", xaxis_title=None, yaxis_title="Agents")
     fig.update_layout(yaxis2={"title": "Gap", "overlaying": "y", "side": "right"})
@@ -1552,6 +1950,10 @@ def render_scheduling() -> None:
     render_plotly_chart(fig)
 
     dates = sorted(schedule["shift_date"].dropna().unique())
+    render_section_header(
+        "Selected Day View",
+        "The controls below expose one simulated day at a time for demo and defense walkthroughs.",
+    )
     selected_date = st.selectbox("Schedule date", dates)
     day_schedule = schedule[schedule["shift_date"] == selected_date].sort_values(
         ["shift_start_datetime", "agent_name"]
@@ -1568,7 +1970,7 @@ def render_scheduling() -> None:
         .sort_values("shift_window")
     )
     if not shift_mix.empty:
-        fig = px.bar(shift_mix, x="shift_window", y="agent_count")
+        fig = px.bar(shift_mix, x="shift_window", y="agent_count", color_discrete_sequence=[ACCENT])
         fig.update_layout(title="Daily shift mix", xaxis_title=None, yaxis_title="Agents")
         add_chart_source(fig, "SIMULATED roster allocation")
         render_plotly_chart(fig)
@@ -1581,6 +1983,7 @@ def render_scheduling() -> None:
                 y=day_coverage["required_agents"],
                 mode="lines",
                 name="Required",
+                line={"color": ACCENT_DARK, "width": 2},
             )
         )
         fig.add_trace(
@@ -1589,6 +1992,7 @@ def render_scheduling() -> None:
                 y=day_coverage["scheduled_agents"],
                 mode="lines",
                 name="Scheduled",
+                line={"color": ACCENT, "width": 2},
             )
         )
         fig.add_trace(
@@ -1597,6 +2001,7 @@ def render_scheduling() -> None:
                 y=day_coverage["understaffed_agents"],
                 name="Understaffed",
                 opacity=0.35,
+                marker={"color": ACCENT_WARM},
             )
         )
         fig.update_layout(title="Selected-day coverage", xaxis_title=None, yaxis_title="Agents")
@@ -1631,6 +2036,7 @@ def render_scheduling() -> None:
             x_end="shift_end_datetime",
             y="agent_name",
             color="shift_window",
+            color_discrete_sequence=EDITORIAL_COLORS,
         )
         timeline.update_yaxes(autorange="reversed")
         timeline.update_layout(
@@ -1648,6 +2054,15 @@ def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame
     if agents.empty:
         st.info("Service quality metrics data is not available.")
         return
+    render_chapter_header(
+        "Chapter 06 - Service Quality Metrics",
+        "Quality indicators are simulated, not employee evidence.",
+        (
+            "The service-quality layer demonstrates how operational metadata could be analyzed while "
+            "keeping synthetic agent entities clearly separated from real NYC 311 demand."
+        ),
+        "SYNTHETIC operational metadata",
+    )
     render_insight_callout("Simulated service-quality indicators demonstrate modeled operational outcomes rather than real employee performance.")
     display = agents.copy()
     if "agent_name" not in display.columns:
@@ -1665,28 +2080,46 @@ def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame
         .sort_values("handled_calls", ascending=False)
     )
 
-    metric_cols = st.columns(4)
-    metric_cols[0].metric("Total agents", total_agents)
-    metric_cols[1].metric("Agents with calls", agents_with_calls)
-    metric_cols[2].metric("Handled calls", format_number(grouped["handled_calls"].sum()))
-    metric_cols[3].metric("Avg AHT", f"{grouped['avg_handle_time_sec'].mean():,.0f}s")
+    render_metric_strip(
+        [
+            ("Total agents", format_number(total_agents), "simulated entities"),
+            ("Agents with calls", format_number(agents_with_calls), "observed in metadata"),
+            ("Handled calls", format_number(grouped["handled_calls"].sum()), "synthetic KPI layer"),
+            ("Avg AHT", f"{grouped['avg_handle_time_sec'].mean():,.0f}s", "modeled handle time"),
+        ]
+    )
 
     if not agent_dimension.empty:
+        render_section_header(
+            "Synthetic Agent Pool",
+            "Skill groups provide a realistic operating structure without representing real employees.",
+        )
         skill_mix = (
             agent_dimension.groupby("skill_group", as_index=False)
             .agg(agent_count=("agent_id", "count"))
             .sort_values("agent_count", ascending=False)
         )
-        fig = px.bar(skill_mix, x="skill_group", y="agent_count")
+        fig = px.bar(skill_mix, x="skill_group", y="agent_count", color_discrete_sequence=[ACCENT])
         fig.update_layout(title="Agent pool by skill group", xaxis_title=None, yaxis_title="Agents")
         add_chart_source(fig, "SYNTHETIC agent entities")
         render_plotly_chart(fig)
 
+    render_section_header(
+        "Modeled Service Workload",
+        "The chart ranks generated agent entities by handled calls and colors them by average handle time.",
+    )
     top_agents = grouped.head(20)
-    fig = px.bar(top_agents, x="agent_name", y="handled_calls", color="avg_handle_time_sec")
+    fig = px.bar(
+        top_agents,
+        x="agent_name",
+        y="handled_calls",
+        color="avg_handle_time_sec",
+        color_continuous_scale=["#dfeaf5", ACCENT, ACCENT_DARK],
+    )
     fig.update_layout(title="Top agents by handled calls", xaxis_title=None, yaxis_title="Calls")
     add_chart_source(fig, "SYNTHETIC agent performance metadata")
     render_plotly_chart(fig)
+    render_section_header("Synthetic Detail Table", "Detailed rows remain available for transparent inspection.")
     render_dataframe(top_agents, hide_index=True)
 
 
@@ -1707,19 +2140,61 @@ def render_methodology() -> None:
         "vw_Agent_Performance": "175,359",
     }
 
+    render_chapter_header(
+        "Chapter 07 - Methods & Assumptions",
+        "The boundary lines are part of the work.",
+        (
+            "The prototype is strongest when it is explicit about what is real, what is synthetic, "
+            "what is forecasted, and what is only simulated."
+        ),
+        "TRANSPARENCY APPENDIX",
+    )
     render_insight_callout("Operational metadata is synthetic and documented for academic transparency.")
 
-    st.subheader("Pipeline flow")
+    render_section_header(
+        "Pipeline Flow",
+        "Each step transforms the previous layer while preserving a visible provenance boundary.",
+    )
     st.markdown(
         """
-        <div class="pipeline-flow">
-        NYC 311 -> Cleaning -> Synthetic Metadata -> Forecasting -> Erlang C -> Roster Simulation -> Dashboard
+        <div class="method-flow">
+            <div class="method-card">
+                <div class="method-card-title">NYC 311</div>
+                <div class="method-card-note">Real service request timestamps and volumes.</div>
+            </div>
+            <div class="method-card">
+                <div class="method-card-title">Cleaning</div>
+                <div class="method-card-note">Date, interval, category, and volume preparation.</div>
+            </div>
+            <div class="method-card synthetic">
+                <div class="method-card-title">Synthetic Metadata</div>
+                <div class="method-card-note">AHT, abandonment, SLA, and agent entities.</div>
+            </div>
+            <div class="method-card">
+                <div class="method-card-title">Forecasting</div>
+                <div class="method-card-note">30-minute demand prediction outputs.</div>
+            </div>
+            <div class="method-card simulated">
+                <div class="method-card-title">Erlang C</div>
+                <div class="method-card-note">Modeled staffing requirements.</div>
+            </div>
+            <div class="method-card simulated">
+                <div class="method-card-title">Roster Simulation</div>
+                <div class="method-card-note">Shift allocation and coverage outcomes.</div>
+            </div>
+            <div class="method-card">
+                <div class="method-card-title">Dashboard</div>
+                <div class="method-card-note">Narrative analytics and defense evidence.</div>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    st.subheader("Real vs Synthetic")
+    render_section_header(
+        "Real vs Synthetic",
+        "The table is intentionally blunt: it prevents the portfolio polish from becoming overclaiming.",
+    )
     transparency_rows = [
         {
             "Layer": "REAL",
@@ -1746,7 +2221,7 @@ def render_methodology() -> None:
 
     assumptions_col, limitations_col = st.columns(2)
     with assumptions_col:
-        st.subheader("Assumptions")
+        render_section_header("Assumptions")
         st.markdown(
             """
             - Synthetic AHT is generated from documented service-category assumptions.
@@ -1756,7 +2231,7 @@ def render_methodology() -> None:
             """
         )
     with limitations_col:
-        st.subheader("Limitations")
+        render_section_header("Limitations")
         st.markdown(
             """
             - No real call center operations are included.

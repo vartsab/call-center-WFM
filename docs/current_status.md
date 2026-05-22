@@ -16,7 +16,7 @@ Completed:
 - dimensional tables and analytics views;
 - Streamlit dashboard with SQL Server access and generated-artifact support;
 - Streamlit dashboard with Postgres deployment mode and password protection;
-- portfolio-quality Overview tab with editorial typography, KPI provenance labels, annotated monthly demand chart, and analytical pipeline panel;
+- portfolio-quality dashboard styling with editorial typography, chapter-style tab framing, KPI provenance labels, annotated charts, and analytical pipeline panels;
 - compact portfolio seed database for VPS deployment;
 - Docker Compose deployment with Postgres, Streamlit, and Caddy;
 - public HTTPS deployment on `https://wfm.vartsab.com:8443` while preserving the existing VPN on port `443`;
