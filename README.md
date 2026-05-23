@@ -28,13 +28,13 @@ The current implementation includes:
 - full raw SQL Server landing table for 10.3M public service records;
 - full synthetic SQL Server warehouse load for 10.3M call-center records;
 - SQL Server staging and load scripts;
-- initial SQL analytics views;
+- SQL analytics views;
 - first 30-minute forecasting input builder;
 - full-history seasonal naive baseline forecast;
 - full-history feature model comparison with holiday and lag features;
 - Erlang C staffing requirement calculator;
 - OR-Tools shift scheduling optimizers;
-- Streamlit dashboard MVP with SQL Server and CSV fallback data access;
+- Streamlit portfolio dashboard with SQL Server, CSV fallback, and compact Postgres deployment data access;
 - portfolio deployment path with Streamlit, PostgreSQL, Caddy, Docker Compose, and password protection;
 - project documentation for dataset selection, data generation methodology, architecture, and data dictionary.
 

@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-05-22
+Last updated: 2026-05-23
 
 ## Repository State
 
@@ -143,13 +143,13 @@ Presentation draft:
 
 Dashboard screenshots:
 
-- `docs/screenshots/01_executive_summary.png`
-- `docs/screenshots/02_historical_trends.png`
-- `docs/screenshots/03_forecasting.png`
-- `docs/screenshots/04_staffing_requirements.png`
-- `docs/screenshots/05_scheduling_coverage.png`
-- `docs/screenshots/06_agent_performance.png`
-- `docs/screenshots/07_methodology_validation.png`
+- `docs/screenshots/01_overview.png`
+- `docs/screenshots/02_demand_analysis.png`
+- `docs/screenshots/03_demand_forecast.png`
+- `docs/screenshots/04_capacity_planning.png`
+- `docs/screenshots/05_roster_simulation.png`
+- `docs/screenshots/06_service_quality_metrics.png`
+- `docs/screenshots/07_methods_assumptions.png`
 
 ## Current Coverage Estimate
 

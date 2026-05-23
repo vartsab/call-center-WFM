@@ -17,18 +17,6 @@ Current dashboard screenshot filenames:
 07_methods_assumptions.png
 ```
 
-The legacy filenames used by the report draft are also refreshed:
-
-```text
-01_executive_summary.png
-02_historical_trends.png
-03_forecasting.png
-04_staffing_requirements.png
-05_scheduling_coverage.png
-06_agent_performance.png
-07_methodology_validation.png
-```
-
 Before using screenshots in the explanatory note, verify that:
 
 - the browser shows the intended local or VPS dashboard URL;

@@ -28,6 +28,12 @@ deploy_bundle.tgz
 *.log
 python
 
+# Generated report/presentation artifacts
+docs/final/
+docs/reporting/word/
+*.docx
+*.pptx
+
 # OS/editor
 .DS_Store
 Thumbs.db

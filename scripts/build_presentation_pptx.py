@@ -96,11 +96,11 @@ SLIDES = [
     Slide(
         title="Dashboard overview",
         bullets=[
-            "Executive KPIs over full 2023-2025 history.",
+            "Overview KPIs over full 2023-2025 history.",
             "Service category filtering and operational summary.",
             "SQL-backed analytics with CSV fallback for local demo mode.",
         ],
-        image="01_executive_summary.png",
+        image="01_overview.png",
     ),
     Slide(
         title="Forecasting and model comparison",
@@ -110,7 +110,7 @@ SLIDES = [
             "Selected model: histogram gradient boosting.",
             "Holdout metrics: MAE 34.8872, RMSE 49.7414, MAPE 22.16%.",
         ],
-        image="03_forecasting.png",
+        image="03_demand_forecast.png",
     ),
     Slide(
         title="Model-aware planning",
@@ -129,17 +129,17 @@ SLIDES = [
             "Max occupancy: 85%; shrinkage: 30%.",
             "Peak shrinkage-adjusted requirement for January 2026: 189 agents.",
         ],
-        image="04_staffing_requirements.png",
+        image="04_capacity_planning.png",
     ),
     Slide(
         title="Schedule optimization",
         bullets=[
-            "OR-Tools CP-SAT creates a legal future roster.",
+            "OR-Tools CP-SAT creates a constraint-valid future roster.",
             "160-agent planning pool, 8-hour shifts, 30-minute break.",
             "Rules: one shift per day, max 5 shifts per week, 11-hour minimum rest.",
             "Planning insight: 160 agents are legal but insufficient for full 24/7 coverage; estimate is 462.",
         ],
-        image="05_scheduling_coverage.png",
+        image="05_roster_simulation.png",
     ),
     Slide(
         title="Validation",
@@ -149,7 +149,7 @@ SLIDES = [
             "Schedule validation shows zero daily-shift, weekly-limit and rest violations.",
             "Automated tests: 13 passed; public dashboard smoke test passed.",
         ],
-        image="07_methodology_validation.png",
+        image="07_methods_assumptions.png",
     ),
     Slide(
         title="Public portfolio deployment",

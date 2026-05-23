@@ -1,6 +1,6 @@
 # Repository Handoff
 
-Last updated: 2026-05-21
+Last updated: 2026-05-23
 
 ## Repository
 
@@ -23,6 +23,7 @@ The GitHub repository should contain the reproducible project package:
 - helper scripts under `scripts/`.
 
 The repository should not contain local secrets or full raw/processed datasets.
+Generated Office files and other local submission exports should stay outside git.
 
 ## Ignored Local Files
 
@@ -36,10 +37,12 @@ These files are intentionally local:
 - `deploy/env.local`
 - `deploy_bundle.tgz`
 - `*.log`
+- `docs/final/`
+- `docs/reporting/word/`
+- `*.docx`
+- `*.pptx`
 
-The weekly report files under `docs/reporting/` are currently ignored by the local `.git/info/exclude` file, not by `.gitignore`. If the weekly report Markdown sources should be published in GitHub, add them with `git add -f docs/reporting/week_03_progress_report.md docs/reporting/week_04_progress_report.md docs/reporting/week_05_progress_report.md docs/reporting/week_06_progress_report.md`.
-
-The generated Word weekly reports are local submission artifacts and can remain outside git unless the program specifically requires storing `.docx` files in the repository.
+The weekly report Markdown sources under `docs/reporting/` are part of the repository. Generated Word and PowerPoint files are local submission artifacts and should remain outside git unless the program specifically requires storing Office binaries in the repository.
 
 ## Final Pre-Push Checks
 

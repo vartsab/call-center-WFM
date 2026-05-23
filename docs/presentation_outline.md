@@ -78,7 +78,7 @@ Key validation:
 
 Use screenshot:
 
-- `docs/screenshots/01_executive_summary.png`
+- `docs/screenshots/01_overview.png`
 
 Explain:
 
@@ -91,7 +91,7 @@ Explain:
 
 Use screenshot:
 
-- `docs/screenshots/03_forecasting.png`
+- `docs/screenshots/03_demand_forecast.png`
 
 Mention:
 
@@ -119,7 +119,7 @@ Mention:
 
 Use screenshot:
 
-- `docs/screenshots/04_staffing_requirements.png`
+- `docs/screenshots/04_capacity_planning.png`
 
 Explain:
 
@@ -133,7 +133,7 @@ Explain:
 
 Use screenshot:
 
-- `docs/screenshots/05_scheduling_coverage.png`
+- `docs/screenshots/05_roster_simulation.png`
 
 Explain:
 
@@ -161,7 +161,7 @@ Mention:
 
 Suggested screenshot:
 
-- `docs/screenshots/07_methodology_validation.png`
+- `docs/screenshots/07_methods_assumptions.png`
 
 ## Slide 13 - Engineering Positioning
 
