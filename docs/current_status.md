@@ -168,3 +168,4 @@ Dashboard screenshots:
 3. Add a lightweight uptime check or reminder if the public demo must stay available for a fixed review window.
 4. Add Postgres backups only if the VPS deployment becomes more than a reproducible portfolio demo.
 5. Manually open `docs/final/Пояснювальна_записка_чернетка.docx` and `docs/final/Презентація_чернетка.pptx` only when returning to final submission polish.
+6. Next dashboard design pass: revisit the mined operational insight sections after the core rewrite is stable. Candidate sections to add deliberately: category volatility, peak-shaped categories, outlier intervals, peak bias, forecast bias by hour, forecast uncertainty, shrinkage impact, staffing miss cost, staffing pressure distribution, morning shortage, recurring gap cell, shift-window ranking, and service-quality sensitivity.

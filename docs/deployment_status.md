@@ -1,6 +1,6 @@
 # Portfolio Deployment Status
 
-Last updated: 2026-05-21
+Last updated: 2026-05-23
 
 ## Public Endpoint
 
@@ -34,17 +34,18 @@ Secrets live in `/opt/wfm/deploy/env.local` on the VPS and are not committed to 
 
 ## Verified State
 
-Verified on 2026-05-21:
+Verified on 2026-05-23:
 
 - `docker compose --env-file deploy/env.local ps` shows `db`, `app`, and `caddy` running.
 - Postgres health check is healthy.
+- Dashboard copy/style hardening update was redeployed with `docker compose --env-file deploy/env.local up -d --build`.
 - Caddy obtained a Let's Encrypt certificate for `wfm.vartsab.com` using the HTTP-01 challenge on port `80`.
 - `http://wfm.vartsab.com` returns `301` to `https://wfm.vartsab.com:8443/`.
 - `https://wfm.vartsab.com:8443` returns `200 OK`.
-- Browser smoke test passes the password gate and reaches the Streamlit dashboard.
+- `https://wfm.vartsab.com:8443/_stcore/health` returns `ok`.
 - Dashboard source indicator shows `Data source: Postgres`.
-- Browser console check showed no errors or warnings.
 - `dashboard_volume_30min` row count is `252790`.
+- Password-gated browser smoke and browser console checks were previously verified on 2026-05-21 and were not repeated during the 2026-05-23 copy/style redeploy.
 
 ## Deployment Commands
 
