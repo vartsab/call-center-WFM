@@ -14,11 +14,11 @@ class DashboardSourceTests(unittest.TestCase):
         with patch.dict(os.environ, {"CALLCENTER_DASHBOARD_SOURCE": "warehouse"}, clear=True):
             self.assertEqual(dashboard_source_mode(), "auto")
 
-    def test_csv_mode_loads_generated_sample(self) -> None:
+    def test_csv_mode_loads_packaged_data(self) -> None:
         with patch.dict(os.environ, {"CALLCENTER_DASHBOARD_SOURCE": "csv"}, clear=True):
             source, data = load_data()
 
-        self.assertEqual(source, "CSV sample")
+        self.assertIn(source, {"CSV sample", "CSV seed"})
         self.assertFalse(data["volume_30min"].empty)
         self.assertFalse(data["forecasting_input"].empty)
 

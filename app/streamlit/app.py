@@ -16,6 +16,7 @@ import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "data" / "processed"
+SEED_DIR = ROOT / "deploy" / "seed"
 DOCS_DIR = ROOT / "docs"
 SQL_CACHE_VERSION = "demo_aggregated_20260520"
 
@@ -34,6 +35,22 @@ POSTGRES_TABLES = {
     "model_staffing_scenarios": "model_staffing_scenarios",
     "optimized_schedule": "optimized_schedule",
     "schedule_coverage": "schedule_coverage",
+}
+
+SEED_FILES = {
+    "volume_30min": "dashboard_volume_30min.csv",
+    "forecasting_input": "dashboard_forecasting_input.csv",
+    "agent_performance": "dashboard_agent_performance.csv",
+    "agent_dimension": "dashboard_agent_dimension.csv",
+    "baseline_forecast": "forecast_baseline.csv",
+    "feature_forecast": "forecast_best_holdout.csv",
+    "model_holdout_predictions": "forecast_model_holdout_predictions.csv",
+    "future_forecast": "future_forecast.csv",
+    "future_model_scenarios": "future_model_scenario_forecasts.csv",
+    "staffing_requirements": "staffing_requirements.csv",
+    "model_staffing_scenarios": "model_staffing_scenarios.csv",
+    "optimized_schedule": "optimized_schedule.csv",
+    "schedule_coverage": "schedule_coverage.csv",
 }
 
 
@@ -1209,7 +1226,9 @@ def read_postgres_or_first_csv(table_key: str, paths: list[Path]) -> pd.DataFram
         data = read_postgres(table_key)
         if not data.empty:
             return data
-    return read_first_csv(paths)
+    seed_file = SEED_FILES.get(table_key)
+    fallback_paths = [*paths, SEED_DIR / seed_file] if seed_file else paths
+    return read_first_csv(fallback_paths)
 
 
 def model_label(model_name: str) -> str:
@@ -1259,6 +1278,14 @@ def load_csv_data() -> dict[str, pd.DataFrame]:
         "calls": calls,
         "forecasting_input": forecasting,
         "baseline": baseline,
+    }
+
+
+def load_seed_data() -> dict[str, pd.DataFrame]:
+    return {
+        table_key: read_csv(SEED_DIR / file_name)
+        for table_key, file_name in SEED_FILES.items()
+        if table_key in {"volume_30min", "forecasting_input", "agent_performance", "agent_dimension"}
     }
 
 
@@ -1358,6 +1385,11 @@ def load_data() -> tuple[str, dict[str, pd.DataFrame]]:
 
     csv_data = load_csv_data()
     calls = csv_data["calls"]
+    if calls.empty:
+        seed_data = normalize_dashboard_data(load_seed_data())
+        source = "CSV seed" if source_mode == "csv" else "CSV seed (warehouse unavailable)"
+        return source, seed_data
+
     source = "CSV sample" if source_mode == "csv" else "CSV sample (SQL unavailable)"
     return (
         source,
