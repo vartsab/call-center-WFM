@@ -1,12 +1,7 @@
-{
-	https_port 8443
-}
-
-http://{$WFM_DOMAIN} {
-	redir https://{$WFM_DOMAIN}:8443{uri} permanent
-}
-
-https://{$WFM_DOMAIN}:8443 {
+{$WFM_DOMAIN} {
+	handle_path /healthz {
+		respond "ok" 200
+	}
 	encode gzip
 	reverse_proxy app:8501
 }

@@ -67,7 +67,7 @@ data/processed/future_model_staffing_scenarios.csv
 docs/future_model_staffing_scenario_summary.json
 ```
 
-The Streamlit Capacity Planning tab reads the summary and compares peak shrinkage-adjusted agents and estimated full-coverage roster size by model. This makes model choice operationally visible rather than only statistically visible.
+The Streamlit Capacity Planning tab compares peak shrinkage-adjusted agents and estimated full-coverage roster size by model, connecting statistical error with operational impact.
 
 ## Add A New Model
 

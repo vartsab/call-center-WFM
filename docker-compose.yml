@@ -22,7 +22,7 @@ services:
     environment:
       CALLCENTER_DASHBOARD_SOURCE: postgres
       DATABASE_URL: postgresql://${POSTGRES_USER:-wfm}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-wfm}
-      WFM_DEMO_PASSWORD: ${WFM_DEMO_PASSWORD:?Set WFM_DEMO_PASSWORD in deploy/env.local}
+      WFM_DEMO_PASSWORD: ${WFM_DEMO_PASSWORD:-}
     depends_on:
       db:
         condition: service_healthy
@@ -34,7 +34,7 @@ services:
       WFM_DOMAIN: ${WFM_DOMAIN:-wfm.vartsab.com}
     ports:
       - "80:80"
-      - "8443:8443"
+      - "443:443"
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

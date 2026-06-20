@@ -78,7 +78,7 @@ Grain: one row per simulated inbound call/contact.
 - Talk time should use a right-skewed distribution such as log-normal or gamma.
 - Abandonment probability should increase as wait time increases.
 - Agent assignment should respect queue/skill groups when implemented.
-- Service level should be analyzed at queue, service-category, interval, and staffing levels rather than as an agent-level performance metric.
+- Service level should be analyzed at queue, service-category, interval, and staffing levels because the queue wait occurs before agent assignment.
 - All synthetic assumptions must be documented in `docs/decision_log.md` or a dedicated methodology note.
 
 ## Seed Dataset Fields

@@ -75,7 +75,7 @@ The comparison script can also export interval-level holdout predictions for eve
 data/processed/full_model_holdout_predictions.csv
 ```
 
-This file supports dashboard visualization of the actual holdout curve against multiple model predictions. It makes the model choice visible rather than hiding it inside a single selected output file.
+This file supports dashboard comparison of the actual holdout curve with predictions from every registered model.
 
 ## Model Registry And Extensibility
 

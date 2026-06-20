@@ -3,7 +3,7 @@
 Store final report and portfolio-demo screenshots in this folder.
 
 The current screenshot set was captured from the live VPS deployment at
-`https://wfm.vartsab.com:8443` after the portfolio chapter-style dashboard polish.
+`https://wfm.vartsab.com` after the portfolio chapter-style dashboard polish.
 
 Current dashboard screenshot filenames:
 

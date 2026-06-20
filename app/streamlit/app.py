@@ -149,6 +149,29 @@ EDITORIAL_COLORS = [
 ]
 
 
+def configure_runtime_palette() -> bool:
+    global PAPER_BG, PANEL_BG, INK, MUTED, RULE, GRID, ACCENT_DARK
+
+    dark_mode = bool(st.session_state.get("dark_theme", False))
+    if dark_mode:
+        PAPER_BG = "#141a20"
+        PANEL_BG = PAPER_BG
+        INK = "#ece6dc"
+        MUTED = "#aeb6be"
+        RULE = "#3a444d"
+        GRID = "#29333b"
+        ACCENT_DARK = "#9fc2dd"
+    else:
+        PAPER_BG = "#f8f3ea"
+        PANEL_BG = PAPER_BG
+        INK = "#182033"
+        MUTED = "#6d675d"
+        RULE = "#d7cec0"
+        GRID = "#e5dbcd"
+        ACCENT_DARK = "#24364b"
+    return dark_mode
+
+
 def page_config() -> None:
     st.set_page_config(
         page_title="Call Center WFM",
@@ -156,6 +179,7 @@ def page_config() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
+    dark_mode = configure_runtime_palette()
     st.markdown(
         """
         <style>
@@ -346,6 +370,33 @@ def page_config() -> None:
             margin: 0 0 0.4rem;
             text-transform: uppercase;
         }
+        .transfer-banner {
+            align-items: center;
+            background: #e4edf2;
+            border: 1px solid #c5d5df;
+            border-left: 4px solid #2f6f9f;
+            color: #263746;
+            display: grid;
+            gap: 0.35rem 1.1rem;
+            grid-template-columns: minmax(145px, 0.8fr) minmax(0, 3.2fr);
+            margin: 0 0 0.65rem;
+            padding: 0.68rem 0.82rem;
+        }
+        .transfer-banner-label {
+            color: #2f5f84;
+            font-size: 0.66rem;
+            font-weight: 800;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+        }
+        .transfer-banner-copy {
+            color: #334553;
+            font-size: 0.79rem;
+            line-height: 1.4;
+        }
+        .transfer-banner-copy strong {
+            color: #182b3d;
+        }
         div[data-testid="stAppViewContainer"] h1 {
             font-size: 2.05rem;
             font-weight: 600;
@@ -367,11 +418,27 @@ def page_config() -> None:
         }
         button[data-baseweb="tab"] {
             background: transparent !important;
+            color: #5f5a51 !important;
         }
         button[data-baseweb="tab"] {
             white-space: nowrap;
             padding-left: 0.32rem;
             padding-right: 0.32rem;
+        }
+        button[data-baseweb="tab"] * {
+            color: #5f5a51 !important;
+        }
+        button[data-baseweb="tab"]:hover,
+        button[data-baseweb="tab"]:hover * {
+            color: #2f6f9f !important;
+        }
+        button[data-baseweb="tab"][aria-selected="true"],
+        button[data-baseweb="tab"][aria-selected="true"] * {
+            color: #2f6f9f !important;
+            font-weight: 700 !important;
+        }
+        div[data-baseweb="tab-highlight"] {
+            background-color: #2f6f9f !important;
         }
         button[data-baseweb="tab"] p {
             font-size: 0.74rem;
@@ -560,6 +627,85 @@ def page_config() -> None:
             margin-top: 1.2rem;
             padding-top: 0.85rem;
         }
+        .portfolio-signal-rule {
+            border: 0;
+            border-top: 1px solid #d7cec0;
+            margin: 1.75rem 0 1.1rem;
+        }
+        .portfolio-signal-header {
+            align-items: flex-start;
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            margin: 0 0 0.85rem;
+        }
+        .portfolio-signal-title {
+            color: #273041;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.52rem;
+            font-weight: 400;
+            letter-spacing: 0;
+            line-height: 1.08;
+            margin: 0.1rem 0 0.35rem;
+        }
+        .portfolio-signal-copy {
+            color: #4b4b4b;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            max-width: 760px;
+        }
+        .signal-card-grid {
+            display: grid;
+            gap: 0.78rem;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 0.35rem;
+        }
+        .signal-card {
+            border-top: 1px solid #cfc5b7;
+            padding-top: 0.7rem;
+        }
+        .signal-label {
+            color: #6d675d;
+            font-size: 0.64rem;
+            font-weight: 700;
+            letter-spacing: 0.11em;
+            line-height: 1.25;
+            text-transform: uppercase;
+        }
+        .signal-number {
+            color: #293141;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.95rem;
+            font-weight: 400;
+            line-height: 1;
+            margin-top: 0.38rem;
+        }
+        .signal-note {
+            color: #5f5a51;
+            font-size: 0.76rem;
+            line-height: 1.35;
+            margin-top: 0.38rem;
+        }
+        .signal-diagram {
+            border-left: 3px solid #2f6f9f;
+            margin-top: 0.65rem;
+            padding-left: 0.82rem;
+        }
+        .signal-diagram.synthetic {
+            border-left-color: #b66a36;
+        }
+        .signal-diagram-title {
+            color: #293141;
+            font-size: 0.86rem;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+        .signal-diagram-note {
+            color: #5f5a51;
+            font-size: 0.76rem;
+            line-height: 1.35;
+            margin-top: 0.2rem;
+        }
         .chapter-header {
             border-bottom: 1px solid #d7cec0;
             margin: 1.2rem 0 1.35rem;
@@ -692,6 +838,54 @@ def page_config() -> None:
             line-height: 1.35;
             margin-top: 0.25rem;
         }
+        .commercial-scope-grid {
+            display: grid;
+            gap: 1.1rem;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin: 0.35rem 0 1.35rem;
+        }
+        .commercial-scope {
+            border-top: 2px solid #2f6f9f;
+            padding-top: 0.72rem;
+        }
+        .commercial-scope:nth-child(2) {
+            border-top-color: #b87522;
+        }
+        .commercial-scope:nth-child(3) {
+            border-top-color: #4e9a86;
+        }
+        .commercial-scope-title {
+            color: #273041;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.18rem;
+            line-height: 1.15;
+        }
+        .commercial-scope-copy {
+            color: #555047;
+            font-size: 0.82rem;
+            line-height: 1.45;
+            margin-top: 0.42rem;
+        }
+        .commercial-formula {
+            background: rgba(255, 255, 255, 0.46);
+            border-left: 3px solid #4e9a86;
+            color: #3f4a50;
+            font-size: 0.83rem;
+            line-height: 1.5;
+            margin: 0.55rem 0 1.15rem;
+            padding: 0.72rem 0.82rem;
+        }
+        .commercial-source {
+            border-top: 1px solid #d7cec0;
+            color: #6d675d;
+            font-size: 0.74rem;
+            line-height: 1.45;
+            margin-top: 1.25rem;
+            padding-top: 0.72rem;
+        }
+        .commercial-source a {
+            color: #2f6f9f;
+        }
         div[data-testid="stDataFrame"] {
             border: 1px solid #dfd6ca;
             border-radius: 4px;
@@ -704,6 +898,21 @@ def page_config() -> None:
             .portfolio-kpi-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
+            .portfolio-signal-header,
+            .signal-card-grid,
+            .commercial-scope-grid,
+            .transfer-banner {
+                display: block;
+            }
+            .commercial-scope {
+                margin-bottom: 1rem;
+            }
+            .transfer-banner-label {
+                margin-bottom: 0.28rem;
+            }
+            .signal-card {
+                margin-bottom: 0.85rem;
+            }
             .portfolio-meta {
                 text-align: left;
             }
@@ -712,6 +921,131 @@ def page_config() -> None:
         """,
         unsafe_allow_html=True,
     )
+    if dark_mode:
+        st.markdown(
+            """
+            <style>
+            .stApp,
+            div[data-baseweb="tab-list"],
+            div[data-testid="stPlotlyChart"],
+            div[data-testid="stPlotlyChart"] > div {
+                background: #141a20 !important;
+                color: #ece6dc !important;
+            }
+            header[data-testid="stHeader"],
+            section[data-testid="stSidebar"] {
+                background: #10161b !important;
+                border-color: #3a444d !important;
+            }
+            section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+                border-color: #3a444d !important;
+            }
+            .sidebar-masthead,
+            .sidebar-filter-label,
+            .portfolio-rule,
+            .portfolio-transparency,
+            .portfolio-signal-rule,
+            .chapter-header,
+            .commercial-source {
+                border-color: #3a444d !important;
+            }
+            .sidebar-card,
+            section[data-testid="stSidebar"] div[data-testid="stExpander"] details,
+            .insight-callout,
+            .pipeline-flow,
+            .portfolio-pipeline-step,
+            .method-card,
+            .commercial-formula {
+                background: #1b232b !important;
+                border-color: #3a444d !important;
+            }
+            .transfer-banner {
+                background: #172733 !important;
+                border-color: #35566d !important;
+            }
+            .transfer-banner-label,
+            .transfer-banner-copy,
+            .transfer-banner-copy strong {
+                color: #d7e5ef !important;
+            }
+            .sidebar-title,
+            .sidebar-card-title,
+            .portfolio-title,
+            .portfolio-kpi-value,
+            .portfolio-signal-title,
+            .signal-number,
+            .portfolio-step-title,
+            .chapter-title,
+            .editorial-metric-value,
+            .method-card-title,
+            .commercial-scope-title,
+            .insight-callout,
+            .pipeline-flow {
+                color: #f0e9df !important;
+            }
+            .sidebar-summary,
+            .sidebar-card-text,
+            .sidebar-ledger,
+            .sidebar-ledger-note,
+            .portfolio-dek,
+            .portfolio-meta,
+            .portfolio-meta-note,
+            .portfolio-kpi-note,
+            .portfolio-section-copy,
+            .portfolio-step-note,
+            .portfolio-transparency,
+            .portfolio-signal-copy,
+            .signal-note,
+            .signal-diagram-note,
+            .chapter-dek,
+            .editorial-note,
+            .chart-note,
+            .editorial-metric-note,
+            .method-card-note,
+            .commercial-scope-copy,
+            .commercial-formula,
+            .commercial-source {
+                color: #b9c0c7 !important;
+            }
+            .sidebar-eyebrow,
+            .sidebar-card-label,
+            .sidebar-filter-label,
+            .app-shell-label,
+            .portfolio-eyebrow,
+            .portfolio-smallcaps,
+            .portfolio-kpi-label,
+            .portfolio-section-label,
+            .signal-label,
+            .chapter-kicker,
+            .editorial-metric-label,
+            .editorial-section,
+            .chart-label,
+            .callout-label {
+                color: #9faab3 !important;
+            }
+            .portfolio-kpi,
+            .signal-card,
+            .editorial-metric,
+            .commercial-scope {
+                border-color: #56616a !important;
+            }
+            button[data-baseweb="tab"],
+            button[data-baseweb="tab"] * {
+                color: #b9c0c7 !important;
+            }
+            button[data-baseweb="tab"][aria-selected="true"],
+            button[data-baseweb="tab"][aria-selected="true"] * {
+                color: #7aaed6 !important;
+            }
+            section[data-testid="stSidebar"] div[data-baseweb="select"] > div,
+            section[data-testid="stSidebar"] div[data-baseweb="input"] > div {
+                background: #1b232b !important;
+                border-color: #3a444d !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -726,6 +1060,19 @@ def load_first_json(paths: list[Path]) -> dict[str, Any]:
         if summary:
             return summary
     return {}
+
+
+@st.cache_data(show_spinner=False)
+def load_raw_311_insights_cached(path: str, cache_version: int) -> dict[str, pd.DataFrame]:
+    raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    return {key: pd.DataFrame(value) for key, value in raw.items()}
+
+
+def load_raw_311_insights() -> dict[str, pd.DataFrame]:
+    path = DOCS_DIR / "analysis" / "raw_nyc_311_sql_server_insights.json"
+    if not path.exists():
+        return {}
+    return load_raw_311_insights_cached(str(path), path.stat().st_mtime_ns)
 
 
 def sql_connection_string() -> str:
@@ -1180,6 +1527,29 @@ def render_insight_callout(text: str) -> None:
     )
 
 
+def render_transferability_banner() -> None:
+    st.markdown(
+        """
+        <div class="transfer-banner">
+            <div class="transfer-banner-label">Transferable prototype</div>
+            <div class="transfer-banner-copy">
+                Adaptable to customer-specific call history, queues, schedules, and service targets.
+                See <strong>Deployment Proposal</strong>.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_top_controls() -> None:
+    banner_column, theme_column = st.columns([8.6, 1.4], vertical_alignment="center")
+    with banner_column:
+        render_transferability_banner()
+    with theme_column:
+        st.toggle("Dark mode", key="dark_theme")
+
+
 def apply_agent_name_lookup(frame: pd.DataFrame, lookup: dict[int, str]) -> pd.DataFrame:
     if frame.empty or "agent_id" not in frame.columns or not lookup:
         return frame
@@ -1243,7 +1613,7 @@ def render_sidebar(source: str, volume: pd.DataFrame) -> tuple[list[str], tuple[
                     Staffing plans, roster assignments, and service outcomes.
                 </div>
                 <div class="sidebar-ledger-note">
-                    Built for analytical demonstration, not live operations software.
+                    Built as an analytical demonstration for workforce planning.
                 </div>
             </div>
             """,
@@ -1293,9 +1663,208 @@ def apply_filters(
     return filtered
 
 
+def render_raw_311_signal_module() -> None:
+    insights = load_raw_311_insights()
+    required = {"summary", "top_complaints", "hour_profile", "weekly_slots"}
+    if not insights or any(key not in insights or insights[key].empty for key in required):
+        return
+
+    summary = insights["summary"].iloc[0]
+    top_complaints = insights["top_complaints"].copy()
+    top_complaints["request_count"] = pd.to_numeric(top_complaints["request_count"])
+    top_complaints["request_share"] = pd.to_numeric(top_complaints["request_share"])
+    top_six = top_complaints.head(6).copy()
+    top_reason = top_six.iloc[0]
+    top_six_share = top_six["request_share"].sum()
+
+    hour_profile = insights["hour_profile"].copy()
+    hour_profile["hour_of_day"] = pd.to_numeric(hour_profile["hour_of_day"]).astype(int)
+    hour_profile["request_count"] = pd.to_numeric(hour_profile["request_count"])
+    hour_profile["request_share"] = pd.to_numeric(hour_profile["request_share"])
+    hour_profile = hour_profile.sort_values("hour_of_day")
+    peak_hour = hour_profile.loc[hour_profile["request_count"].idxmax()]
+
+    weekly_slots = insights["weekly_slots"].copy()
+    weekly_slots["avg_requests"] = pd.to_numeric(weekly_slots["avg_requests"])
+    peak_slot = weekly_slots.iloc[0]
+
+    complaint_monthly = insights.get("complaint_monthly", pd.DataFrame()).copy()
+    heat_winter_share = None
+    if not complaint_monthly.empty:
+        heat = complaint_monthly[complaint_monthly["complaint_type"].eq("HEAT/HOT WATER")].copy()
+        if not heat.empty:
+            heat["request_count"] = pd.to_numeric(heat["request_count"])
+            heat["month_num"] = pd.to_datetime(heat["month"] + "-01").dt.month
+            heat_total = heat["request_count"].sum()
+            if heat_total:
+                heat_winter = heat[heat["month_num"].isin([11, 12, 1, 2, 3])]["request_count"].sum()
+                heat_winter_share = heat_winter / heat_total
+
+    heat_winter_display = f"{heat_winter_share:.1%}" if heat_winter_share is not None else "n/a"
+
+    fireworks_dates = insights.get("illegal_fireworks_dates", pd.DataFrame()).copy()
+    fireworks_row = None
+    if not fireworks_dates.empty:
+        fireworks_dates["request_count"] = pd.to_numeric(fireworks_dates["request_count"])
+        fireworks_row = fireworks_dates.iloc[0]
+
+    top_intervals = insights.get("top_intervals_reasons", pd.DataFrame()).copy()
+    outlier_row = None
+    if not top_intervals.empty:
+        top_intervals["request_count"] = pd.to_numeric(top_intervals["request_count"])
+        top_intervals["top_reason_share"] = pd.to_numeric(top_intervals["top_reason_share"])
+        outlier_row = top_intervals.iloc[0]
+
+    st.markdown('<hr class="portfolio-signal-rule">', unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class="portfolio-signal-header">
+            <div>
+                <div class="portfolio-section-label">Real Demand Signals · NYC 311</div>
+                <div class="portfolio-signal-title">Reason, clock, and event pressure</div>
+                <div class="portfolio-signal-copy">
+                    The raw source contains {format_compact_number(summary["raw_rows"])} public request records.
+                    Complaint reasons shape the arrival pattern before forecasting or staffing logic is applied.
+                </div>
+            </div>
+            <span class="portfolio-chip real">Real</span>
+        </div>
+        <div class="signal-card-grid">
+            <div class="signal-card">
+                <div class="signal-label">Largest reason</div>
+                <div class="signal-number">{format_compact_number(top_reason["request_count"])}</div>
+                <div class="signal-note">{escape(str(top_reason["complaint_type"]))} · {top_reason["request_share"]:.1%} of all requests.</div>
+            </div>
+            <div class="signal-card">
+                <div class="signal-label">Recurring peak</div>
+                <div class="signal-number">{escape(str(peak_slot["Day_Of_Week"]))} {escape(str(peak_slot["Interval_Start_Time"]))}</div>
+                <div class="signal-note">{peak_slot["avg_requests"]:.1f} average requests in the busiest half-hour cell.</div>
+            </div>
+            <div class="signal-card">
+                <div class="signal-label">Winter concentration</div>
+                <div class="signal-number">{heat_winter_display}</div>
+                <div class="signal-note">Dated HEAT/HOT WATER requests arriving from November through March.</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    left, right = st.columns([1.12, 1])
+    with left:
+        st.markdown(
+            f"""
+            <div class="portfolio-section-label">Complaint reason mix</div>
+            <div class="portfolio-section-copy">
+            The six largest complaint types carry {top_six_share:.1%} of source volume.
+            Parking, noise, heating, and housing conditions create different operating patterns.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        reason_chart = top_six.sort_values("request_count", ascending=True)
+        reason_chart["label"] = reason_chart["request_count"].map(format_compact_number)
+        fig = go.Figure(
+            go.Bar(
+                x=reason_chart["request_count"],
+                y=reason_chart["complaint_type"],
+                orientation="h",
+                marker={"color": [ACCENT_SOFT] * (len(reason_chart) - 1) + [ACCENT_DARK]},
+                text=reason_chart["label"],
+                textposition="outside",
+                cliponaxis=False,
+                hovertemplate="%{y}<br>%{x:,.0f} requests<extra></extra>",
+                name="Complaint type",
+            )
+        )
+        fig.update_layout(
+            height=340,
+            margin={"l": 8, "r": 54, "t": 56, "b": 28},
+            showlegend=False,
+        )
+        fig.update_xaxes(title=None, tickformat="~s")
+        fig.update_yaxes(title=None)
+        add_chart_source(fig, "Source: REAL NYC 311 complaint types")
+        render_plotly_chart(fig)
+    with right:
+        st.markdown(
+            """
+            <div class="portfolio-section-label">Arrival rhythm</div>
+            <div class="portfolio-section-copy">
+            Hour-of-day volume peaks late morning, while specific reasons create separate evening and event-driven spikes.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=hour_profile["hour_of_day"],
+                y=hour_profile["request_share"],
+                mode="lines+markers",
+                line={"color": ACCENT_DARK, "width": 2.1},
+                marker={"size": 6, "color": ACCENT},
+                fill="tozeroy",
+                fillcolor="rgba(47, 111, 159, 0.12)",
+                hovertemplate="%{x}:00<br>%{y:.1%} of requests<extra></extra>",
+                name="Hourly share",
+            )
+        )
+        fig.add_annotation(
+            x=int(peak_hour["hour_of_day"]),
+            y=float(peak_hour["request_share"]),
+            text=f"Peak hour<br>{int(peak_hour['hour_of_day']):02d}:00",
+            showarrow=True,
+            arrowhead=0,
+            arrowwidth=1,
+            arrowcolor="#7c6f60",
+            ax=36,
+            ay=-38,
+            bgcolor="rgba(248, 243, 234, 0.92)",
+            bordercolor="#cbbfac",
+            borderwidth=1,
+            font={"color": "#2b3444", "size": 11},
+        )
+        fig.update_layout(
+            height=245,
+            margin={"l": 8, "r": 8, "t": 56, "b": 28},
+            showlegend=False,
+        )
+        fig.update_xaxes(
+            title=None,
+            tickmode="array",
+            tickvals=list(range(0, 24, 3)),
+            ticktext=[f"{hour:02d}:00" for hour in range(0, 24, 3)],
+        )
+        fig.update_yaxes(title=None, tickformat=".0%")
+        add_chart_source(fig, "Source: REAL NYC 311 request timestamps")
+        render_plotly_chart(fig)
+
+        event_html = ""
+        if fireworks_row is not None:
+            event_html += (
+                '<div class="signal-diagram">'
+                '<div class="signal-diagram-title">Public-event spike</div>'
+                f'<div class="signal-diagram-note">{format_number(fireworks_row["request_count"])} Illegal Fireworks requests on '
+                f'{escape(str(fireworks_row["calendar_date"]))}.</div>'
+                "</div>"
+            )
+        if outlier_row is not None:
+            event_html += (
+                '<div class="signal-diagram">'
+                '<div class="signal-diagram-title">Largest 30-minute outlier</div>'
+                f'<div class="signal-diagram-note">{format_number(outlier_row["request_count"])} requests at '
+                f'{escape(str(outlier_row["Interval_Start_Datetime"]))}; '
+                f'{escape(str(outlier_row["top_reason"]))} supplied {outlier_row["top_reason_share"]:.1%}.</div>'
+                "</div>"
+            )
+        if event_html:
+            st.markdown(event_html, unsafe_allow_html=True)
+
+
 def render_executive_summary(volume: pd.DataFrame) -> None:
     if volume.empty:
-        st.info("Historical call volume data is not available.")
+        st.info("Historical call volume is unavailable for this selection.")
         return
 
     total_calls = volume["offered_calls"].sum() if not volume.empty else 0
@@ -1348,8 +1917,8 @@ def render_executive_summary(volume: pd.DataFrame) -> None:
             <div class="portfolio-eyebrow">Workforce Management · Portfolio Project</div>
             <div class="portfolio-title">NYC 311 Call Center<br>WFM Analytics Prototype</div>
             <div class="portfolio-dek">
-            This page summarizes the scale of historical NYC 311 demand and shows how the prototype separates
-            real data from forecasted, synthetic, and simulated layers.
+            Historical NYC 311 demand supplies the observed layer. Forecasts, operating metadata,
+            staffing requirements, and roster outcomes are labeled by origin.
             </div>
             """,
             unsafe_allow_html=True,
@@ -1534,20 +2103,21 @@ def render_executive_summary(volume: pd.DataFrame) -> None:
             unsafe_allow_html=True,
         )
 
+    render_raw_311_signal_module()
+
     st.markdown("</div>", unsafe_allow_html=True)
 
 
 def render_historical_trends(volume: pd.DataFrame) -> None:
     if volume.empty:
-        st.info("Historical trend data is not available.")
+        st.info("Historical trend data is unavailable for this selection.")
         return
 
     render_chapter_header(
         "CHAPTER 02 · DEMAND ANALYSIS",
         "Demand by Hour and Weekday",
         (
-            "This page shows how demand is distributed across the week and identifies the recurring "
-            "periods with the highest average call volume."
+            "Average demand by weekday and hour identifies the recurring periods with the highest call volume."
         ),
         "REAL NYC 311 DEMAND",
     )
@@ -1574,7 +2144,7 @@ def render_historical_trends(volume: pd.DataFrame) -> None:
 
     render_insight_callout(
         (
-            "Demand is concentrated by hour and weekday, not evenly distributed. "
+            "Demand concentrates by hour and weekday. "
             f"The highest average load occurs on {peak_hour['day_name']} at {peak_hour['hour_label']}, "
             "which supports interval-based forecasting."
         )
@@ -1647,16 +2217,15 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         "CHAPTER 03 · FORECAST EVIDENCE",
         "Forecast Model Comparison and Planning Output",
         (
-            "This page compares forecast models on holdout data and then shows the selected forecast "
-            "horizon used in downstream staffing and roster simulation."
+            "Holdout results compare candidate models. The selected forecast supplies the downstream staffing "
+            "and roster simulation."
         ),
         "FORECASTED MODEL OUTPUT",
     )
     render_insight_callout(
         (
-            "Histogram Gradient Boosting demonstrates the highest performance, followed by Random Forest, "
-            "while the other three models perform significantly worse. This ranking remains consistent "
-            "across all reported error metrics, with the greatest difference observed in RMSE."
+            "Histogram Gradient Boosting records the lowest holdout error, followed by Random Forest. "
+            "RMSE creates the widest separation between the five candidates."
         )
     )
 
@@ -1677,9 +2246,8 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         render_section_header(
             "Model Comparison",
             (
-                "Histogram Gradient Boosting demonstrates the highest performance, followed by Random Forest, "
-                "while the other three models perform significantly worse. This ranking remains consistent "
-                "across all reported error metrics, with the greatest difference observed in RMSE."
+                "Histogram Gradient Boosting records the lowest error, followed by Random Forest. "
+                "The model order remains consistent across MAE, RMSE, and MAPE."
             ),
         )
         display_rows = model_rows.copy()
@@ -1717,7 +2285,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
         [DATA_DIR / "future_model_scenario_forecasts.csv"],
     )
     if baseline.empty:
-        st.info("Baseline forecast output is not available.")
+        st.info("Baseline forecast output is unavailable.")
         return
 
     baseline["interval_start_datetime"] = pd.to_datetime(baseline["interval_start_datetime"])
@@ -1755,8 +2323,7 @@ def render_forecasting(forecasting: pd.DataFrame) -> None:
     render_chart_header(
         "Holdout Forecast Evidence",
         (
-            "The chart compares actual historical demand with candidate model outputs over the same holdout "
-            "window, allowing forecast error to be evaluated directly against observed volume."
+            "Actual demand and candidate predictions share the same chronological holdout window."
         ),
     )
     fig = go.Figure()
@@ -1942,7 +2509,7 @@ def render_staffing() -> None:
         ]
     )
     if staffing.empty:
-        st.info("Staffing requirements output is not available.")
+        st.info("Staffing requirements output is unavailable.")
         return
     scenario_summary = load_json(DOCS_DIR / "future_model_staffing_scenario_summary.json")
     staffing["interval_start_datetime"] = pd.to_datetime(staffing["interval_start_datetime"])
@@ -1955,7 +2522,7 @@ def render_staffing() -> None:
     render_chapter_header(
         "CHAPTER 04 · CAPACITY PLANNING",
         "Forecasted Volume and Required Staffing",
-        "This page shows how forecasted 30-minute call volume converts into required staffing under the selected queueing assumptions.",
+        "Forecasted 30-minute volume is converted into required staffing under the selected queue assumptions.",
         "FORECASTED + SIMULATED",
     )
     render_insight_callout(
@@ -1979,8 +2546,7 @@ def render_staffing() -> None:
     render_section_header(
         "Staffing Requirement Curve",
         (
-            "The chart compares forecasted call volume with required staffing for each 30-minute interval. "
-            "The gap between base and shrinkage-adjusted staffing represents the additional staffing needed beyond raw queue demand."
+            "Each interval combines forecast volume, base queue staffing, and the roster requirement after shrinkage."
         ),
     )
     fig = go.Figure()
@@ -2130,7 +2696,7 @@ def render_scheduling() -> None:
         ]
     )
     if schedule.empty or coverage.empty:
-        st.info("Roster simulation output is not available.")
+        st.info("Roster simulation output is unavailable.")
         return
 
     schedule["shift_start_datetime"] = pd.to_datetime(schedule["shift_start_datetime"])
@@ -2156,12 +2722,12 @@ def render_scheduling() -> None:
     render_chapter_header(
         "CHAPTER 05 · ROSTER SIMULATION",
         "Required Staffing vs Simulated Roster Coverage",
-        "This page compares required staffing with the simulated roster and shows where scheduled coverage falls short across the planning horizon.",
+        "Required staffing and simulated roster coverage identify shortages across the planning horizon.",
         "SIMULATED ROSTER ALLOCATION",
     )
     render_insight_callout(
         (
-            "The simulated roster does not meet modeled demand at peak periods. "
+            "The simulated roster falls short of modeled peak demand. "
             f"With {format_number(summary.get('peak_scheduled_agents', 0))} scheduled agents against a peak requirement of "
             f"{format_number(summary.get('peak_required_agents', 0))}, coverage remains below full need across much of the planning window."
         )
@@ -2186,7 +2752,7 @@ def render_scheduling() -> None:
 
     render_section_header(
         "Coverage Gap Over Time",
-        "The chart compares required staffing, scheduled staffing, and understaffed intervals across the planning horizon. It shows where the simulated roster falls below required coverage.",
+        "Required, scheduled, and shortage series are aligned for every planning interval.",
     )
     fig = go.Figure()
     fig.add_trace(
@@ -2241,7 +2807,7 @@ def render_scheduling() -> None:
     dates = sorted(schedule["shift_date"].dropna().unique())
     render_section_header(
         "Selected Day View",
-        "The selected day view breaks the roster into individual shift windows and shows how scheduled supply aligns with required staffing across a single day.",
+        "Individual shift windows show how scheduled supply aligns with required staffing across one day.",
     )
     selected_date = st.selectbox("Schedule date", dates)
     day_schedule = schedule[schedule["shift_date"] == selected_date].sort_values(
@@ -2353,18 +2919,17 @@ def render_scheduling() -> None:
 
 def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame) -> None:
     if agents.empty:
-        st.info("Service quality metrics data is not available.")
+        st.info("Service quality metrics are unavailable.")
         return
     render_chapter_header(
         "CHAPTER 06 · SERVICE QUALITY METRICS",
         "Synthetic Service Metrics",
-        "This page shows the modeled service layer built on top of the simulated operation. No real employee performance data is used here.",
+        "Synthetic service outcomes generated from the modeled operation.",
         "SYNTHETIC OPERATIONAL METADATA",
     )
     render_insight_callout(
         (
-            "The charts and tables on this page summarize the synthetic workload assigned to the modeled "
-            "agent pool. They show workload distribution and handle-time variation within the simulated environment."
+            "Synthetic workload distribution and handle-time variation describe the modeled agent pool."
         )
     )
     display = agents.copy()
@@ -2413,7 +2978,7 @@ def render_agent_performance(agents: pd.DataFrame, agent_dimension: pd.DataFrame
     if not agent_dimension.empty:
         render_chart_header(
             "Synthetic Agent Pool",
-            "The chart shows how the modeled agent pool is distributed across service categories.",
+            "Modeled agents grouped by service category.",
         )
         skill_mix = (
             agent_dimension.groupby("skill_group", as_index=False)
@@ -2468,19 +3033,18 @@ def render_methodology() -> None:
     render_chapter_header(
         "CHAPTER 07 · METHODS & ASSUMPTIONS",
         "Data Scope, Assumptions, and Modeling Boundaries",
-        "This page documents which parts of the prototype are real, which are generated, and which are produced through forecasting or simulation.",
+        "Observed, synthetic, forecasted, and simulated layers are documented separately.",
         "TRANSPARENCY APPENDIX",
     )
     render_insight_callout(
         (
-            "The prototype combines real public demand with synthetic operational assumptions and simulated "
-            "outcomes. This page defines those boundaries explicitly."
+            "Real public demand supports synthetic operating assumptions, forecast output, and simulated planning outcomes."
         )
     )
 
     render_section_header(
         "Pipeline Flow",
-        "Each stage below shows how the prototype moves from raw demand into cleaned intervals, synthetic operational assumptions, forecast output, staffing calculations, and simulated roster coverage.",
+        "NYC 311 demand moves through cleaning, forecasting, staffing, roster simulation, and dashboard review.",
     )
     st.markdown(
         """
@@ -2561,10 +3125,10 @@ def render_methodology() -> None:
         render_section_header("Limitations")
         st.markdown(
             """
-            - No real call center operations are observed.
-            - No employee records are included.
+            - Operational call-center metadata is synthetic.
+            - Agent entities are fictional labels used by the simulation.
             - Staffing rules are simplified for an academic prototype.
-            - Results demonstrate a method, not live operations software.
+            - Results demonstrate the implemented analytical method.
             """
         )
 
@@ -2576,6 +3140,155 @@ def render_methodology() -> None:
         with right:
             st.subheader("Database Object Summary")
             st.table(pd.DataFrame(validation.items(), columns=["Object", "Value"]))
+
+
+def render_deployment_proposal() -> None:
+    render_chapter_header(
+        "Project Engagement",
+        "Deployment Proposal",
+        (
+            "A practical scope and estimate for adapting the prototype to a customer's data, workforce rules, "
+            "and operating environment."
+        ),
+        "Consulting scope · planning estimate",
+    )
+    render_insight_callout(
+        "The expected first-year range is $55K-$90K. For a 160-agent operation, the $68K reference case "
+        "equals roughly 0.7% of annual loaded labor cost."
+    )
+    render_metric_strip(
+        [
+            ("First-year project", "$55K-$90K", "customer implementation"),
+            ("Annual support", "$12K-$24K", "maintenance + retraining"),
+            ("Reference case", "$68K", "first-year estimate"),
+            ("Break-even", "0.70%", "160-agent labor base"),
+        ]
+    )
+
+    render_section_header(
+        "Proposed Scope",
+        "The engagement covers data preparation, local model validation, staffing logic, dashboard delivery, and handoff.",
+    )
+    st.markdown(
+        """
+        <div class="commercial-scope-grid">
+            <div class="commercial-scope">
+                <div class="commercial-scope-title">Inputs I would need</div>
+                <div class="commercial-scope-copy">
+                    Historical contacts, timestamps, reason codes, queues, AHT, service outcomes, schedules,
+                    staffing rules, and access to the people who review forecasts and rosters.
+                </div>
+            </div>
+            <div class="commercial-scope">
+                <div class="commercial-scope-title">What I would deliver</div>
+                <div class="commercial-scope-copy">
+                    Reproducible analytical views, interval-demand models, chronological validation, Erlang-based
+                    staffing scenarios, roster-gap analysis, and a deployed review dashboard.
+                </div>
+            </div>
+            <div class="commercial-scope">
+                <div class="commercial-scope-title">How we would accept it</div>
+                <div class="commercial-scope-copy">
+                    Agree forecast and staffing thresholds with the workforce team, test the full planning run,
+                    review representative intervals, document assumptions, and complete user sign-off.
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    quality_col, boundary_col = st.columns(2)
+    with quality_col:
+        render_section_header("Expected Outcomes")
+        st.markdown(
+            """
+            - A traceable path from contact demand to staffing and roster decisions.
+            - Local model comparison using a chronological holdout.
+            - Interval-level visibility into forecast error and coverage gaps.
+            - Scenario evidence for overtime, hiring, shift design, and service targets.
+            """
+        )
+    with boundary_col:
+        render_section_header("Base-Range Conditions")
+        st.markdown(
+            """
+            - One primary historical data source and a limited queue set.
+            - Export or database access supplied by the customer.
+            - Batch planning workflow with agreed operational assumptions.
+            - Complex identity, regulated-data controls, real-time integrations, and multi-site scheduling receive a separate estimate.
+            """
+        )
+
+    render_section_header(
+        "Implementation Estimate",
+        "The phases can be contracted separately or combined into one customer implementation.",
+    )
+    implementation_rows = pd.DataFrame(
+        [
+            ("Assessment and data review", "2-4 weeks", "$8K-$15K"),
+            ("Customer-specific prototype", "4-8 weeks", "$25K-$45K"),
+            ("Deployment, validation, and handoff", "4-6 weeks", "$20K-$35K"),
+            ("Expected first-year range", "10-18 weeks", "$55K-$90K"),
+        ],
+        columns=["Phase", "Estimated duration", "Planning range"],
+    )
+    render_dataframe(implementation_rows, hide_index=True)
+
+    render_section_header(
+        "Customer Value Scenario",
+        "The scenario values labor capacity placed more accurately against demand. Realized value is measured during the pilot.",
+    )
+    value_rows = pd.DataFrame(
+        [
+            ("1% capacity improvement", "$97.8K", "$29.8K", "8.3 months"),
+            ("2% capacity improvement", "$195.5K", "$127.5K", "4.2 months"),
+            ("3% capacity improvement", "$293.3K", "$225.3K", "2.8 months"),
+        ],
+        columns=["Scenario", "Annual capacity value", "Value after $68K first-year cost", "Payback"],
+    )
+    render_dataframe(value_rows, hide_index=True)
+    st.markdown(
+        """
+        <div class="commercial-formula">
+            <strong>Value basis:</strong> 2024 median customer-service wage of $42,830 ÷ 70.1% wage share
+            = approximately $61,100 loaded annual cost per employee. At 160 agents, the modeled labor base is
+            approximately $9.78M. The 1%-3% scenarios represent planning sensitivity. Pilot measurement would track
+            overtime, hiring demand, schedule fit, forecast error, and service-level performance.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    render_section_header(
+        "Engagement Options",
+        "The work can be delivered as a paid assessment, a customer-specific prototype, or a supported deployment.",
+    )
+    commercial_rows = pd.DataFrame(
+        [
+            ("Assessment", "Data sufficiency, source mapping, operational assumptions, and implementation plan", "$8K-$15K"),
+            ("Prototype", "Local models, staffing logic, roster analysis, and dashboard validation", "$25K-$45K"),
+            ("Deployment", "Environment setup, documentation, user validation, and handoff", "$20K-$35K"),
+            ("Annual support", "Maintenance, monitoring, scheduled retraining, and reporting updates", "$12K-$24K"),
+        ],
+        columns=["Stage", "Deliverable", "Planning range"],
+    )
+    render_dataframe(commercial_rows, hide_index=True)
+    st.markdown(
+        """
+        <div class="commercial-source">
+            Planning estimates prepared for the portfolio case study. Compensation assumptions use the
+            <a href="https://www.bls.gov/ooh/office-and-administrative-support/customer-service-representatives.htm"
+               target="_blank">U.S. Bureau of Labor Statistics customer-service wage</a>
+            and the
+            <a href="https://www.bls.gov/news.release/ecec.nr0.htm" target="_blank">
+               December 2025 Employer Costs for Employee Compensation</a>.
+            Final scope and pricing depend on source-system access, data quality, security requirements, integrations,
+            and customer validation.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def main() -> None:
@@ -2593,6 +3306,7 @@ def main() -> None:
         '<div class="app-shell-label">Call Center Workforce Management</div>',
         unsafe_allow_html=True,
     )
+    render_top_controls()
 
     tabs = st.tabs(
         [
@@ -2603,6 +3317,7 @@ def main() -> None:
             "Roster Simulation",
             "Service Quality Metrics",
             "Methods & Assumptions",
+            "Deployment Proposal",
         ]
     )
 
@@ -2620,6 +3335,8 @@ def main() -> None:
         render_agent_performance(data["agent_performance"], data["agent_dimension"])
     with tabs[6]:
         render_methodology()
+    with tabs[7]:
+        render_deployment_proposal()
 
 
 if __name__ == "__main__":

@@ -4,13 +4,13 @@ This file records important project choices. Keep entries short and dated.
 
 ## 2026-05-11 - Treat the capstone as an engineering project
 
-Status: accepted pending supervisor feedback.
+Status: accepted.
 
 Reasoning: the project creates a working analytical product with data pipelines, SQL Server database design, forecasting, staffing, optimization, and a Streamlit UI.
 
 ## 2026-05-11 - Use a hybrid data strategy
 
-Status: accepted pending dataset validation.
+Status: accepted.
 
 Decision: use real public 311 data as the demand seed and generate missing call center operational metadata synthetically.
 
@@ -54,7 +54,7 @@ Reasoning: Streamlit is fast for data applications, supports Plotly charts, and 
 
 ## 2026-05-11 - Select NYC 311 Service Requests as the first seed dataset
 
-Status: accepted for MVP.
+Status: accepted.
 
 Decision: use the NYC Open Data 311 Service Requests from 2020 to Present dataset through the public Socrata CSV API endpoint `https://data.cityofnewyork.us/resource/erm2-nwe9.csv`.
 
@@ -64,7 +64,7 @@ Limitations: a 311 service request is not guaranteed to be a phone call, and ope
 
 ## 2026-05-11 - Use standard-library Python for the first data scripts
 
-Status: accepted for MVP.
+Status: accepted.
 
 Decision: implement the first acquisition and generation scripts using Python standard-library modules.
 
@@ -72,7 +72,7 @@ Reasoning: the current machine has Python available but does not yet have pandas
 
 ## 2026-05-11 - Preserve source dates but simulate call start time within day
 
-Status: accepted for MVP.
+Status: accepted.
 
 Decision: keep the original 311 `created_date` as `Source_Created_Datetime`, but generate `Call_Start_Datetime` within the same calendar date using a business-hour-heavy distribution.
 
@@ -82,7 +82,7 @@ Limitation: this is a synthetic intraday distribution, so the final report must 
 
 ## 2026-05-14 - Add SQL-load-ready files before SQL Server execution
 
-Status: accepted for MVP.
+Status: accepted.
 
 Decision: generate SQL-load-ready CSV files for `Dim_Date`, `Dim_Time`, `Dim_Agent`, `Dim_Queue`, and `Fact_Calls` before running SQL Server bulk load scripts.
 
@@ -124,7 +124,7 @@ Reasoning: shift scheduling is a constrained optimization problem. CP-SAT gives 
 
 Status: accepted.
 
-Decision: treat service level as a queue, service-category, interval, and staffing metric rather than an agent-level performance metric.
+Decision: treat service level as a queue, service-category, interval, and staffing metric.
 
 Reasoning: service level measures whether calls are answered within a target wait time. That outcome is driven by demand, routing, queue backlog, staffing, scheduling, and forecast accuracy before the call reaches an individual agent. Agent performance should focus on handled-call volume and handle-time components.
 
@@ -196,7 +196,7 @@ Reasoning: named agents make the dashboard and schedule easier to inspect during
 
 ## 2026-05-20 - Treat MLflow as an optional productization layer
 
-Status: proposed.
+Status: deferred.
 
 Decision: evaluate MLflow for experiment tracking and model artifact management, but do not add it as a hard dependency until the project team confirms the demonstration workflow.
 

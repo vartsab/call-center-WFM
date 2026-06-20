@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The staffing step converts the 30-minute demand forecast into the required number of agents for each interval. This is a queueing-theory calculation rather than a machine-learning prediction.
+The staffing step converts the 30-minute demand forecast into the required number of agents through a queueing-theory calculation.
 
 ## Input
 

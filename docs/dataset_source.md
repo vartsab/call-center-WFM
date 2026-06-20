@@ -49,7 +49,7 @@ Raw CSV chunks and processed modeling files are excluded from version control.
 
 ## Why This Dataset Fits
 
-The project needs realistic inbound demand rather than a perfectly complete call center dataset. Public 311 records are suitable because they contain real request timestamps, service categories, agencies, boroughs, and status fields. These fields are enough to create the operational arrival curve and queue mix for a city service contact center.
+The project requires realistic inbound demand. Public 311 records provide request timestamps, service categories, agencies, boroughs, and status fields that support an operational arrival curve and service mix.
 
 Most public 311 datasets do not include agent-level call center metadata. That limitation is acceptable for this engineering project because synthetic operational fields can be generated with transparent assumptions and then used to demonstrate database design, dashboarding, forecasting, Erlang C staffing, and shift optimization.
 

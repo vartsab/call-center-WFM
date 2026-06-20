@@ -10,8 +10,13 @@ data/processed
 logs
 notebooks
 docs/final
+docs/reporting
 docs/screenshots
 deploy/seed
+tmp
 *.docx
 *.pptx
+*.pptm
+*.pdf
+*.zip
 *.log

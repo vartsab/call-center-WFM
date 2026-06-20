@@ -16,8 +16,8 @@ For the public portfolio demo:
 
 - `wfm.vartsab.com` points to the VPS IP.
 - Docker Compose is running Postgres, Streamlit, and Caddy on the VPS.
-- The dashboard is available at `https://wfm.vartsab.com:8443`.
-- The demo password is set in the private `deploy/env.local` file.
+- The dashboard is available at `https://wfm.vartsab.com`.
+- The demo opens without a password unless `WFM_DEMO_PASSWORD` is set in the private `deploy/env.local` file.
 
 ## Launch
 
@@ -36,7 +36,7 @@ http://localhost:8501/
 Public demo URL:
 
 ```text
-https://wfm.vartsab.com:8443
+https://wfm.vartsab.com
 ```
 
 If the January 2026 planning artifacts need to be rebuilt:
@@ -120,12 +120,12 @@ Points to mention:
 
 ### 8. Public Deployment
 
-If showing the portfolio version, open `https://wfm.vartsab.com:8443` and log in with the demo password.
+If showing the portfolio version, open `https://wfm.vartsab.com`.
 
 Points to mention:
 
-- the public deployment uses compact Postgres seed tables rather than the full SQL Server warehouse;
-- Caddy provides HTTPS on port `8443` because the VPS keeps an existing VPN on port `443`;
+- the public deployment uses compact PostgreSQL seed tables generated from the validated SQL Server outputs;
+- Caddy provides HTTPS on standard port `443`; the existing Xray/V2Ray service uses port `4443`;
 - the deployment is documented in `deploy/README.md` and `docs/deployment_status.md`.
 
 ## Screenshot List

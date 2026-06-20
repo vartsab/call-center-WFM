@@ -1,222 +1,175 @@
-# Call Center Workforce Optimization
+# Call Center Workforce Management Analytics Prototype
 
-Master's capstone engineering project focused on call center analytics, demand forecasting, and workforce planning.
+Master's engineering capstone that connects demand analysis, machine-learning
+forecasting, Erlang C staffing, roster simulation, and an interactive review
+dashboard.
 
-## Overview
+- Public demo: [wfm.vartsab.com](https://wfm.vartsab.com)
+- Source data: NYC 311 Service Requests, 2023-2025
+- Historical records: 10,336,480
+- Planning grain: 30 minutes
 
-This project develops an end-to-end analytical workflow for a city service contact center. It uses public 311 service request data as a realistic demand source and enriches it with documented synthetic operational fields needed for workforce management analysis.
-
-The system is designed to support:
-
-- call-level data preparation;
-- dimensional modeling in Microsoft SQL Server;
-- SQL views for operational analytics;
-- 30-minute interval call volume forecasting;
-- staffing requirement calculation;
-- shift scheduling optimization;
-- dashboard reporting.
-
-## Current Scope
-
-The current implementation includes:
-
-- NYC 311 sample acquisition script;
-- full 2023-2025 NYC 311 acquisition and raw SQL load scripts;
-- synthetic call center data generation script;
-- SQL-load-ready dimension and fact file builder;
-- initial SQL Server warehouse schema;
-- full raw SQL Server landing table for 10.3M public service records;
-- full synthetic SQL Server warehouse load for 10.3M call-center records;
-- SQL Server staging and load scripts;
-- SQL analytics views;
-- first 30-minute forecasting input builder;
-- full-history seasonal naive baseline forecast;
-- full-history feature model comparison with holiday and lag features;
-- Erlang C staffing requirement calculator;
-- OR-Tools shift scheduling optimizers;
-- Streamlit portfolio dashboard with SQL Server, CSV fallback, and compact Postgres deployment data access;
-- portfolio deployment path with Streamlit, PostgreSQL, Caddy, Docker Compose, and password protection;
-- project documentation for dataset selection, data generation methodology, architecture, and data dictionary.
-
-## Repository Structure
+## What The Project Does
 
 ```text
-app/streamlit/          Streamlit dashboard application
-docs/                   project documentation
-notebooks/              exploratory analysis notebooks
-sql/schema/             SQL Server DDL scripts
-sql/views/              SQL analytics views
-sql/etl/                ETL/load scripts
-src/data_acquisition/   source data extraction scripts
-src/data_generation/    synthetic operational data generation
-src/forecasting/        forecasting pipeline
-src/workforce/          staffing calculation logic
-src/scheduling/         schedule optimization logic
-tests/                  tests
+NYC 311 demand
+  -> SQL Server raw and dimensional layers
+  -> interval feature engineering
+  -> chronological model comparison
+  -> January 2026 demand forecast
+  -> Erlang C staffing requirements
+  -> OR-Tools roster simulation
+  -> Streamlit dashboard
 ```
 
-## Data Source
+The local engineering workflow uses Microsoft SQL Server for the full
+10.34-million-row warehouse. The public deployment uses compact PostgreSQL
+tables generated from the validated analytical outputs.
 
-The seed dataset is NYC Open Data's 311 Service Requests from 2020 to Present, accessed through the public Socrata API.
+## Data Boundaries
 
-The public dataset provides real service request timestamps, categories, agencies, boroughs, statuses, and location fields. Operational call center fields that are not available publicly, such as handle time, wait time, abandonment, SLA status, and agent assignment, are generated synthetically and documented in `docs/data_generation_methodology.md`.
+| Layer | Status | Content |
+| --- | --- | --- |
+| Historical demand | Real | NYC 311 timestamps, complaint types, agencies, boroughs, and volumes |
+| Operating metadata | Synthetic | AHT, abandonment, SLA fields, agents, and shift records |
+| Future demand | Forecasted | Model output for 30-minute planning intervals |
+| Staffing and roster | Simulated | Erlang C requirements, assignments, and coverage outcomes |
 
-The current full-history extract covers 2023-01-01 through 2025-12-31 and contains 10,336,480 records loaded into SQL Server. Raw and processed data files are generated locally and excluded from version control.
+These boundaries are shown in the dashboard and documented in
+[`docs/data_generation_methodology.md`](docs/data_generation_methodology.md).
+
+## Forecasting Results
+
+The final 90 days of 2025 form a chronological holdout of 4,320 intervals.
+
+| Model | MAE | RMSE | MAPE |
+| --- | ---: | ---: | ---: |
+| Histogram Gradient Boosting | 34.8872 | 49.7414 | 22.16% |
+| Random Forest | 35.7124 | 50.8680 | 22.54% |
+| Gradient Boosting | 38.2330 | 54.0725 | 24.20% |
+| Ridge | 42.0608 | 59.0505 | 27.20% |
+| Poisson | 47.9825 | 71.4876 | 30.55% |
+
+Histogram Gradient Boosting supplies the January 2026 planning forecast.
+Model definitions remain replaceable through the registry in
+[`src/forecasting/sklearn_model_compare.py`](src/forecasting/sklearn_model_compare.py).
+
+## Staffing And Roster Results
+
+| Metric | Value |
+| --- | ---: |
+| Future planning intervals | 1,488 |
+| Average predicted calls | 204.4150 |
+| Peak predicted calls | 386.1923 |
+| Peak base staffing | 132 |
+| Peak staffing after shrinkage | 189 |
+| Simulated roster | 160 agents |
+| Assigned shifts | 3,427 |
+| Estimated full-coverage roster | 462 agents |
+| Daily, weekly, and rest-rule violations | 0 |
+
+The 160-agent case is a constrained scenario. It exposes the difference
+between a feasible roster and full coverage of the modeled 24/7 requirement.
+
+## Technology
+
+- Python, pandas, NumPy
+- scikit-learn
+- Microsoft SQL Server and T-SQL
+- PostgreSQL
+- OR-Tools CP-SAT
+- Streamlit and Plotly
+- Docker Compose and Caddy
+- pytest
+
+## Repository Layout
+
+```text
+app/streamlit/          dashboard application
+deploy/                 PostgreSQL, Caddy, and Docker deployment
+docs/                   technical methods, results, and screenshots
+scripts/                reproducible run and readiness scripts
+sql/                    SQL Server schema, ETL, views, and validation
+src/data_acquisition/   NYC 311 extraction and raw loading
+src/data_generation/    synthetic operational layer
+src/forecasting/        feature engineering, training, and forecasting
+src/workforce/          Erlang C staffing
+src/scheduling/         CP-SAT roster simulation
+tests/                  automated tests
+```
 
 ## Quick Start
 
-Start the dashboard product demo:
+Create a virtual environment and install dependencies:
 
 ```powershell
-.\scripts\run_dashboard.ps1
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Force the SQL-backed dashboard path when rehearsing SQL live:
+Start the dashboard with locally generated CSV evidence:
+
+```powershell
+$env:CALLCENTER_DASHBOARD_SOURCE = "csv"
+.\.venv\Scripts\python.exe -m streamlit run app\streamlit\app.py
+```
+
+Use the SQL Server path:
 
 ```powershell
 .\scripts\run_dashboard.ps1 -DataSource Sql
 ```
 
-Check demo readiness without launching the dashboard:
+Run the automated checks:
 
 ```powershell
+.\.venv\Scripts\python.exe -m pytest -q
 .\scripts\check_demo_readiness.ps1
-.\scripts\check_demo_readiness.ps1 -RequireSql
 ```
 
-Download a small January 2025 sample:
+## Rebuild The Planning Pipeline
 
-```powershell
-python src\data_acquisition\download_nyc_311_sample.py --start-date 2025-01-01 --end-date 2025-01-31 --target-total 6200
-```
-
-Generate synthetic call center records:
-
-```powershell
-python src\data_generation\generate_synthetic_calls.py
-```
-
-Prepare SQL-load-ready files:
-
-```powershell
-python src\data_generation\prepare_sql_load_files.py
-```
-
-Build forecasting input and run the first baseline forecast:
-
-```powershell
-python src\forecasting\build_forecasting_input.py
-python src\forecasting\build_feature_matrix.py
-python src\forecasting\baseline_forecast.py
-python src\forecasting\sklearn_model_compare.py
-```
-
-Calculate interval staffing requirements:
-
-```powershell
-python src\workforce\erlang_c_staffing.py
-```
-
-Generate the first optimized shift schedule:
-
-```powershell
-python src\scheduling\shift_optimizer.py
-```
-
-Load and validate the SQL Server sample:
-
-```text
-Run the scripts listed in sql/README.md, then run sql/validation/001_validate_loaded_sample.sql.
-```
-
-Run the dashboard:
-
-```powershell
-streamlit run app\streamlit\app.py
-```
-
-## Portfolio VPS Deployment
-
-The public portfolio deployment uses a compact Postgres seed database instead of the local SQL Server warehouse. The current VPS shape is documented in `deploy/README.md`:
-
-- DNS: `wfm.vartsab.com` points to the VPS public IP.
-- Public URL: `https://wfm.vartsab.com:8443`.
-- Port `443` remains available for the existing VPN.
-- Docker Compose runs Postgres, Streamlit, and Caddy.
-
-Build or refresh the deployment seed:
-
-```powershell
-python scripts\build_portfolio_seed.py
-```
-
-Deploy from the VPS project directory:
-
-```bash
-docker compose --env-file deploy/env.local up -d --build
-```
-
-View the generated summary:
-
-```powershell
-Get-Content docs\sample_generation_summary.json
-Get-Content docs\baseline_forecast_summary.json
-```
-
-## Full-History Workflow
-
-Download the full 2023-2025 public extract:
-
-```powershell
-python src\data_acquisition\download_nyc_311_full.py --start-date 2023-01-01 --end-date 2025-12-31
-```
-
-Create and load the SQL raw table:
-
-```text
-Run sql/raw/001_create_raw_nyc_311.sql, then:
-```
-
-```powershell
-python src\data_acquisition\load_raw_nyc_311_pyodbc.py --truncate --batch-size 10000
-```
-
-After loading, create raw-table indexes:
-
-```text
-Run sql/raw/003_create_raw_nyc_311_indexes.sql.
-```
-
-Load the full synthetic warehouse:
-
-```text
-Run sql/etl/004_load_full_synthetic_warehouse_from_raw.sql.
-```
-
-Build the full historical model-evaluation artifacts:
-
-```powershell
-python src\forecasting\build_full_forecasting_input_from_sql.py
-python src\forecasting\build_feature_matrix.py --input data\processed\full_forecasting_input.csv --output data\processed\full_forecast_features.csv
-python src\forecasting\baseline_forecast.py --input data\processed\full_forecasting_input.csv --output data\processed\full_baseline_forecast.csv --summary-output docs\full_baseline_forecast_summary.json --test-days 90
-python src\forecasting\sklearn_model_compare.py --input data\processed\full_forecast_features.csv --output data\processed\full_sklearn_best_forecast.csv --summary-output docs\full_sklearn_model_comparison_summary.json --test-days 90
-```
-
-Build the January 2026 planning artifacts:
+The local workflow expects the full historical feature matrix in
+`data/processed/`. Raw and processed extracts remain outside version control.
 
 ```powershell
 .\scripts\run_planning_pipeline.ps1
 ```
 
-Demo and reporting notes:
+The script regenerates the future forecast, staffing requirements, roster,
+coverage output, and summary files.
 
-- `docs/demo_script.md`
-- `docs/deployment_status.md`
-- `docs/repository_handoff.md`
-- `docs/technology_choice.md`
-- `docs/reporting_evidence_week3_6.md`
-- `docs/productization_plan.md`
+## Public Deployment
 
-## Notes
+The portfolio runtime is deliberately compact:
 
-Raw and processed data files are excluded from version control. The repository stores code, SQL scripts, and documentation needed to reproduce the pipeline.
+```text
+Browser
+  -> Caddy on ports 80/443
+  -> Streamlit
+  -> PostgreSQL seed tables
+```
+
+Create the private environment file from `deploy/env.example`, then run:
+
+```bash
+docker compose --env-file deploy/env.local up -d --build
+```
+
+Deployment details are in [`deploy/README.md`](deploy/README.md).
+
+## Technical Documentation
+
+- [Architecture](docs/architecture.md)
+- [Dataset source](docs/dataset_source.md)
+- [Data dictionary](docs/data_dictionary.md)
+- [Synthetic data methodology](docs/data_generation_methodology.md)
+- [Forecasting methodology](docs/forecasting_methodology.md)
+- [Model registry](docs/model_registry.md)
+- [Staffing methodology](docs/staffing_methodology.md)
+- [Scheduling methodology](docs/scheduling_methodology.md)
+- [SQL validation](docs/sql_validation_summary.md)
+- [Deployment status](docs/deployment_status.md)
+
+The repository excludes raw data, local database files, credentials, academic
+document drafts, rehearsal material, and generated office files.

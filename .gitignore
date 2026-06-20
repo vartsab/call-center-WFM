@@ -31,11 +31,35 @@ python
 # Generated report/presentation artifacts
 docs/final/
 docs/reporting/word/
+docs/reporting/
+docs/capstone_report_outline.md
+docs/current_status.md
+docs/explanatory_note_draft.md
+docs/presentation_defense_text.md
+docs/presentation_outline.md
+docs/productization_plan.md
+docs/project_brief.md
+docs/reporting_evidence_week3_6.md
+docs/repository_handoff.md
+docs/submission_checklist.md
+docs/week3_progress_summary.md
+scripts/build_explanatory_note_docx.py
+scripts/build_presentation_pptx.py
+scripts/build_defense_presentation*.py
+scripts/create_advisor_revised_explanatory_note.py
 *.docx
 *.pptx
+*.pptm
+*.pdf
+*.zip
+
+# Local review and rehearsal artifacts
+tmp/
 
 # OS/editor
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+.codex/
+.agents/

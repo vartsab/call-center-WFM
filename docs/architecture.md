@@ -58,7 +58,7 @@ Full raw-history views:
 - `vw_Raw_NYC_311_Daily_Summary` for daily public-service demand;
 - `vw_Raw_NYC_311_Complaint_Type_Summary` for source complaint mix.
 
-Service level is treated as a queue, service-category, and staffing metric rather than an agent-level performance metric because an individual agent does not control the queue wait before the call is routed.
+Service level is treated as a queue, service-category, and staffing metric because queue wait is determined before a call reaches an individual agent.
 
 ### Forecasting
 
@@ -67,9 +67,11 @@ Forecast target: call count per 30-minute interval.
 Candidate models:
 
 - seasonal naive baseline;
-- Prophet;
-- XGBoost with lag and calendar features;
-- optional SARIMA or LSTM only if time allows.
+- Ridge regression;
+- Poisson regression;
+- Random Forest;
+- Gradient Boosting;
+- Histogram Gradient Boosting.
 
 Current baseline:
 
@@ -148,7 +150,8 @@ Tabs:
 - Capacity Planning;
 - Roster Simulation;
 - Service Quality Metrics;
-- Methods & Assumptions.
+- Methods & Assumptions;
+- Deployment Proposal.
 
 The current dashboard reads from SQL Server views when available and uses generated CSV files as a fallback for local demos.
 
